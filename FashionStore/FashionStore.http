@@ -1,0 +1,40 @@
+@FashionStore_HostAddress = http://localhost:5041
+
+### L?y t?t c? vai trò
+GET http://localhost:5041/api/VaiTro
+Accept: application/json
+
+###
+
+### L?y vai trò theo ID
+GET http://localhost:5041/api/VaiTro/1111-4444-1111-4444
+Accept: application/json
+
+###
+
+### Thêm vai trò m?i
+POST http://localhost:5041/api/VaiTro
+Content-Type: application/json
+
+{
+  "ma_VaiTro": "1111-4444-1111-4444",
+  "ten_VaiTro": "Nhân viên"
+}
+
+###
+
+### C?p nh?t vai trò
+PUT http://localhost:5041/api/VaiTro
+Content-Type: application/json
+
+{
+  "ma_VaiTro": "1111-4444-1111-4444",
+  "ten_VaiTro": "Nhân viên c?p nh?t"
+}
+
+###
+
+### Xóa vai trò
+DELETE http://localhost:5041/api/VaiTro/1111-4444-1111-4444
+Accept: application/json
+
