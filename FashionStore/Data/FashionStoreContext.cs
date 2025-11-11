@@ -9,6 +9,8 @@ namespace FashionStore.Data
 
         public DbSet<VaiTro> VaiTros { get; set; }
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
+
+
         public DbSet<NhanVien> NhanViens { get; set; }
         public DbSet<KhachHang> KhachHangs { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
