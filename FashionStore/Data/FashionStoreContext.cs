@@ -11,7 +11,7 @@ namespace FashionStore.Data
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<NhanVien> NhanViens { get; set; }
         public DbSet<KhachHang> KhachHangs { get; set; }
-        public DbSet<DanhMuc> DanhMucs { get; set; }
+        public DbSet<DanhMuc> DanhMuc { get; set; }
         public DbSet<SanPham> SanPhams { get; set; }
         public DbSet<HinhAnhSanPham> HinhAnhSanPhams { get; set; }
         public DbSet<GioHang> GioHangs { get; set; }
@@ -55,7 +55,37 @@ namespace FashionStore.Data
                 .HasOne(dm => dm.DanhMucCha)
                 .WithMany(dm => dm.DanhMucCon)
                 .HasForeignKey(dm => dm.Ma_DanhMucCha)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SanPham>(entity =>
+            {
+                entity.Property(e => e.Gia)
+                      .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.Gia_Gia)
+                      .HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<ChiTietDonHang>(entity =>
+            {
+                entity.Property(e => e.DonGia)
+                      .HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<DonHang>(entity =>
+            {
+                entity.Property(e => e.Tong_Tien)
+                      .HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<Voucher>(entity =>
+            {
+                entity.Property(e => e.GiaTri_ToiThieu)
+                      .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.Giam_Tien)
+                      .HasColumnType("decimal(18,2)");
+            });
         }
 
     }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace FashionStore
 {
@@ -48,13 +49,13 @@ namespace FashionStore
                         context.HandleResponse(); // Ng?n ASP.NET t? ghi l?i m?c ??nh
                         context.Response.StatusCode = 401;
                         context.Response.ContentType = "application/json";
-                        return context.Response.WriteAsync("{\"message\": \"Kh�ng c� quy?n truy c?p ch?c n?ng n�y!\"}");
+                        return context.Response.WriteAsync("{\"message\": \"Không có quyền truy cập chức năng này!\"}");
                     },
                     OnForbidden = context =>
                     {
                         context.Response.StatusCode = 403;
                         context.Response.ContentType = "application/json";
-                        return context.Response.WriteAsync("{\"message\": \"B?n kh�ng c� quy?n th?c hi?n h�nh ??ng n�y!\"}");
+                        return context.Response.WriteAsync("{\"message\": \"Bạn không có quyền thực hiện hành động này!\"}");
                     }
                 };
             });
@@ -66,10 +67,17 @@ namespace FashionStore
             builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
             builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
             builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+            builder.Services.AddScoped<IDanhMucRepository, DanhMucRepository>();
 
             builder.Services.AddScoped<JwtService>();
 
             builder.Services.AddControllers();
+                //.AddJsonOptions(options =>
+                //{
+                //    // SI�U D�NG � B? QUA V�NG L?P
+                //    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                //});
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

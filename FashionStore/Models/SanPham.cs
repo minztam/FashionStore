@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FashionStore.Models
 {
+    [Table("SanPham")]
     public class SanPham
     {
         [Key]
