@@ -16,7 +16,9 @@ namespace FashionStore.Models
         // Navigation property
         [JsonIgnore]
         public DanhMuc? DanhMucCha { get; set; }
+        [JsonIgnore]
         public ICollection<DanhMuc>? DanhMucCon { get; set; }
+        [JsonIgnore]
         public ICollection<SanPham>? SanPhams { get; set; }
 
     }

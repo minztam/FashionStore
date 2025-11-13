@@ -68,6 +68,7 @@ namespace FashionStore
             builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
             builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
             builder.Services.AddScoped<IDanhMucRepository, DanhMucRepository>();
+            builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
 
             builder.Services.AddScoped<JwtService>();
 

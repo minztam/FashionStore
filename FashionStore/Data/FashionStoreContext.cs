@@ -57,12 +57,26 @@ namespace FashionStore.Data
                 .HasForeignKey(dm => dm.Ma_DanhMucCha)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // SanPham → DanhMuc
+            modelBuilder.Entity<SanPham>()
+                .HasOne(sp => sp.DanhMuc)
+                .WithMany(dm => dm.SanPhams)
+                .HasForeignKey(sp => sp.Ma_DanhMuc)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // HinhAnhSanPham → SanPham
+            modelBuilder.Entity<HinhAnhSanPham>()
+                .HasOne(ha => ha.SanPham)
+                .WithMany(sp => sp.HinhAnhSanPhams)
+                .HasForeignKey(ha => ha.Ma_SanPham)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<SanPham>(entity =>
             {
                 entity.Property(e => e.Gia)
                       .HasColumnType("decimal(18,2)");
 
-                entity.Property(e => e.Gia_Gia)
+                entity.Property(e => e.Gia_Giam)
                       .HasColumnType("decimal(18,2)");
             });
 
