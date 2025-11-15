@@ -12,6 +12,7 @@ namespace FashionStore.Repositories.Interfaces
         Task<bool> UpdatePartialAsync(int maTaiKhoan, TaiKhoanDTO dto);
         Task<bool> DeleteAsync(int maTaiKhoan);
         Task<TaiKhoan?> LoginAsync(string username, string password);
+        Task<TaiKhoan?> RegisterCustomerAsync(RegisterDTO dto);
         Task<bool> AssignRoleAsync(int taiKhoanId, string roleId);
         Task<bool> ExistsByUsernameAsync(string ten_DangNhap);
         Task<bool> ExistsByEmailAsync(string email);

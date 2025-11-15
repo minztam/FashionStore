@@ -100,6 +100,25 @@ namespace FashionStore.Data
                 entity.Property(e => e.Giam_Tien)
                       .HasColumnType("decimal(18,2)");
             });
+
+            // Seed dữ liệu VaiTro
+            modelBuilder.Entity<VaiTro>().HasData(
+                new VaiTro { Ma_VaiTro = "1111-1111-1111-1111", Ten_VaiTro = "Admin" },
+                new VaiTro { Ma_VaiTro = "1111-2222-1111-2222", Ten_VaiTro = "Nhân viên bán hàng" },
+                new VaiTro { Ma_VaiTro = "1111-3333-1111-3333", Ten_VaiTro = "Nhân viên kho" },
+                new VaiTro { Ma_VaiTro = "2222-2222-2222-2222", Ten_VaiTro = "Khách hàng" }
+            );
+
+            // Seed Admin mặc định
+            //modelBuilder.Entity<TaiKhoan>().HasData(
+            //    new TaiKhoan
+            //    {
+            //        Ten_DangNhap = "admin",
+            //        Mat_Khau = "123456",
+            //        Ma_VaiTro = "1111-1111-1111-1111",
+            //        Email = "admin@fashionstore.com"
+            //    }
+            //);
         }
 
     }
