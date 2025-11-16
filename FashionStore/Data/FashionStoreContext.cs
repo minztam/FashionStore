@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FashionStore.DataSeed;
 using FashionStore.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FashionStore.Data
 {
@@ -22,6 +23,11 @@ namespace FashionStore.Data
         public DbSet<Voucher> Vouchers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Seed data cho danh mục
+            modelBuilder.Entity<DanhMuc>().HasData(DanhMucSeedData.GetSeedData());
+            base.OnModelCreating(modelBuilder);
+            //Seed dât cho san pham
+            modelBuilder.Entity<SanPham>().HasData(SanPhamSeedData.GetSeedData());
             base.OnModelCreating(modelBuilder);
 
             // Quan hệ VaiTro - TaiKhoan (1 - nhiều)

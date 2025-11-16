@@ -2,6 +2,7 @@ using FashionStore.Data;
 using FashionStore.Models;
 using FashionStore.Repositories.Implementations;
 using FashionStore.Repositories.Interfaces;
+using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,7 @@ namespace FashionStore
             builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
             builder.Services.AddScoped<IDanhMucRepository, DanhMucRepository>();
             builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
+            builder.Services.AddScoped<ResponseMessageResult>();
 
             builder.Services.AddScoped<JwtService>();
 

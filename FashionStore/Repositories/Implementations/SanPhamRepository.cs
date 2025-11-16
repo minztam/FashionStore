@@ -2,23 +2,35 @@
 using FashionStore.DTO;
 using FashionStore.Models;
 using FashionStore.Repositories.Interfaces;
+using FashionStore.Repositories.ResponseMessage;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStore.Repositories.Implementations
 {
-    public class SanPhamRepository : ISanPhamRepository
+    public class SanPhamRepository(FashionStoreContext _context, 
+        ResponseMessageResult _response) : ISanPhamRepository
     {
-        private readonly FashionStoreContext _context;
-        public SanPhamRepository(FashionStoreContext context)
+        public async Task<ResponseMessageResult> GetAllAsync()
         {
-            _context = context;
-        }
-        public async Task<IEnumerable<SanPham>> GetAllAsync()
-        {
-            return await _context.SanPhams
-                .Include(x => x.HinhAnhSanPhams)
-                .Include(x => x.DanhMuc)
-                .ToListAsync();
+            try
+            {
+                var sanphams = await _context.SanPhams
+                    .Include(x => x.HinhAnhSanPhams)
+                    .Include(x => x.DanhMuc)
+                    .ToListAsync();
+                if(sanphams is not null)
+                {
+                    _response.SetSuccess("Lấy danh sách sản phẩm thành công", sanphams);
+                    return _response;
+                }
+                _response.SetCustom(true,null,200, null);
+                return _response;
+            }
+            catch (Exception ex) {
+                _response.SetCustom(false, "Có lỗi trong quá trình lấy danh sách sản phẩm", 500, null);
+                return _response;
+            }
+
         }
         public async Task<SanPham?> GetByIdAsync(string id)
         {

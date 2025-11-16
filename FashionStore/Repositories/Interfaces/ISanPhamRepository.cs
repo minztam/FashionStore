@@ -1,11 +1,12 @@
 ﻿using FashionStore.DTO;
 using FashionStore.Models;
+using FashionStore.Repositories.ResponseMessage;
 
 namespace FashionStore.Repositories.Interfaces
 {
     public interface ISanPhamRepository
     {
-        Task<IEnumerable<SanPham>> GetAllAsync();
+        Task<ResponseMessageResult> GetAllAsync();
         Task<SanPham?> GetByIdAsync(string id);
         Task<bool> CreateAsync(SanPham sp, List<HinhAnhDTO>? hinhAnhs);
         Task<bool> UpdateAsync(string maSanPham, SanPhamDTO dto);

@@ -2,30 +2,42 @@
 using FashionStore.DTO;
 using FashionStore.Models;
 using FashionStore.Repositories.Interfaces;
+using FashionStore.Repositories.ResponseMessage;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace FashionStore.Repositories.Implementations
 {
-    public class DanhMucRepository : IDanhMucRepository
+    public class DanhMucRepository(FashionStoreContext _context,
+        ResponseMessageResult _response) : IDanhMucRepository
     {
-        private readonly FashionStoreContext _context;
-        public DanhMucRepository(FashionStoreContext context)
+        public async Task<ResponseMessageResult> GetAllAsync()
         {
-            _context = context;
-        }
-
-        public async Task<IEnumerable<DanhMucDTO>> GetAllAsync()
-        {
-            return await _context.DanhMuc
-                .Select(dm => new DanhMucDTO
+            try
+            {
+                var rs = await _context.DanhMuc.Select(dm => new DanhMucDTO
                 {
                     Ma_DanhMuc = dm.Ma_DanhMuc,
-                    Ten_DanhMuc = dm.Ten_DanhMuc ,
+                    Ten_DanhMuc = dm.Ten_DanhMuc,
                     Ma_DanhMucCha = dm.Ma_DanhMucCha,
                     Ten_DanhMucCha = dm.DanhMucCha != null ? dm.DanhMucCha.Ten_DanhMuc : null,
-                    Trang_Thai = dm.Trang_Thai ,
+                    Trang_Thai = dm.Trang_Thai,
                 })
-                .ToListAsync();
+               .ToListAsync();
+                if (rs.Count == 0) {
+                    _response.SetCustom(true, null, 200, null);
+                }
+                _response.SetSuccess("Lấy danh sách danh mục thành công", rs);
+                return _response;
+            }
+            catch (Exception ex)
+            {
+
+                _response.SetCustom(false, "Có lỗi trong quá trình lấy danh sách danh mục", 500, null);
+                return _response;
+            }
+
+
         }
 
         public async Task<DanhMucDTO?> GetByIdAsync(string maDanhMuc)

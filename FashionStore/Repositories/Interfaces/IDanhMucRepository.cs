@@ -1,11 +1,12 @@
 ﻿using FashionStore.DTO;
 using FashionStore.Models;
+using FashionStore.Repositories.ResponseMessage;
 
 namespace FashionStore.Repositories.Interfaces
 {
     public interface IDanhMucRepository
     {
-        Task<IEnumerable<DanhMucDTO>> GetAllAsync();
+        Task<ResponseMessageResult> GetAllAsync();
         Task<DanhMucDTO?> GetByIdAsync(string maDanhMuc);
         Task<IEnumerable<DanhMucDTO>> SearchAsync(string? keyword);
         Task<bool> AddAsync(DanhMuc danhMuc);
