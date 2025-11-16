@@ -43,7 +43,7 @@ packages/
 .vscode/
 *.csproj.user
 *.sln.docstates
-
+.vs/
 # ========================================
 # NEXT.JS (Frontend)
 # ========================================
