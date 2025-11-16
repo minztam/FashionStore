@@ -70,6 +70,7 @@ namespace FashionStore
             builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
             builder.Services.AddScoped<IDanhMucRepository, DanhMucRepository>();
             builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
+            builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
             builder.Services.AddScoped<ResponseMessageResult>();
 
             builder.Services.AddScoped<JwtService>();

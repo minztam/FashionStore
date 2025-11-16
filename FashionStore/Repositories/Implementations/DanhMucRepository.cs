@@ -8,8 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FashionStore.Repositories.Implementations
 {
-    public class DanhMucRepository(FashionStoreContext _context,
-        ResponseMessageResult _response) : IDanhMucRepository
+    public class DanhMucRepository(FashionStoreContext _context,ResponseMessageResult _response) : IDanhMucRepository
     {
         public async Task<ResponseMessageResult> GetAllAsync()
         {
@@ -30,7 +29,7 @@ namespace FashionStore.Repositories.Implementations
                 _response.SetSuccess("Lấy danh sách danh mục thành công", rs);
                 return _response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 _response.SetCustom(false, "Có lỗi trong quá trình lấy danh sách danh mục", 500, null);
