@@ -1,5 +1,6 @@
 ﻿using FashionStore.DTO;
 using FashionStore.Repositories.Interfaces;
+using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,29 +52,16 @@ namespace FashionStore.Controllers
             });
         }
 
-        // POST api/TaiKhoan/
+        // POST api/TaiKhoan
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TaiKhoanDTO dto, [FromServices] EmailService emailService)
         {
             try
             {
-                if (dto == null) return BadRequest("Dữ liệu không hợp lệ.");
+                if (dto == null)
+                    return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu không hợp lệ!"));
 
-                // Kiểm tra vai trò khách hàng
-                bool isKhachHang = dto.Ma_VaiTro == "2222-2222-2222-2222";
-                if (isKhachHang && string.IsNullOrWhiteSpace(dto.Email))
-                    return BadRequest("Email là bắt buộc đối với khách hàng!");
-
-                // Kiểm tra trùng tên đăng nhập
-                if (await _taikhoanRepo.ExistsByUsernameAsync(dto.Ten_DangNhap!))
-                    return BadRequest("Tên đăng nhập đã tồn tại!");
-
-                // Kiểm tra trùng email
-                if (!string.IsNullOrWhiteSpace(dto.Email) &&
-                    await _taikhoanRepo.ExistsByEmailAsync(dto.Email))
-                    return BadRequest("Email đã tồn tại!");
-
-                // Thêm tài khoản
+                // Gọi Repo – Repo tự kiểm tra trùng username, email, sinh KH hoặc NV
                 var result = await _taikhoanRepo.AddAsync(
                     dto.Ten_DangNhap!,
                     dto.Mat_Khau!,
@@ -81,20 +69,23 @@ namespace FashionStore.Controllers
                     dto.Email
                 );
 
-                if (!result) return BadRequest("Tạo tài khoản thất bại!");
+                // Nếu repo trả lỗi
+                if (!result.Success)
+                    return StatusCode(result.StatusCode, result);
 
-                // Nếu là khách hàng, gửi email chào mừng
-                if (isKhachHang && emailService != null)
+                // Nếu tạo tài khoản KH → gửi email chào mừng
+                bool isKhachHang = dto.Ma_VaiTro == "2222-2222-2222-2222";
+                if (isKhachHang && !string.IsNullOrWhiteSpace(dto.Email))
                 {
-                    
                     await emailService.SendWelcomeEmailAsync(dto.Email!, dto.Ten_DangNhap!);
                 }
 
-                return Ok("Tạo tài khoản thành công!");
+                // Trả về phản hồi thành công
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
+                return StatusCode(500, new ResponseMessageResult().SetFail("Lỗi server: " + ex.Message, 500));
             }
         }
 

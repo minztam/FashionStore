@@ -1,13 +1,14 @@
 ﻿using FashionStore.DTO;
 using FashionStore.Models;
+using FashionStore.Repositories.ResponseMessage;
 
 namespace FashionStore.Repositories.Interfaces
 {
     public interface ITaiKhoanRepository
     {
-        Task<IEnumerable<TaiKhoan>> GetAllAsync();
+        Task<ResponseMessageResult> GetAllAsync();
         Task<TaiKhoan?> GetByIdAsync(int maTaiKhoan);
-        Task<bool> AddAsync(string tenDangNhap, string matKhau, string maVaiTro, string? email);
+        Task<ResponseMessageResult> AddAsync(string tenDangNhap, string matKhau, string maVaiTro, string? email);
         Task<bool> UpdateAsync(int maTaiKhoan, string? tenDangNhap, string? matKhau, string? maVaiTro, string? email);
         Task<bool> UpdatePartialAsync(int maTaiKhoan, TaiKhoanDTO dto);
         Task<bool> DeleteAsync(int maTaiKhoan);
