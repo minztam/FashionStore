@@ -61,6 +61,16 @@ namespace FashionStore
                 };
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddTransient<EmailService>();
 
@@ -86,6 +96,7 @@ namespace FashionStore
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -100,6 +111,7 @@ namespace FashionStore
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseCors("AllowAll");
 
             app.MapControllers();
 
