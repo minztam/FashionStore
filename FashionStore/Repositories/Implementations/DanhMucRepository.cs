@@ -14,7 +14,7 @@ namespace FashionStore.Repositories.Implementations
         {
             try
             {
-                var rs = await _context.DanhMuc.Select(dm => new DanhMucDTO
+                var rs = await _context.DanhMucs.Select(dm => new DanhMucDTO
                 {
                     Ma_DanhMuc = dm.Ma_DanhMuc,
                     Ten_DanhMuc = dm.Ten_DanhMuc,
@@ -24,7 +24,7 @@ namespace FashionStore.Repositories.Implementations
                 })
                .ToListAsync();
                 if (rs.Count == 0) {
-                    _response.SetCustom(true, null, 200, null);
+                    _response.SetCustom(true, null!, 200, null);
                 }
                 _response.SetSuccess("Lấy danh sách danh mục thành công", rs);
                 return _response;
@@ -35,13 +35,11 @@ namespace FashionStore.Repositories.Implementations
                 _response.SetCustom(false, "Có lỗi trong quá trình lấy danh sách danh mục", 500, null);
                 return _response;
             }
-
-
         }
 
         public async Task<DanhMucDTO?> GetByIdAsync(string maDanhMuc)
         {
-            return await _context.DanhMuc
+            return await _context.DanhMucs
                 .Where(dm => dm.Ma_DanhMuc == maDanhMuc)
                 .Select(dm => new DanhMucDTO
                 {
@@ -53,12 +51,11 @@ namespace FashionStore.Repositories.Implementations
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
-
         }
 
         public async Task<IEnumerable<DanhMucDTO>> SearchAsync(string? keyword)
         {
-            var query = _context.DanhMuc.AsQueryable();
+            var query = _context.DanhMucs.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {
@@ -78,7 +75,7 @@ namespace FashionStore.Repositories.Implementations
 
         public async Task<IEnumerable<DanhMuc>> GetTreeAsync()
         {
-            var danMucs = await _context.DanhMuc
+            var danMucs = await _context.DanhMucs
                 .Include(x => x.DanhMucCon)
                 .Where(x => x.Ma_DanhMucCha == null)
                 .ToListAsync();
@@ -98,21 +95,21 @@ namespace FashionStore.Repositories.Implementations
                 return false;
 
             // Kiểm tra trùng mã danh mục
-            var exists = await _context.DanhMuc
+            var exists = await _context.DanhMucs
                 .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMuc);
             if (exists) return false;
 
             // Nếu có mã cha → kiểm tra cha có tồn tại không
             if (!string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMucCha))
             {
-                var parentExists = await _context.DanhMuc
+                var parentExists = await _context.DanhMucs
                     .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMucCha);
                 if (!parentExists) return false;
             }
 
             try
             {
-                await _context.DanhMuc.AddAsync(danhMuc);
+                await _context.DanhMucs.AddAsync(danhMuc);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch
@@ -125,7 +122,7 @@ namespace FashionStore.Repositories.Implementations
         {
             if (danhMuc == null) return false;
 
-            var existing = await _context.DanhMuc
+            var existing = await _context.DanhMucs
                 .FirstOrDefaultAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMuc);
 
             if (existing == null) return false;
@@ -142,7 +139,7 @@ namespace FashionStore.Repositories.Implementations
                 if (danhMuc.Ma_DanhMucCha == danhMuc.Ma_DanhMuc)
                     return false;
 
-                var parentExists = await _context.DanhMuc
+                var parentExists = await _context.DanhMucs
                     .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMucCha);
                 if (!parentExists)
                     return false;
@@ -155,7 +152,7 @@ namespace FashionStore.Repositories.Implementations
 
             try
             {
-                _context.DanhMuc.Update(existing);
+                _context.DanhMucs.Update(existing);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch
@@ -171,11 +168,11 @@ namespace FashionStore.Repositories.Implementations
 
             id = id.Trim().ToUpper();
 
-            var dm = await _context.DanhMuc.FindAsync(id);
+            var dm = await _context.DanhMucs.FindAsync(id);
             if (dm == null) return false;
 
             // Kiểm tra có danh mục con
-            bool hasChild = await _context.DanhMuc.AnyAsync(x => x.Ma_DanhMucCha == id);
+            bool hasChild = await _context.DanhMucs.AnyAsync(x => x.Ma_DanhMucCha == id);
             if (hasChild)
                 return false; // hoặc throw new InvalidOperationException("Không thể xóa vì có danh mục con.");
 
@@ -186,7 +183,7 @@ namespace FashionStore.Repositories.Implementations
 
             try
             {
-                _context.DanhMuc.Remove(dm);
+                _context.DanhMucs.Remove(dm);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch
@@ -202,7 +199,7 @@ namespace FashionStore.Repositories.Implementations
 
             id = id.Trim().ToUpper();
 
-            var dm = await _context.DanhMuc.FindAsync(id);
+            var dm = await _context.DanhMucs.FindAsync(id);
             if (dm == null) return false;
 
             dm.Trang_Thai = !dm.Trang_Thai;

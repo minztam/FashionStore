@@ -81,16 +81,17 @@ namespace FashionStore
             builder.Services.AddScoped<IDanhMucRepository, DanhMucRepository>();
             builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
             builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
+            builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
             builder.Services.AddScoped<ResponseMessageResult>();
 
             builder.Services.AddScoped<JwtService>();
 
-            builder.Services.AddControllers();
-                //.AddJsonOptions(options =>
-                //{
-                //    // SI�U D�NG � B? QUA V�NG L?P
-                //    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                //});
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // Sử dụng để bỏ qua vòng lặp
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

@@ -14,6 +14,8 @@ namespace FashionStore.Models
         public string? DiaChi { get; set; }
         public string? Hinh_Anh { get; set; }
 
+        // Navigation property
+        [ForeignKey("Ma_TaiKhoan")]
         public TaiKhoan? TaiKhoan { get; set; }
     }
 }

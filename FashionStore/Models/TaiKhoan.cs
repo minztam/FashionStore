@@ -20,7 +20,8 @@ namespace FashionStore.Models
         public DateTime? Han_XacThuc { get; set; }
 
         // Navigation property
-        
+
+        [ForeignKey("Ma_VaiTro")]
         public VaiTro? VaiTro { get; set; }
         [JsonIgnore]
         public NhanVien? NhanVien { get; set; }

@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FashionStore.Models
 {
+    [Table("GioHang")]
     public class GioHang
     {
         [Key]
@@ -9,9 +11,8 @@ namespace FashionStore.Models
         public int Ma_KhachHang { get; set; }
 
         // Navigation property
+        [ForeignKey("Ma_KhachHang")]
         public KhachHang? KhachHang { get; set; }
-
-        // Luôn khởi tạo danh sách để tránh null khi Add()
         public ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
     }
 }

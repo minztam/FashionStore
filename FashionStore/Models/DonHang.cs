@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FashionStore.Models
 {
+    [Table("DonHang")]
     public class DonHang
     {
         [Key]
@@ -14,9 +16,13 @@ namespace FashionStore.Models
         public string? Ma_Voucher { get; set; }
 
         // Navigation
+        [ForeignKey("Ma_KhachHang")]
         public KhachHang? KhachHang { get; set; }
+        [ForeignKey("Ma_PhuongThuc")]
         public PhuongThucThanhToan? PhuongThucThanhToan { get; set; }
-        public ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
+        [ForeignKey("Ma_Voucher")]
         public Voucher? Voucher { get; set; }
+
+        public ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
     }
 }

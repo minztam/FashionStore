@@ -9,12 +9,12 @@ namespace FashionStore.Models
     {
         [Key] // <-- khóa chính
         public int Ma_HinhAnh { get; set; }
-
         public string? Ma_SanPham { get; set; }
         public string? DuongDan { get; set; }
 
         // Navigation property
         [JsonIgnore]
+        [ForeignKey("Ma_SanPham")]
         public SanPham? SanPham { get; set; }
     }
 }

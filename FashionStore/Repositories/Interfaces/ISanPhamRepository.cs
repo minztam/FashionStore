@@ -7,17 +7,20 @@ namespace FashionStore.Repositories.Interfaces
     public interface ISanPhamRepository
     {
         Task<ResponseMessageResult> GetAllAsync();
-        Task<SanPham?> GetByIdAsync(string id);
-        Task<bool> CreateAsync(SanPham sp, List<HinhAnhDTO>? hinhAnhs);
-        Task<bool> UpdateAsync(string maSanPham, SanPhamDTO dto);
-        Task<bool> DeleteAsync(string id);
-        Task<bool> ToggleStatusAsync(string id);
+        Task<ResponseMessageResult> GetByIdAsync(string id);
+        Task<ResponseMessageResult> CreateAsync(SanPham sp, List<HinhAnhDTO>? hinhAnhs, List<SanPhamBienTheDTO>? bienThes = null);
+        Task<ResponseMessageResult> UpdateAsync(string maSanPham, SanPhamDTO dto);
+        Task<ResponseMessageResult> DeleteAsync(string id);
+        Task<ResponseMessageResult> ToggleStatusAsync(string id);
 
         // Cập nhật riêng từng phần (PATCH)
-        Task<bool> PatchAsync(string id, SanPhamDTO dto);
+        Task<ResponseMessageResult> PatchAsync(string id, SanPhamDTO dto);
 
         // Quản lý hình ảnh
-        Task<bool> AddImageAsync(HinhAnhSanPham img);
-        Task<bool> DeleteImageAsync(int id);
+        Task<ResponseMessageResult> AddImageAsync(HinhAnhSanPham img);
+        Task<ResponseMessageResult> DeleteImageAsync(int id);
+
+        // Phương thức mới: Quản lý biến thể
+        Task<ResponseMessageResult> CreateBienTheAsync(string maSanPham, SanPhamBienTheDTO dto);
     }
 }

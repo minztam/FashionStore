@@ -8,64 +8,55 @@ namespace FashionStore.DataSeed
         {
             return new List<SanPham>
             {
-              new SanPham
-            {
-        Ma_SanPham = "SP001",
-        Ten_SanPham = "Áo Sơ Mi Oxford Nam",
-        Ma_DanhMuc = "DM001A", // Áo nam
-        Mo_Ta = "Áo sơ mi vải Oxford cao cấp, thoáng mát, phong cách công sở trẻ trung.",
-        Gia = 450000,
-        Gia_Giam = 399000, // Có giảm giá
-        So_Luong = 150,
-        Mau_Sac = "Trắng",
-        Kich_Thuoc = "M, L, XL",
-        Trang_Thai = true
-    },
-    
-    // 2. Sản phẩm Nữ - Váy Maxi (DM002B)
-    new SanPham
-    {
-        Ma_SanPham = "SP002",
-        Ten_SanPham = "Váy Maxi Lụa Hoa Nhí",
-        Ma_DanhMuc = "DM002B", // Váy nữ
-        Mo_Ta = "Váy maxi chất liệu lụa mềm mại, họa tiết hoa nhí, thích hợp đi biển hoặc dạo phố.",
-        Gia = 780000,
-        Gia_Giam = null, // Không giảm giá
-        So_Luong = 80,
-        Mau_Sac = "Vàng, Xanh",
-        Kich_Thuoc = "S, M, L",
-        Trang_Thai = true
-    },
-    
-    // 3. Sản phẩm Nam - Quần Jeans (DM001B)
-    new SanPham
-    {
-        Ma_SanPham = "SP003",
-        Ten_SanPham = "Quần Jeans Slimfit Đen",
-        Ma_DanhMuc = "DM001B", // Quần nam
-        Mo_Ta = "Quần jeans co giãn nhẹ, form slimfit hiện đại, dễ phối đồ.",
-        Gia = 550000,
-        Gia_Giam = 450000,
-        So_Luong = 120,
-        Mau_Sac = "Đen",
-        Kich_Thuoc = "28, 29, 30, 31, 32",
-        Trang_Thai = true
-    },
-    
-    // 4. Sản phẩm Nữ - Áo Len Dáng Rộng (DM002A)
-    new SanPham
-    {
-        Ma_SanPham = "SP004",
-        Ten_SanPham = "Áo Len Croptop Tay Dài",
-        Ma_DanhMuc = "DM002A", // Áo nữ
-        Mo_Ta = "Áo len mỏng, kiểu dáng croptop, phong cách Hàn Quốc.",
-        Gia = 320000,
-        Gia_Giam = null,
-        So_Luong = 95,
-        Mau_Sac = "Be, Đỏ",
-        Kich_Thuoc = "Freesize",
-        Trang_Thai = true
-    }
+                new SanPham
+                {
+                    Ma_SanPham = "SP001",
+                    Ten_SanPham = "Áo Sơ Mi Oxford Nam Cao Cấp",
+                    Ma_DanhMuc = "DM001A", // Áo nam
+                    Mo_Ta = "Chất vải Oxford nhập khẩu, thoáng mát, không nhăn, form dáng chuẩn công sở và dự tiệc.",
+                    Trang_Thai = true
+                },
+                new SanPham
+                {
+                    Ma_SanPham = "SP002",
+                    Ten_SanPham = "Váy Maxi Lụa Hoa Nhí Thanh Lịch",
+                    Ma_DanhMuc = "DM002B", // Váy nữ
+                    Mo_Ta = "Lụa cao cấp mát mẻ, họa tiết hoa nhí vintage, dáng dài thướt tha, đi biển hay dự tiệc đều đẹp.",
+                    Trang_Thai = true
+                },
+                new SanPham
+                {
+                    Ma_SanPham = "SP003",
+                    Ten_SanPham = "Quần Jeans Nam Slimfit Rách Gối",
+                    Ma_DanhMuc = "DM001B", // Quần nam
+                    Mo_Ta = "Jeans co giãn 4 chiều, form slimfit tôn dáng, rách gối phong cách streetwear trẻ trung.",
+                    Trang_Thai = true
+                },
+                new SanPham
+                {
+                    Ma_SanPham = "SP004",
+                    Ten_SanPham = "Áo Len Croptop Nữ Dáng Rộng",
+                    Ma_DanhMuc = "DM002A", // Áo nữ
+                    Mo_Ta = "Len mỏng nhẹ, dáng croptop tay dài, phối đồ mùa thu đông cực xinh, freesize từ 45-60kg.",
+                    Trang_Thai = true
+                },
+                // Thêm 2 sản phẩm bonus cho đẹp
+                new SanPham
+                {
+                    Ma_SanPham = "SP005",
+                    Ten_SanPham = "Sơ Mi Kẻ Sọc Nữ Form Rộng",
+                    Ma_DanhMuc = "DM002A",
+                    Mo_Ta = "Sơ mi kẻ caro hàn quốc, form rộng oversize, mặc mát cả mùa hè.",
+                    Trang_Thai = true
+                },
+                new SanPham
+                {
+                    Ma_SanPham = "SP006",
+                    Ten_SanPham = "Áo Khoác Kaki Nam Có Mũ",
+                    Ma_DanhMuc = "DM001A", // Áo khoác nam
+                    Mo_Ta = "Kaki dày dặn, có mũ tháo rời, chống nắng chống mưa nhẹ, form dáng trẻ trung.",
+                    Trang_Thai = true
+                }
             };
         }
     }

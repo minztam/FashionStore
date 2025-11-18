@@ -4,110 +4,140 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FashionStore.Data
 {
-    public class FashionStoreContext: DbContext
+    public class FashionStoreContext : DbContext
     {
-        public FashionStoreContext(DbContextOptions<FashionStoreContext> options) : base(options){}
+        public FashionStoreContext(DbContextOptions<FashionStoreContext> options) : base(options) { }
 
         public DbSet<VaiTro> VaiTros { get; set; }
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<NhanVien> NhanViens { get; set; }
         public DbSet<KhachHang> KhachHangs { get; set; }
-        public DbSet<DanhMuc> DanhMuc { get; set; }
+        public DbSet<DanhMuc> DanhMucs { get; set; }
         public DbSet<SanPham> SanPhams { get; set; }
         public DbSet<HinhAnhSanPham> HinhAnhSanPhams { get; set; }
+        public DbSet<SanPhamBienThe> SanPhamBienThes { get; set; }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
         public DbSet<DonHang> DonHangs { get; set; }
         public DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; }
         public DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Seed data cho danh mục
-            modelBuilder.Entity<DanhMuc>().HasData(DanhMucSeedData.GetSeedData());
-            base.OnModelCreating(modelBuilder);
-            //Seed dât cho san pham
-            modelBuilder.Entity<SanPham>().HasData(SanPhamSeedData.GetSeedData());
             base.OnModelCreating(modelBuilder);
 
-            // Quan hệ VaiTro - TaiKhoan (1 - nhiều)
+            // ===============================
+            // 1. SEED DATA DANH MỤC + SẢN PHẨM
+            // ===============================
+            modelBuilder.Entity<DanhMuc>().HasData(DanhMucSeedData.GetSeedData());
+            modelBuilder.Entity<SanPham>().HasData(SanPhamSeedData.GetSeedData());
+            modelBuilder.Entity<SanPhamBienThe>().HasData(SanPhamBienTheSeedData.GetSeedData());
+            modelBuilder.Entity<HinhAnhSanPham>().HasData(HinhAnhSanPhamSeedData.GetSeedData());
+
+            // ===============================
+            // 2. QUAN HỆ VAI TRÒ – TÀI KHOẢN
+            // ===============================
             modelBuilder.Entity<TaiKhoan>()
                 .HasOne(t => t.VaiTro)
                 .WithMany(v => v.TaiKhoans)
-                .HasForeignKey(t => t.Ma_VaiTro);
+                .HasForeignKey(t => t.Ma_VaiTro)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Quan hệ TaiKhoan - NhanVien (1 - 1)
+            // ===============================
+            // 3. TÀI KHOẢN – NHÂN VIÊN (1–1)
+            // ===============================
             modelBuilder.Entity<NhanVien>()
                 .HasOne(n => n.TaiKhoan)
                 .WithOne(t => t.NhanVien)
                 .HasForeignKey<NhanVien>(n => n.Ma_TaiKhoan);
 
-            // Quan hệ TaiKhoan - KhachHang (1 - 1) 
+            // ===============================
+            // 4. TÀI KHOẢN – KHÁCH HÀNG (1–1)
+            // ===============================
             modelBuilder.Entity<KhachHang>()
                 .HasOne(k => k.TaiKhoan)
                 .WithOne(t => t.KhachHang)
                 .HasForeignKey<KhachHang>(k => k.Ma_TaiKhoan);
 
-            // Khóa chính ghép ChiTietDonHang
+            // ===============================
+            // 5. KHÓA CHÍNH GHÉP: CHI TIẾT ĐƠN HÀNG
+            // ===============================
             modelBuilder.Entity<ChiTietDonHang>()
                 .HasKey(ct => new { ct.Ma_DonHang, ct.Ma_SanPham });
 
-            // Khóa chính ghép ChiTietGioHang
+            // ===============================
+            // 6. KHÓA CHÍNH GHÉP: CHI TIẾT GIỎ HÀNG
+            // ===============================
             modelBuilder.Entity<ChiTietGioHang>()
                 .HasKey(ct => new { ct.Ma_GioHang, ct.Ma_SanPham });
 
-            //
+            // ===============================
+            // 7. DANH MỤC CHA – CON
+            // ===============================
             modelBuilder.Entity<DanhMuc>()
                 .HasOne(dm => dm.DanhMucCha)
                 .WithMany(dm => dm.DanhMucCon)
                 .HasForeignKey(dm => dm.Ma_DanhMucCha)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // SanPham → DanhMuc
+            // ===============================
+            // 8. SẢN PHẨM – DANH MỤC
+            // ===============================
             modelBuilder.Entity<SanPham>()
                 .HasOne(sp => sp.DanhMuc)
                 .WithMany(dm => dm.SanPhams)
                 .HasForeignKey(sp => sp.Ma_DanhMuc)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // HinhAnhSanPham → SanPham
+            // ===============================
+            // 9. HÌNH ẢNH SẢN PHẨM
+            // ===============================
             modelBuilder.Entity<HinhAnhSanPham>()
                 .HasOne(ha => ha.SanPham)
                 .WithMany(sp => sp.HinhAnhSanPhams)
                 .HasForeignKey(ha => ha.Ma_SanPham)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<SanPham>(entity =>
-            {
-                entity.Property(e => e.Gia)
-                      .HasColumnType("decimal(18,2)");
+            // ===============================
+            // 10. SẢN PHẨM BIẾN THỂ – SẢN PHẨM
+            // ===============================
+            modelBuilder.Entity<SanPhamBienThe>()
+                .HasOne(bt => bt.SanPham)
+                .WithMany(sp => sp.BienThes)
+                .HasForeignKey(bt => bt.Ma_SanPham)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                entity.Property(e => e.Gia_Giam)
-                      .HasColumnType("decimal(18,2)");
-            });
+            // ===============================
+            // 11. FORMAT CÁC TRƯỜNG DECIMAL
+            // ===============================
+            modelBuilder.Entity<SanPhamBienThe>()
+                .Property(p => p.Gia_BienThe)
+                .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<ChiTietDonHang>(entity =>
-            {
-                entity.Property(e => e.DonGia)
-                      .HasColumnType("decimal(18,2)");
-            });
+            modelBuilder.Entity<SanPhamBienThe>()
+                .Property(p => p.Gia_Giam)
+                .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<DonHang>(entity =>
-            {
-                entity.Property(e => e.Tong_Tien)
-                      .HasColumnType("decimal(18,2)");
-            });
+            modelBuilder.Entity<ChiTietDonHang>()
+                .Property(p => p.DonGia)
+                .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<Voucher>(entity =>
-            {
-                entity.Property(e => e.GiaTri_ToiThieu)
-                      .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DonHang>()
+                .Property(p => p.Tong_Tien)
+                .HasColumnType("decimal(18,2)");
 
-                entity.Property(e => e.Giam_Tien)
-                      .HasColumnType("decimal(18,2)");
-            });
+            modelBuilder.Entity<Voucher>()
+                .Property(p => p.GiaTri_ToiThieu)
+                .HasColumnType("decimal(18,2)");
 
-            // Seed dữ liệu VaiTro
+            modelBuilder.Entity<Voucher>()
+                .Property(p => p.Giam_Tien)
+                .HasColumnType("decimal(18,2)");
+
+            // ===============================
+            // 12. SEED ROLE
+            // ===============================
             modelBuilder.Entity<VaiTro>().HasData(
                 new VaiTro { Ma_VaiTro = "1111-1111-1111-1111", Ten_VaiTro = "Admin" },
                 new VaiTro { Ma_VaiTro = "1111-2222-1111-2222", Ten_VaiTro = "Nhân viên bán hàng" },
@@ -115,17 +145,14 @@ namespace FashionStore.Data
                 new VaiTro { Ma_VaiTro = "2222-2222-2222-2222", Ten_VaiTro = "Khách hàng" }
             );
 
-            // Seed Admin mặc định
-            //modelBuilder.Entity<TaiKhoan>().HasData(
-            //    new TaiKhoan
-            //    {
-            //        Ten_DangNhap = "admin",
-            //        Mat_Khau = "123456",
-            //        Ma_VaiTro = "1111-1111-1111-1111",
-            //        Email = "admin@fashionstore.com"
-            //    }
+            // ===============================
+            // 13. SEED PHƯƠNG THỨC THANH TOÁN
+            // ===============================
+            //modelBuilder.Entity<PhuongThucThanhToan>().HasData(
+            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Thanh toán khi nhận hàng" },
+            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Ví điện tử" },
+            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Ngân hàng" }
             //);
         }
-
     }
 }

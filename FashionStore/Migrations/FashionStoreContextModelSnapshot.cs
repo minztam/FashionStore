@@ -40,7 +40,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietDonHangs");
+                    b.ToTable("ChiTietDonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.ChiTietGioHang", b =>
@@ -58,7 +58,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietGioHangs");
+                    b.ToTable("ChiTietGioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.DanhMuc", b =>
@@ -130,9 +130,6 @@ namespace FashionStore.Migrations
                     b.Property<string>("Ma_DonHang")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("KhachHangMa_KhachHang")
-                        .HasColumnType("int");
-
                     b.Property<int>("Ma_KhachHang")
                         .HasColumnType("int");
 
@@ -140,13 +137,10 @@ namespace FashionStore.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Ma_Voucher")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Ngay_Dat")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("PhuongThucThanhToanMa_PhuongThuc")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("Tong_Tien")
                         .HasColumnType("decimal(18,2)");
@@ -155,18 +149,15 @@ namespace FashionStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VoucherMa_Voucher")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Ma_DonHang");
 
-                    b.HasIndex("KhachHangMa_KhachHang");
+                    b.HasIndex("Ma_KhachHang");
 
-                    b.HasIndex("PhuongThucThanhToanMa_PhuongThuc");
+                    b.HasIndex("Ma_PhuongThuc");
 
-                    b.HasIndex("VoucherMa_Voucher");
+                    b.HasIndex("Ma_Voucher");
 
-                    b.ToTable("DonHangs");
+                    b.ToTable("DonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.GioHang", b =>
@@ -177,17 +168,14 @@ namespace FashionStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ma_GioHang"));
 
-                    b.Property<int?>("KhachHangMa_KhachHang")
-                        .HasColumnType("int");
-
                     b.Property<int>("Ma_KhachHang")
                         .HasColumnType("int");
 
                     b.HasKey("Ma_GioHang");
 
-                    b.HasIndex("KhachHangMa_KhachHang");
+                    b.HasIndex("Ma_KhachHang");
 
-                    b.ToTable("GioHangs");
+                    b.ToTable("GioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.HinhAnhSanPham", b =>
@@ -209,6 +197,134 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_SanPham");
 
                     b.ToTable("HinhAnhSanPham");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_HinhAnh = 1,
+                            DuongDan = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 2,
+                            DuongDan = "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 3,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 4,
+                            DuongDan = "https://images.unsplash.com/photo-1617114919317-8f6dce8e9df5?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 5,
+                            DuongDan = "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 6,
+                            DuongDan = "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 7,
+                            DuongDan = "https://images.unsplash.com/photo-1550616541-96cf6efa3c5e?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 8,
+                            DuongDan = "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 9,
+                            DuongDan = "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 10,
+                            DuongDan = "https://images.unsplash.com/photo-1602293589930-45aad59ba3e4?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 11,
+                            DuongDan = "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 12,
+                            DuongDan = "https://images.unsplash.com/photo-1611318440154-8f60a0b9f512?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 13,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 14,
+                            DuongDan = "https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 15,
+                            DuongDan = "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 16,
+                            DuongDan = "https://images.unsplash.com/photo-1612902376491-7a8a9b42425f?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 17,
+                            DuongDan = "https://images.unsplash.com/photo-1622473596033-9d8d1e7e6a5a?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 18,
+                            DuongDan = "https://images.unsplash.com/photo-1551029506-0807df4e2031?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 19,
+                            DuongDan = "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 20,
+                            DuongDan = "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 21,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP006"
+                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.KhachHang", b =>
@@ -295,27 +411,12 @@ namespace FashionStore.Migrations
                     b.Property<string>("Ma_SanPham")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("Gia")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("Gia_Giam")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Kich_Thuoc")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Ma_DanhMuc")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Mau_Sac")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Mo_Ta")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("So_Luong")
-                        .HasColumnType("int");
 
                     b.Property<string>("Ten_SanPham")
                         .IsRequired()
@@ -334,52 +435,253 @@ namespace FashionStore.Migrations
                         new
                         {
                             Ma_SanPham = "SP001",
-                            Gia = 450000m,
-                            Gia_Giam = 399000m,
-                            Kich_Thuoc = "M, L, XL",
                             Ma_DanhMuc = "DM001A",
-                            Mau_Sac = "Trắng",
-                            Mo_Ta = "Áo sơ mi vải Oxford cao cấp, thoáng mát, phong cách công sở trẻ trung.",
-                            So_Luong = 150,
-                            Ten_SanPham = "Áo Sơ Mi Oxford Nam",
+                            Mo_Ta = "Chất vải Oxford nhập khẩu, thoáng mát, không nhăn, form dáng chuẩn công sở và dự tiệc.",
+                            Ten_SanPham = "Áo Sơ Mi Oxford Nam Cao Cấp",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP002",
-                            Gia = 780000m,
-                            Kich_Thuoc = "S, M, L",
                             Ma_DanhMuc = "DM002B",
-                            Mau_Sac = "Vàng, Xanh",
-                            Mo_Ta = "Váy maxi chất liệu lụa mềm mại, họa tiết hoa nhí, thích hợp đi biển hoặc dạo phố.",
-                            So_Luong = 80,
-                            Ten_SanPham = "Váy Maxi Lụa Hoa Nhí",
+                            Mo_Ta = "Lụa cao cấp mát mẻ, họa tiết hoa nhí vintage, dáng dài thướt tha, đi biển hay dự tiệc đều đẹp.",
+                            Ten_SanPham = "Váy Maxi Lụa Hoa Nhí Thanh Lịch",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP003",
-                            Gia = 550000m,
-                            Gia_Giam = 450000m,
-                            Kich_Thuoc = "28, 29, 30, 31, 32",
                             Ma_DanhMuc = "DM001B",
-                            Mau_Sac = "Đen",
-                            Mo_Ta = "Quần jeans co giãn nhẹ, form slimfit hiện đại, dễ phối đồ.",
-                            So_Luong = 120,
-                            Ten_SanPham = "Quần Jeans Slimfit Đen",
+                            Mo_Ta = "Jeans co giãn 4 chiều, form slimfit tôn dáng, rách gối phong cách streetwear trẻ trung.",
+                            Ten_SanPham = "Quần Jeans Nam Slimfit Rách Gối",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP004",
-                            Gia = 320000m,
-                            Kich_Thuoc = "Freesize",
                             Ma_DanhMuc = "DM002A",
-                            Mau_Sac = "Be, Đỏ",
-                            Mo_Ta = "Áo len mỏng, kiểu dáng croptop, phong cách Hàn Quốc.",
-                            So_Luong = 95,
-                            Ten_SanPham = "Áo Len Croptop Tay Dài",
+                            Mo_Ta = "Len mỏng nhẹ, dáng croptop tay dài, phối đồ mùa thu đông cực xinh, freesize từ 45-60kg.",
+                            Ten_SanPham = "Áo Len Croptop Nữ Dáng Rộng",
                             Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP005",
+                            Ma_DanhMuc = "DM002A",
+                            Mo_Ta = "Sơ mi kẻ caro hàn quốc, form rộng oversize, mặc mát cả mùa hè.",
+                            Ten_SanPham = "Sơ Mi Kẻ Sọc Nữ Form Rộng",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP006",
+                            Ma_DanhMuc = "DM001A",
+                            Mo_Ta = "Kaki dày dặn, có mũ tháo rời, chống nắng chống mưa nhẹ, form dáng trẻ trung.",
+                            Ten_SanPham = "Áo Khoác Kaki Nam Có Mũ",
+                            Trang_Thai = true
+                        });
+                });
+
+            modelBuilder.Entity("FashionStore.Models.SanPhamBienThe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Gia_BienThe")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Gia_Giam")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Kich_Thuoc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ma_SanPham")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Mau_Sac")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PhanTramGiam")
+                        .HasColumnType("int");
+
+                    b.Property<int>("So_Luong")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Ma_SanPham");
+
+                    b.ToTable("SanPhamBienThe");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Gia_BienThe = 450000m,
+                            Gia_Giam = 399000m,
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP001",
+                            Mau_Sac = "Trắng",
+                            PhanTramGiam = 11,
+                            So_Luong = 80
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Gia_BienThe = 450000m,
+                            Gia_Giam = 399000m,
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP001",
+                            Mau_Sac = "Trắng",
+                            PhanTramGiam = 11,
+                            So_Luong = 100
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Gia_BienThe = 470000m,
+                            Gia_Giam = 420000m,
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP001",
+                            Mau_Sac = "Xanh Navy",
+                            PhanTramGiam = 11,
+                            So_Luong = 60
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Gia_BienThe = 780000m,
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Vàng Nhạt",
+                            So_Luong = 40
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Gia_BienThe = 780000m,
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Vàng Nhạt",
+                            So_Luong = 55
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Gia_BienThe = 780000m,
+                            Gia_Giam = 699000m,
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Xanh Mint",
+                            PhanTramGiam = 10,
+                            So_Luong = 35
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Gia_BienThe = 590000m,
+                            Gia_Giam = 499000m,
+                            Kich_Thuoc = "29",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 15,
+                            So_Luong = 70
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Gia_BienThe = 590000m,
+                            Gia_Giam = 499000m,
+                            Kich_Thuoc = "30",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Đen",
+                            So_Luong = 90
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Gia_BienThe = 610000m,
+                            Kich_Thuoc = "31",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Xanh Đậm",
+                            So_Luong = 50
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Gia_BienThe = 350000m,
+                            Gia_Giam = 299000m,
+                            Kich_Thuoc = "Freesize",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Be",
+                            PhanTramGiam = 15,
+                            So_Luong = 120
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Gia_BienThe = 350000m,
+                            Kich_Thuoc = "Freesize",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đỏ Rượu",
+                            So_Luong = 80
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Gia_BienThe = 380000m,
+                            Gia_Giam = 329000m,
+                            Kich_Thuoc = "Freesize",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Trắng Kẻ Xanh",
+                            PhanTramGiam = 13,
+                            So_Luong = 100
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Gia_BienThe = 690000m,
+                            Gia_Giam = 590000m,
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Xanh Rêu",
+                            PhanTramGiam = 14,
+                            So_Luong = 60
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Gia_BienThe = 690000m,
+                            Gia_Giam = 590000m,
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Xanh Rêu",
+                            So_Luong = 80
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Gia_BienThe = 710000m,
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Đen",
+                            So_Luong = 45
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Gia_BienThe = 690000m,
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Be",
+                            So_Luong = 55
                         });
                 });
 
@@ -547,15 +849,19 @@ namespace FashionStore.Migrations
                 {
                     b.HasOne("FashionStore.Models.KhachHang", "KhachHang")
                         .WithMany()
-                        .HasForeignKey("KhachHangMa_KhachHang");
+                        .HasForeignKey("Ma_KhachHang")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FashionStore.Models.PhuongThucThanhToan", "PhuongThucThanhToan")
                         .WithMany("DonHangs")
-                        .HasForeignKey("PhuongThucThanhToanMa_PhuongThuc");
+                        .HasForeignKey("Ma_PhuongThuc")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FashionStore.Models.Voucher", "Voucher")
                         .WithMany("DonHangs")
-                        .HasForeignKey("VoucherMa_Voucher");
+                        .HasForeignKey("Ma_Voucher");
 
                     b.Navigation("KhachHang");
 
@@ -568,7 +874,9 @@ namespace FashionStore.Migrations
                 {
                     b.HasOne("FashionStore.Models.KhachHang", "KhachHang")
                         .WithMany()
-                        .HasForeignKey("KhachHangMa_KhachHang");
+                        .HasForeignKey("Ma_KhachHang")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("KhachHang");
                 });
@@ -616,12 +924,23 @@ namespace FashionStore.Migrations
                     b.Navigation("DanhMuc");
                 });
 
+            modelBuilder.Entity("FashionStore.Models.SanPhamBienThe", b =>
+                {
+                    b.HasOne("FashionStore.Models.SanPham", "SanPham")
+                        .WithMany("BienThes")
+                        .HasForeignKey("Ma_SanPham")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SanPham");
+                });
+
             modelBuilder.Entity("FashionStore.Models.TaiKhoan", b =>
                 {
                     b.HasOne("FashionStore.Models.VaiTro", "VaiTro")
                         .WithMany("TaiKhoans")
                         .HasForeignKey("Ma_VaiTro")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("VaiTro");
@@ -651,6 +970,8 @@ namespace FashionStore.Migrations
 
             modelBuilder.Entity("FashionStore.Models.SanPham", b =>
                 {
+                    b.Navigation("BienThes");
+
                     b.Navigation("HinhAnhSanPhams");
                 });
 

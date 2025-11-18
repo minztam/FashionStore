@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FashionStore.Models
 {
+    [Table("ChiTietDonHang")]
     public class ChiTietDonHang
     {
         [Key]
@@ -11,7 +13,9 @@ namespace FashionStore.Models
         public decimal DonGia { get; set; }
 
         // Navigation
+        [ForeignKey("Ma_DonHang")]
         public DonHang? DonHang { get; set; }
+        [ForeignKey("Ma_SanPham")]
         public SanPham? SanPham { get; set; }
     }
 }
