@@ -73,14 +73,42 @@ namespace FashionStore.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<DanhMuc>> GetTreeAsync()
+        public async Task<ResponseMessageResult> GetTreeAsync()
         {
-            var danMucs = await _context.DanhMucs
-                .Include(x => x.DanhMucCon)
-                .Where(x => x.Ma_DanhMucCha == null)
-                .ToListAsync();
+            try
+            {
+                var allCategories = await _context.DanhMucs
+                    .AsNoTracking()
+                    .Where(d => d.Trang_Thai)
+                    .Select(d => new DanhMucDTO
+                    {
+                        Ma_DanhMuc = d.Ma_DanhMuc,
+                        Ten_DanhMuc = d.Ten_DanhMuc,
+                        Ma_DanhMucCha = d.Ma_DanhMucCha,
+                        Ten_DanhMucCha = d.DanhMucCha != null ? d.DanhMucCha.Ten_DanhMuc : null,
+                        Trang_Thai = d.Trang_Thai
+                    })
+                    .ToListAsync();
 
-            return danMucs;
+                var lookup = allCategories.ToLookup(x => x.Ma_DanhMucCha);
+
+                foreach (var cat in allCategories)
+                {
+                    cat.DanhMucCon = lookup[cat.Ma_DanhMuc].OrderBy(c => c.Ten_DanhMuc).ToList();
+                }
+
+                var rootCategories = allCategories
+                    .Where(x => string.IsNullOrEmpty(x.Ma_DanhMucCha))
+                    .OrderBy(x => x.Ten_DanhMuc)
+                    .ToList();
+
+                return _response.SetSuccess("Lấy cây danh mục thành công!", rootCategories);
+            }
+            catch (Exception)
+            {
+                //_logger?.LogError(ex, "Lỗi khi lấy cây danh mục");
+                return _response.SetFail("Không thể tải danh mục!", 500);
+            }
         }
 
         public async Task<bool> AddAsync(DanhMuc danhMuc)

@@ -33,10 +33,15 @@ namespace FashionStore.Migrations
                     b.Property<decimal>("DonGia")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("Ma_BienThe")
+                        .HasColumnType("int");
+
                     b.Property<int>("So_Luong")
                         .HasColumnType("int");
 
                     b.HasKey("Ma_DonHang", "Ma_SanPham");
+
+                    b.HasIndex("Ma_BienThe");
 
                     b.HasIndex("Ma_SanPham");
 
@@ -51,10 +56,15 @@ namespace FashionStore.Migrations
                     b.Property<string>("Ma_SanPham")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Ma_BienThe")
+                        .HasColumnType("int");
+
                     b.Property<int>("So_Luong")
                         .HasColumnType("int");
 
-                    b.HasKey("Ma_GioHang", "Ma_SanPham");
+                    b.HasKey("Ma_GioHang", "Ma_SanPham", "Ma_BienThe");
+
+                    b.HasIndex("Ma_BienThe");
 
                     b.HasIndex("Ma_SanPham");
 
@@ -799,6 +809,11 @@ namespace FashionStore.Migrations
 
             modelBuilder.Entity("FashionStore.Models.ChiTietDonHang", b =>
                 {
+                    b.HasOne("FashionStore.Models.SanPhamBienThe", "BienThe")
+                        .WithMany()
+                        .HasForeignKey("Ma_BienThe")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("FashionStore.Models.DonHang", "DonHang")
                         .WithMany("ChiTietDonHangs")
                         .HasForeignKey("Ma_DonHang")
@@ -811,6 +826,8 @@ namespace FashionStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("BienThe");
+
                     b.Navigation("DonHang");
 
                     b.Navigation("SanPham");
@@ -818,6 +835,12 @@ namespace FashionStore.Migrations
 
             modelBuilder.Entity("FashionStore.Models.ChiTietGioHang", b =>
                 {
+                    b.HasOne("FashionStore.Models.SanPhamBienThe", "BienThe")
+                        .WithMany()
+                        .HasForeignKey("Ma_BienThe")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FashionStore.Models.GioHang", "GioHang")
                         .WithMany("ChiTietGioHangs")
                         .HasForeignKey("Ma_GioHang")
@@ -827,8 +850,10 @@ namespace FashionStore.Migrations
                     b.HasOne("FashionStore.Models.SanPham", "SanPham")
                         .WithMany()
                         .HasForeignKey("Ma_SanPham")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("BienThe");
 
                     b.Navigation("GioHang");
 

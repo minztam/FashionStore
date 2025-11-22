@@ -29,7 +29,7 @@ namespace FashionStore.Controllers
             if (dto == null)
                 return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
 
-            var result = await _gioHangRepo.AddToCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong);
+            var result = await _gioHangRepo.AddToCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong, dto.Ma_BienThe);
 
             if (result.Success)
                 return Ok(result);
@@ -43,20 +43,21 @@ namespace FashionStore.Controllers
             if (dto == null)
                 return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
 
-            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong);
+            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong, dto.Ma_BienThe);
 
             if (result.Success)
                 return Ok(result);
             else
                 return StatusCode(result.StatusCode, result);
         }
+
         [HttpDelete("{maKhachHang}/remove")]
         public async Task<IActionResult> RemoveFromCart(int maKhachHang, [FromBody] ChiTietGioHangDTO dto)
         {
             if (dto == null)
                 return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
 
-            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, dto.Ma_SanPham);
+            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, dto.Ma_SanPham, dto.Ma_BienThe);
 
             if (result.Success)
                 return Ok(result);

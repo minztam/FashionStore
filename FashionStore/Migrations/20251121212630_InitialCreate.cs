@@ -274,6 +274,7 @@ namespace FashionStore.Migrations
                 {
                     Ma_DonHang = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Ma_SanPham = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Ma_BienThe = table.Column<int>(type: "int", nullable: true),
                     So_Luong = table.Column<int>(type: "int", nullable: false),
                     DonGia = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
@@ -286,6 +287,12 @@ namespace FashionStore.Migrations
                         principalTable: "DonHang",
                         principalColumn: "Ma_DonHang",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChiTietDonHang_SanPhamBienThe_Ma_BienThe",
+                        column: x => x.Ma_BienThe,
+                        principalTable: "SanPhamBienThe",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ChiTietDonHang_SanPham_Ma_SanPham",
                         column: x => x.Ma_SanPham,
@@ -300,11 +307,12 @@ namespace FashionStore.Migrations
                 {
                     Ma_GioHang = table.Column<int>(type: "int", nullable: false),
                     Ma_SanPham = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Ma_BienThe = table.Column<int>(type: "int", nullable: false),
                     So_Luong = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChiTietGioHang", x => new { x.Ma_GioHang, x.Ma_SanPham });
+                    table.PrimaryKey("PK_ChiTietGioHang", x => new { x.Ma_GioHang, x.Ma_SanPham, x.Ma_BienThe });
                     table.ForeignKey(
                         name: "FK_ChiTietGioHang_GioHang_Ma_GioHang",
                         column: x => x.Ma_GioHang,
@@ -312,11 +320,17 @@ namespace FashionStore.Migrations
                         principalColumn: "Ma_GioHang",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_ChiTietGioHang_SanPhamBienThe_Ma_BienThe",
+                        column: x => x.Ma_BienThe,
+                        principalTable: "SanPhamBienThe",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_ChiTietGioHang_SanPham_Ma_SanPham",
                         column: x => x.Ma_SanPham,
                         principalTable: "SanPham",
                         principalColumn: "Ma_SanPham",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -415,9 +429,19 @@ namespace FashionStore.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChiTietDonHang_Ma_BienThe",
+                table: "ChiTietDonHang",
+                column: "Ma_BienThe");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChiTietDonHang_Ma_SanPham",
                 table: "ChiTietDonHang",
                 column: "Ma_SanPham");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChiTietGioHang_Ma_BienThe",
+                table: "ChiTietGioHang",
+                column: "Ma_BienThe");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChiTietGioHang_Ma_SanPham",
@@ -498,16 +522,13 @@ namespace FashionStore.Migrations
                 name: "NhanVien");
 
             migrationBuilder.DropTable(
-                name: "SanPhamBienThe");
-
-            migrationBuilder.DropTable(
                 name: "DonHang");
 
             migrationBuilder.DropTable(
                 name: "GioHang");
 
             migrationBuilder.DropTable(
-                name: "SanPham");
+                name: "SanPhamBienThe");
 
             migrationBuilder.DropTable(
                 name: "PhuongThucThanhToans");
@@ -519,10 +540,13 @@ namespace FashionStore.Migrations
                 name: "KhachHang");
 
             migrationBuilder.DropTable(
-                name: "DanhMuc");
+                name: "SanPham");
 
             migrationBuilder.DropTable(
                 name: "TaiKhoan");
+
+            migrationBuilder.DropTable(
+                name: "DanhMuc");
 
             migrationBuilder.DropTable(
                 name: "VaiTro");

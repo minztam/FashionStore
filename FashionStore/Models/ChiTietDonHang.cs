@@ -9,6 +9,7 @@ namespace FashionStore.Models
         [Key]
         public required string Ma_DonHang { get; set; }
         public required string Ma_SanPham { get; set; }
+        public int? Ma_BienThe { get; set; }
         public int So_Luong { get; set; }
         public decimal DonGia { get; set; }
 
@@ -17,5 +18,8 @@ namespace FashionStore.Models
         public DonHang? DonHang { get; set; }
         [ForeignKey("Ma_SanPham")]
         public SanPham? SanPham { get; set; }
+
+        [ForeignKey("Ma_BienThe")]
+        public SanPhamBienThe BienThe { get; set; } = null!;
     }
 }

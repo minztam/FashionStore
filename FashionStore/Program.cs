@@ -1,9 +1,11 @@
 using FashionStore.Data;
 using FashionStore.Models;
+using FashionStore.Models.Momo;
 using FashionStore.Repositories.Implementations;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
+using FashionStore.Services.Momo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +20,9 @@ namespace FashionStore
         {
             var builder = WebApplication.CreateBuilder(args);
             var jwsSettings = builder.Configuration.GetSection("Jwt");
+
+            builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+            builder.Services.AddScoped<IMomoService, MomoService>();
 
             // Add services to the container.
 
@@ -82,6 +87,9 @@ namespace FashionStore
             builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
             builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
             builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+            builder.Services.AddScoped<IThanhToanRepository, ThanhToanRepository>();
+            builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
+            builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
             builder.Services.AddScoped<ResponseMessageResult>();
 
             builder.Services.AddScoped<JwtService>();

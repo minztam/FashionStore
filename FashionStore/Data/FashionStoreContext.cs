@@ -1,6 +1,7 @@
 ﻿using FashionStore.DataSeed;
 using FashionStore.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FashionStore.Data
 {
@@ -25,6 +26,7 @@ namespace FashionStore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             base.OnModelCreating(modelBuilder);
 
             // ===============================
@@ -63,14 +65,53 @@ namespace FashionStore.Data
             // ===============================
             // 5. KHÓA CHÍNH GHÉP: CHI TIẾT ĐƠN HÀNG
             // ===============================
-            modelBuilder.Entity<ChiTietDonHang>()
-                .HasKey(ct => new { ct.Ma_DonHang, ct.Ma_SanPham });
+            modelBuilder.Entity<ChiTietDonHang>(entity =>
+            {
+                entity.HasKey(ct => new { ct.Ma_DonHang, ct.Ma_SanPham });
+
+                entity.Property(ct => ct.Ma_BienThe)
+                      .IsRequired(); // Bắt buộc NOT NULL
+
+                entity.HasOne(ct => ct.DonHang)
+                      .WithMany(dh => dh.ChiTietDonHangs)
+                      .HasForeignKey(ct => ct.Ma_DonHang)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ct => ct.SanPham)
+                      .WithMany()
+                      .HasForeignKey(ct => ct.Ma_SanPham)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // DÒNG QUAN TRỌNG NHẤT – ÉP BUỘC KHÔNG DÙNG SET NULL!!!
+                entity.HasOne(ct => ct.BienThe)
+                      .WithMany()
+                      .HasForeignKey(ct => ct.Ma_BienThe)
+                      .OnDelete(DeleteBehavior.Restrict)   // hoặc NoAction
+                      .IsRequired();
+            });
 
             // ===============================
             // 6. KHÓA CHÍNH GHÉP: CHI TIẾT GIỎ HÀNG
             // ===============================
-            modelBuilder.Entity<ChiTietGioHang>()
-                .HasKey(ct => new { ct.Ma_GioHang, ct.Ma_SanPham });
+            modelBuilder.Entity<ChiTietGioHang>(entity =>
+            {
+                entity.HasKey(ct => new { ct.Ma_GioHang, ct.Ma_SanPham, ct.Ma_BienThe });
+
+                entity.HasOne(ct => ct.GioHang)
+                      .WithMany(g => g.ChiTietGioHangs)
+                      .HasForeignKey(ct => ct.Ma_GioHang)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ct => ct.SanPham)
+                      .WithMany()
+                      .HasForeignKey(ct => ct.Ma_SanPham)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ct => ct.BienThe)
+                      .WithMany()
+                      .HasForeignKey(ct => ct.Ma_BienThe)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
             // ===============================
             // 7. DANH MỤC CHA – CON
@@ -148,10 +189,17 @@ namespace FashionStore.Data
             // ===============================
             // 13. SEED PHƯƠNG THỨC THANH TOÁN
             // ===============================
+            modelBuilder.Entity<PhuongThucThanhToan>(entity =>
+            {
+                entity.HasKey(e => e.Ma_PhuongThuc);
+                //entity.Property(e => e.Ma_PhuongThuc)
+                //      .ValueGeneratedNever()
+                //      .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
+            });
             //modelBuilder.Entity<PhuongThucThanhToan>().HasData(
-            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Thanh toán khi nhận hàng" },
-            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Ví điện tử" },
-            //    new PhuongThucThanhToan { Ten_PhuongThuc = "Ngân hàng" }
+            //    new PhuongThucThanhToan { Ma_PhuongThuc = 1, Ten_PhuongThuc = "Thanh toán khi nhận hàng (COD)" },
+            //    new PhuongThucThanhToan { Ma_PhuongThuc = 2, Ten_PhuongThuc = "Ví điện tử" },
+            //    new PhuongThucThanhToan { Ma_PhuongThuc = 3, Ten_PhuongThuc = "Chuyển khoản ngân hàng" }
             //);
         }
     }

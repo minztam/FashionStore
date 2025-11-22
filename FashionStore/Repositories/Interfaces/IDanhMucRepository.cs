@@ -12,7 +12,7 @@ namespace FashionStore.Repositories.Interfaces
         Task<bool> AddAsync(DanhMuc danhMuc);
         Task<bool> UpdateAsync(DanhMuc danhMuc);
         Task<bool> DeleteAsync(string id);
-        Task<IEnumerable<DanhMuc>> GetTreeAsync();
+        Task<ResponseMessageResult> GetTreeAsync();
         Task<bool> ToggleStatusAsync(string id);
     }
 }
