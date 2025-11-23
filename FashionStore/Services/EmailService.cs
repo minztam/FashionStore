@@ -165,7 +165,7 @@ namespace FashionStore.Services
                 <h2 style='color: #e91e63;'>Đơn hàng của bạn đã được xác nhận!</h2>
                 <p><strong>Mã đơn hàng:</strong> <span style='font-size: 20px; color: #e91e63;'>{donHang.Ma_DonHang}</span></p>
                 <p><strong>Ngày đặt:</strong> {donHang.Ngay_Dat:dd/MM/yyyy HH:mm}</p>
-                <p><strong>Hình thức thanh toán:</strong> Thanh toán khi nhận hàng (COD)</p>
+                <p><strong>Hình thức thanh toán:</strong> {donHang.Ten_PhuongThuc}</p>
 
                 <table style='width: 100%; margin: 20px 0; border-collapse: separate; border-spacing: 0 10px;'>
                     <thead>

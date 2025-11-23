@@ -7,6 +7,7 @@ using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace FashionStore.Repositories.Implementations
 {
@@ -294,9 +295,9 @@ namespace FashionStore.Repositories.Implementations
                         d.Ngay_Dat,
                         d.Tong_Tien,
                         TrangThai = d.Trang_Thai
-                            //(d.Trang_Thai == "Chờ xác nhận" || d.Trang_Thai == "Đang xử lý")
-                            //? "Đang xử lý"
-                            //: d.Trang_Thai
+                        //(d.Trang_Thai == "Chờ xác nhận" || d.Trang_Thai == "Đang xử lý")
+                        //? "Đang xử lý"
+                        //: d.Trang_Thai
                     })
                     .AsQueryable();
 
@@ -471,7 +472,311 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi cập nhật trạng thái: " + ex.Message, 500);
             }
         }
+        public async Task<DonHang?> GetDonHangForInvoiceAsync(string maDonHang)
+        {
+            return await _context.DonHangs
+                .AsNoTracking()
+                .Include(d => d.KhachHang!).ThenInclude(k => k!.TaiKhoan)
+                .Include(d => d.PhuongThucThanhToan)
+                .Include(d => d.ChiTietDonHangs!)
+                    .ThenInclude(ct => ct.SanPham!)
+                        .ThenInclude(sp => sp!.HinhAnhSanPhams!)
+                .Include(d => d.ChiTietDonHangs!)
+                    .ThenInclude(ct => ct.BienThe!)
+                .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
+        }
+        public async Task<string> GenerateInvoiceHtmlAsync(string maDonHang)
+        {
+            var donHang = await GetDonHangForInvoiceAsync(maDonHang);
+            if (donHang == null)
+                return "<h1 style='text-align:center;color:red;margin-top:100px;font-family:Arial'>KHÔNG TÌM THẤY ĐƠN HÀNG!</h1>";
 
+            var sb = new StringBuilder();
+            sb.Append(@"
+<!DOCTYPE html>
+<html lang=""vi"">
+<head>
+    <meta charset=""utf-8"">
+    <title>Hóa đơn - ").Append(maDonHang).Append(@"</title>
+    <style>
+        body { 
+            font-family: 'DejaVu Sans', Arial, sans-serif; 
+            margin: 0; 
+            padding: 10mm; 
+            font-size: 11pt; 
+            line-height: 1.4;
+            color: #000;
+        }
+        .invoice {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #333;
+            padding: 20px;
+            background: white;
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 3px double #333; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px;
+        }
+        .header h1 { 
+            margin: 0; 
+            font-size: 28pt; 
+            color: #d32f2f; 
+            font-weight: bold;
+        }
+        .header p { margin: 5px 0; font-size: 12pt; }
+        .info { 
+            margin: 20px 0; 
+            font-size: 12pt;
+        }
+        .info table { width: 100%; }
+        .info td { padding: 6px 0; }
+        .info td:first-child { font-weight: bold; width: 140px; }
+        table.items { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0;
+            font-size: 11pt;
+        }
+        table.items th {
+            background: #333;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        table.items td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #666;
+            text-align: center;
+        }
+        table.items td:nth-child(2) { text-align: left; }
+        .text-right { text-align: right; }
+        .total {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #d32f2f;
+            text-align: right;
+            padding: 15px 10px;
+            background: #f0f0f0;
+            border-top: 3px double #333;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 11pt;
+            border-top: 1px dashed #666;
+            padding-top: 15px;
+        }
+        .text-center { text-align: center; }
+        .bold { font-weight: bold; }
+
+        /* TỐI ƯU IN NHIỆT 80MM */
+        @media print {
+            body { padding: 3mm; font-size: 10pt; }
+            .invoice { border: none; padding: 5px; }
+            table.items th, table.items td { padding: 6px 4px; font-size: 9pt; }
+            .header h1 { font-size: 18pt; }
+            @page { size: 80mm auto; margin: 0; }
+        }
+    </style>
+</head>
+<body onload=""window.print()"">
+<div class=""invoice"">
+    <div class=""header"">
+        <h1>FASHION STORE</h1>
+        <p>123 Đường Thời Trang, Q.1, TP.HCM</p>
+        <p>Hotline: 0909.123.456</p>
+        <h2>HÓA ĐƠN BÁN HÀNG</h2>
+        <p class=""bold"">Mã đơn: ").Append(maDonHang).Append(@" | ")
+                  .Append(donHang.Ngay_Dat).Append(@"</p>
+    </div>
+
+    <div class=""info"">
+        <table>
+            <tr><td>Khách hàng:</td><td>").Append(donHang.KhachHang?.HoTen ?? "Khách lẻ").Append(@"</td></tr>
+            <tr><td>Số điện thoại:</td><td>").Append(donHang.KhachHang?.SoDienThoai ?? "-").Append(@"</td></tr>
+            <tr><td>Địa chỉ:</td><td>").Append(donHang.KhachHang?.DiaChi ?? "-").Append(@"</td></tr>
+            <tr><td>Thanh toán:</td><td>").Append(donHang.PhuongThucThanhToan?.Ten_PhuongThuc ?? "COD").Append(@"</td></tr>
+        </table>
+    </div>
+
+    <table class=""items"">
+        <thead>
+            <tr>
+                <th width=""5%"">STT</th>
+                <th width=""45%"">Sản phẩm</th>
+                <th width=""20%"">Màu/Size</th>
+                <th width=""10%"">SL</th>
+                <th width=""10%"">Đơn giá</th>
+                <th width=""10%"">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>");
+
+            int stt = 1;
+            foreach (var ct in donHang.ChiTietDonHangs!)
+            {
+                var thanhTien = ct.DonGia * ct.So_Luong;
+                sb.Append($@"
+            <tr>
+                <td>{stt++}</td>
+                <td style=""text-align:left"">
+                    <div class=""bold"">{ct.SanPham?.Ten_SanPham}</div>
+                    <small>Mã SP: {ct.Ma_SanPham}</small>
+                </td>
+                <td>{ct.BienThe?.Mau_Sac ?? "-"} / {ct.BienThe?.Kich_Thuoc ?? "-"}</td>
+                <td>{ct.So_Luong}</td>
+                <td class=""text-right"">{ct.DonGia:N0}</td>
+                <td class=""text-right"">{thanhTien:N0}</td>
+            </tr>");
+            }
+
+            sb.Append($@"
+        </tbody>
+    </table>
+
+    <div class=""total"">
+        TỔNG TIỀN: {donHang.Tong_Tien:N0} ₫
+    </div>
+
+    <div class=""footer"">
+        <p class=""bold"">Xin chân thành cảm ơn Quý khách!</p>
+        <p>Đổi trả trong 7 ngày • Miễn phí vận chuyển đơn từ 500k</p>
+    </div>
+</div>
+</body>
+</html>");
+            return sb.ToString();
+        }
+
+        // 1. LẤY ĐƠN HÀNG THEO TRẠNG THÁI + PHÂN QUYỀN (DÙNG CHO TẤT CẢ NHÂN VIÊN)
+        public async Task<ResponseMessageResult> GetDonHangByTrangThaiAsync(string[] trangThaiChoPhep, string? search = null, int page = 1, int pageSize = 20)
+        {
+            var query = _context.DonHangs
+                .Include(d => d.KhachHang)
+                .Include(d => d.ChiTietDonHangs!)
+                    .ThenInclude(ct => ct.SanPham!)
+                        .ThenInclude(sp => sp!.HinhAnhSanPhams!)
+                .Where(d => trangThaiChoPhep.Contains(d.Trang_Thai));
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(d =>
+                    d.Ma_DonHang.Contains(search) ||
+                    d.KhachHang!.HoTen!.ToLower().Contains(search) ||
+                    d.KhachHang!.SoDienThoai!.Contains(search));
+            }
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(d => d.Ngay_Dat)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(d => new
+                {
+                    d.Ma_DonHang,
+                    d.Ngay_Dat,
+                    KhachHang = d.KhachHang!.HoTen,
+                    SoDienThoai = d.KhachHang.SoDienThoai,
+                    d.Tong_Tien,
+                    d.Trang_Thai,
+                    SoSanPham = d.ChiTietDonHangs!.Count
+                })
+                .ToListAsync();
+
+            return _response.SetSuccess("Lấy danh sách đơn hàng thành công!", new { Total = total, Items = items });
+        }
+
+        // 2. CẬP NHẬT TRẠNG THÁI CÓ KIỂM TRA QUYỀN + GHI LỊCH SỬ
+        public async Task<ResponseMessageResult> CapNhatTrangThaiAsync(string maDonHang,string trangThaiMoi, string vaiTroNguoiThucHien,string tenNguoiThucHien)
+        {
+            var donHang = await _context.DonHangs
+                .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
+
+            if (donHang == null)
+                return _response.SetFail("Đơn hàng không tồn tại!", 404);
+
+            // KIỂM TRA QUYỀN CHUYỂN TRẠNG THÁI
+            bool choPhep = (vaiTroNguoiThucHien, donHang.Trang_Thai, trangThaiMoi) switch
+            {
+                ("Nhân viên bán hàng", "Chờ xác nhận", "Đang xác nhận") => true,
+                ("Nhân viên bán hàng", "Đang xác nhận", "Chờ xử lý kho") => true,
+
+                ("Nhân viên kho", "Chờ xử lý kho", "Đang đóng gói") => true,
+                ("Nhân viên kho", "Đang đóng gói", "Chờ shipper") => true,
+
+                ("Shipper", "Chờ shipper", "Đã lấy hàng") => true,
+                ("Shipper", "Đã lấy hàng", "Đang giao") => true,
+                ("Shipper", "Đang giao", "Đã giao") => true,
+                ("Shipper", "Đang giao", "Giao không thành công") => true,
+
+                _ => false
+            };
+
+            if (!choPhep)
+                return _response.SetFail("Bạn không có quyền chuyển trạng thái này!", 403);
+
+            var trangThaiCu = donHang.Trang_Thai;
+            donHang.Trang_Thai = trangThaiMoi;
+            //donHang.NgayCapNhat = DateTime.Now;
+
+            //// GHI LỊCH SỬ
+            //_context.LichSuTrangThaiDonHangs.Add(new LichSuTrangThaiDonHang
+            //{
+            //    MaDonHang = maDonHang,
+            //    TrangThaiCu = trangThaiCu,
+            //    TrangThaiMoi = trangThaiMoi,
+            //    NguoiThucHien = tenNguoiThucHien,
+            //    VaiTro = vaiTroNguoiThucHien,
+            //    ThoiGian = DateTime.Now
+            //});
+
+            await _context.SaveChangesAsync();
+            return _response.SetSuccess("Cập nhật trạng thái thành công!", new { maDonHang, trangThaiMoi });
+        }
+
+        // 3. TRA CỨU KHÁCH HÀNG
+        public async Task<ResponseMessageResult> TimKiemKhachHangAsync(string search)
+        {
+            var query = _context.KhachHangs
+                .Where(k => k.SoDienThoai!.Contains(search) ||
+                            k.HoTen!.ToLower().Contains(search.ToLower()));
+
+            var result = await query.Select(k => new
+            {
+                k.Ma_KhachHang,
+                k.HoTen,
+                k.SoDienThoai,
+                TongDonHang = _context.DonHangs.Count(d => d.Ma_KhachHang == k.Ma_KhachHang),
+                TongTienMua = _context.DonHangs.Where(d => d.Ma_KhachHang == k.Ma_KhachHang).Sum(d => d.Tong_Tien)
+            }).Take(20).ToListAsync();
+
+            return _response.SetSuccess("Tìm khách hàng thành công!", result);
+        }
+
+        // 4. LỊCH SỬ TRẠNG THÁI ĐƠN HÀNG
+        //public async Task<ResponseMessageResult> GetLichSuTrangThaiAsync(string maDonHang)
+        //{
+        //    var lichSu = await _context.LichSuTrangThaiDonHangs
+        //        .Where(l => l.MaDonHang == maDonHang)
+        //        .OrderBy(l => l.ThoiGian)
+        //        .Select(l => new
+        //        {
+        //            l.TrangThaiCu,
+        //            l.TrangThaiMoi,
+        //            l.NguoiThucHien,
+        //            l.VaiTro,
+        //            ThoiGian = l.ThoiGian.ToString("dd/MM/yyyy HH:mm")
+        //        })
+        //        .ToListAsync();
+
+        //    return _response.SetSuccess("Lấy lịch sử thành công!", lichSu);
+        //}
     }
 
     public class TaoDonHangRequest

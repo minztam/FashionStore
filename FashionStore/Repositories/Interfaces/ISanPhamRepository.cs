@@ -22,5 +22,8 @@ namespace FashionStore.Repositories.Interfaces
 
         // Phương thức mới: Quản lý biến thể
         Task<ResponseMessageResult> CreateBienTheAsync(string maSanPham, SanPhamBienTheDTO dto);
+
+        //  Danh mục + Biến thể + Hình ảnh
+        Task<ResponseMessageResult> TimKiemSanPhamAsync(SanPhamFilterDTO dto);
     }
 }

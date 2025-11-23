@@ -469,6 +469,98 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Có lỗi khi thêm biến thể", 500);
             }
         }
+        public async Task<ResponseMessageResult> TimKiemSanPhamAsync(SanPhamFilterDTO dto)
+        {
+            try
+            {
+                var query = _context.SanPhams
+                    .Include(p => p.DanhMuc)
+                    .Include(p => p.BienThes)
+                    .Include(p => p.HinhAnhSanPhams)
+                    .AsQueryable();
+
+                //  Tìm theo tên
+                if (!string.IsNullOrEmpty(dto.TuKhoa))
+                    query = query.Where(p => p.Ten_SanPham.Contains(dto.TuKhoa));
+
+                //  Lọc danh mục
+                if (!string.IsNullOrEmpty(dto.MaDanhMuc))
+                    query = query.Where(p => EF.Functions.Like(p.Ma_DanhMuc!, $"%{dto.MaDanhMuc}%"));
+
+                //  Lọc màu sắc
+                if (!string.IsNullOrEmpty(dto.MauSac))
+                    query = query.Where(p => p.BienThes.Any(b => EF.Functions.Like(b.Mau_Sac!, $"%{dto.MauSac}%")));
+
+                //  Lọc kích thước
+                if (!string.IsNullOrEmpty(dto.KichThuoc))
+                    query = query.Where(p => p.BienThes.Any(b => b.Kich_Thuoc == dto.KichThuoc));
+
+                //  Lọc theo khoảng giá
+                if (dto.GiaTu.HasValue)
+                    query = query.Where(p => p.BienThes.Any(b => b.Gia_BienThe >= dto.GiaTu.Value));
+
+                if (dto.GiaDen.HasValue)
+                    query = query.Where(p => p.BienThes.Any(b => b.Gia_BienThe <= dto.GiaDen.Value));
+
+                //  Còn hàng
+                if (dto.ConHang.HasValue)
+                {
+                    if (dto.ConHang.Value)
+                        query = query.Where(p => p.BienThes.Any(b => b.So_Luong > 0));
+                    else
+                        query = query.Where(p => p.BienThes.All(b => b.So_Luong == 0));
+                }
+
+                //  Sắp xếp  
+                query = dto.SortBy?.ToLower() switch
+                {
+                    "gia_tang" => query.OrderBy(p => p.BienThes.Min(b => b.Gia_BienThe)),
+                    "gia_giam" => query.OrderByDescending(p => p.BienThes.Max(b => b.Gia_BienThe)),
+                    "moi_nhat" => query.OrderByDescending(p => p.Ma_SanPham), // có thể thay bằng ngày tạo nếu có
+                    _ => query.OrderBy(p => p.Ten_SanPham)
+                };
+
+                //  Phân trang
+                var total = await query.CountAsync();
+                var data = await query
+                    .Skip((dto.Page - 1) * dto.PageSize)
+                    .Take(dto.PageSize)
+                    .Select(p => new
+                    {
+                        p.Ma_SanPham,
+                        p.Ten_SanPham,
+                        p.Mo_Ta,
+                        p.Trang_Thai,
+                        DanhMuc = p.DanhMuc!.Ten_DanhMuc,
+                        HinhAnh = p.HinhAnhSanPhams.Select(h => h.DuongDan).ToList(),
+
+                        // giá thấp nhất trong biến thể
+                        GiaThapNhat = p.BienThes.Any() ? p.BienThes.Min(b => b.Gia_BienThe) : 0,
+                        BienThes = p.BienThes.Select(b => new {
+                            b.Id,
+                            b.Mau_Sac,
+                            b.Kich_Thuoc,
+                            b.So_Luong,
+                            b.Gia_BienThe,
+                            b.Gia_Giam,
+                            b.PhanTramGiam
+                        })
+                    })
+                    .ToListAsync();
+
+                return _response.SetSuccess("Danh sách sản phẩm", new
+                {
+                    Total = total,
+                    Page = dto.Page,
+                    PageSize = dto.PageSize,
+                    Items = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return _response.SetFail("Lỗi tìm kiếm sản phẩm: " + ex.Message);
+            }
+        }
 
         private async Task<string> GenerateMaSanPhamAsync()
         {

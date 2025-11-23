@@ -6,6 +6,7 @@ using FashionStore.Repositories.Interfaces;
 using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using FashionStore.Services.Momo;
+using FashionStore.Services.VnPay;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -44,7 +45,7 @@ namespace FashionStore
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwsSettings["Issuer"],
                     ValidAudience = jwsSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwsSettings["Key"] 
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwsSettings["Key"]
                                                 ?? throw new Exception("JWT Key is missing in appsettings.json")))
                 };
 
@@ -70,9 +71,10 @@ namespace FashionStore
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
+                    policy.AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials()
+               .SetIsOriginAllowed(_ => true);
                 });
             });
 
@@ -88,10 +90,12 @@ namespace FashionStore
             builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
             builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
             builder.Services.AddScoped<IThanhToanRepository, ThanhToanRepository>();
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
             builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
             builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<VnPayService>();
             builder.Services.AddScoped<ResponseMessageResult>();
-
             builder.Services.AddScoped<JwtService>();
 
             builder.Services.AddControllers()
@@ -100,6 +104,14 @@ namespace FashionStore
                     // Sử dụng để bỏ qua vòng lặp
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
+
+            builder.Services.AddDistributedMemoryCache();        // BẮT BUỘC CHO SESSION
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -119,6 +131,8 @@ namespace FashionStore
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseCors("AllowAll");
 

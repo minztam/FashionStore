@@ -2,15 +2,17 @@
 {
     public class SanPhamFilterDTO
     {
-        public string? Ten { get; set; }
-        public int? MaLoai { get; set; }
-        public decimal? GiaTu { get; set; }
+        public string? TuKhoa { get; set; }          // tìm theo tên
+        public string? MaDanhMuc { get; set; }       // lọc theo danh mục
+        public string? MauSac { get; set; }          // lọc biến thể
+        public string? KichThuoc { get; set; }       // lọc biến thể
+        public decimal? GiaTu { get; set; }          // khoảng giá
         public decimal? GiaDen { get; set; }
-        public string? MauSac { get; set; }
-        public string? KichThuoc { get; set; }
-        public bool? ConHang { get; set; }
+        public bool? ConHang { get; set; }           // còn hàng hay không
+
+        public string? SortBy { get; set; }          // giá_tang, giá_giam, moi_nhat
+
         public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
-        public string? SortBy { get; set; } // "GiaTang", "GiaGiam", "MoiNhat"
+        public int PageSize { get; set; } = 12;
     }
 }

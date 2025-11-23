@@ -19,7 +19,6 @@ namespace FashionStore.Repositories.Implementations
         }
 
         // Lấy toàn bộ danh sách tài khoản
-        // Lấy toàn bộ danh sách tài khoản
         public async Task<ResponseMessageResult> GetAllAsync()
         {
             var list = await _context.TaiKhoans

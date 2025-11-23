@@ -5,6 +5,7 @@ using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace FashionStore.Controllers
 {
@@ -72,5 +73,14 @@ namespace FashionStore.Controllers
             var result = await _donHangRepo.CapNhatTrangThaiAsync(maDonHang, trangThaiMoi);
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpGet("in-hoa-don/{maDonHang}")]
+        public async Task<IActionResult> InHoaDon(string maDonHang)
+        {
+            var html = await _donHangRepo.GenerateInvoiceHtmlAsync(maDonHang);
+            return Content(html, "text/html", Encoding.UTF8);
+        }
+
+
     }
 }

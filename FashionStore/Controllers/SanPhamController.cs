@@ -136,5 +136,14 @@ namespace FashionStore.Controllers
             var result = await _sanPhamRepo.CreateBienTheAsync(maSanPham, dto);
             return StatusCode(result.StatusCode, result);
         }
+
+        //  ===== GET: api/SanPham/tim-kiem
+        [HttpGet("tim-kiem")]
+        public async Task<IActionResult> TimKiem([FromQuery] SanPhamFilterDTO dto)
+        {
+            var result = await _sanPhamRepo.TimKiemSanPhamAsync(dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
     }
 }

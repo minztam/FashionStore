@@ -1,13 +1,12 @@
-﻿using Azure.Core;
-using FashionStore.Data;
-using FashionStore.DTO;
-using FashionStore.Models;
-using FashionStore.Models.Momo;
+﻿using FashionStore.Data;
+using FashionStore.Models.VNPay;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services.Momo;
+using FashionStore.Services.VnPay;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace FashionStore.Controllers
 {
@@ -18,148 +17,27 @@ namespace FashionStore.Controllers
         private readonly FashionStoreContext _context;
         private readonly IMomoService _momoService;
         private readonly IThanhToanRepository _thanhToanRepo;
+        private readonly IVnPayService _vnPayService;
+        private readonly ResponseMessageResult _response;
+        private readonly ILogger<ThanhToanController> _logger;
 
         public ThanhToanController(FashionStoreContext context,
                                    IMomoService momoService,
-                                   IThanhToanRepository thanhToanRepo)
+                                   IThanhToanRepository thanhToanRepo,
+                                   IVnPayService vnPayService,
+                                   ResponseMessageResult response,
+                                   ILogger<ThanhToanController> logger)
         {
             _context = context;
             _momoService = momoService;
             _thanhToanRepo = thanhToanRepo;
+            _vnPayService = vnPayService;
+            _response = response;
+            _logger = logger;
         }
 
-        
-        [HttpPost("momo/thanhtoan")]
-        public async Task<IActionResult> ThanhToanMomo(int maKhachHang, int maPhuongThuc)
-        {
-            if (maPhuongThuc <= 0)
-                return BadRequest(new { message = "Vui lòng chọn phương thức thanh toán!" });
-
-            var gioHang = await _context.GioHangs
-                .Include(g => g.ChiTietGioHangs)
-                .ThenInclude(ct => ct.SanPham)
-                .ThenInclude(sp => sp!.BienThes)
-                .FirstOrDefaultAsync(g => g.Ma_KhachHang == maKhachHang);
-
-            if (gioHang == null || !gioHang.ChiTietGioHangs.Any())
-                return BadRequest(new { message = "Giỏ hàng rỗng!" });
-
-            decimal tongTien = 0;
-            var chiTietDonHangs = new List<ChiTietDonHang>();
-
-            // TẠO ĐƠN HÀNG TRƯỚC – CHỈ TẠO 1 LẦN!
-            var donHang = new DonHang
-            {
-                Ma_DonHang = "DH" + DateTime.Now.ToString("yyyyMMddHHmmssfff"),
-                Ma_KhachHang = maKhachHang,
-                Tong_Tien = 0, // sẽ cập nhật sau
-                Ma_PhuongThuc = maPhuongThuc,
-                Trang_Thai = "Chờ thanh toán",
-                Ngay_Dat = DateTime.Now
-            };
-
-            _context.DonHangs.Add(donHang);
-            await _context.SaveChangesAsync(); // Lưu để có Ma_DonHang
-
-            foreach (var ct in gioHang.ChiTietGioHangs)
-            {
-                // Lấy biến thể (nếu có), không thì lấy giá sản phẩm gốc
-                var bienThe = ct.SanPham?.BienThes?.FirstOrDefault();
-                decimal gia = bienThe != null
-                    ? (bienThe.Gia_Giam.HasValue && bienThe.Gia_Giam > 0 ? bienThe.Gia_Giam.Value : bienThe.Gia_BienThe) : 0;
-
-                tongTien += gia * ct.So_Luong;
-
-                chiTietDonHangs.Add(new ChiTietDonHang
-                {
-                    Ma_DonHang = donHang.Ma_DonHang,
-                    Ma_SanPham = ct.Ma_SanPham,
-                    So_Luong = ct.So_Luong,
-                    DonGia = gia
-                });
-            }
-
-            if (tongTien <= 0)
-                return BadRequest(new { message = "Tổng tiền không hợp lệ!" });
-
-            // CẬP NHẬT TỔNG TIỀN CHO ĐƠN HÀNG
-            donHang.Tong_Tien = tongTien;
-            _context.DonHangs.Update(donHang);
-
-            // Thêm chi tiết đơn hàng
-            _context.ChiTietDonHangs.AddRange(chiTietDonHangs);
-
-            // XÓA GIỎ HÀNG
-            _context.ChiTietGioHangs.RemoveRange(gioHang.ChiTietGioHangs);
-            _context.GioHangs.Remove(gioHang);
-
-            await _context.SaveChangesAsync();
-
-            // GỌI MOMO
-            var momoModel = new OrderInfoModel
-            {
-                OrderId = donHang.Ma_DonHang,
-                Amount = tongTien,
-                OrderInfo = $"Thanh toán đơn hàng #{donHang.Ma_DonHang} - FashionStore",
-                FullName = "Khách hàng FashionStore"
-            };
-
-            var momoResult = await _momoService.CreatePaymentAsync(momoModel);
-
-            if (string.IsNullOrEmpty(momoResult?.PayUrl))
-                return BadRequest(new { message = "Tạo link MoMo thất bại!" });
-
-            return Ok(new
-            {
-                success = true,
-                message = "Tạo đơn hàng + link thanh toán MoMo thành công!",
-                payUrl = momoResult.PayUrl,
-                orderId = donHang.Ma_DonHang,
-                tongTien = tongTien
-            });
-        }
-
-        [HttpGet("MomoCallback")]
-        public async Task<IActionResult> MomoCallback()
-        {
-            var momoRes = _momoService.PaymentExecute(Request.Query);
-
-            if (!string.IsNullOrEmpty(momoRes.OrderId))
-            {
-                var donHang = await _context.DonHangs
-                    .FirstOrDefaultAsync(d => d.Ma_DonHang == momoRes.OrderId);
-
-                if (donHang != null && momoRes.ErrorCode == "0")  // “0” thành công
-                {
-                    donHang.Trang_Thai = "Đã thanh toán";
-                    await _context.SaveChangesAsync();
-
-                    return Ok(new { message = "Thanh toán thành công!", momoRes });
-                }
-            }
-
-            return BadRequest(new { message = "Thanh toán thất bại hoặc đơn hàng không tìm thấy", momoRes });
-        }
-
-        [HttpPost("MomoNotify")]
-        public async Task<IActionResult> MomoNotify([FromBody] MomoExecuteResponseModel momoRes)
-        {
-            if (momoRes != null && !string.IsNullOrEmpty(momoRes.OrderId) && momoRes.ErrorCode == "0")
-            {
-                var donHang = await _context.DonHangs
-                    .FirstOrDefaultAsync(d => d.Ma_DonHang == momoRes.OrderId);
-
-                if (donHang != null)
-                {
-                    donHang.Trang_Thai = "Đã thanh toán";
-                    await _context.SaveChangesAsync();
-                }
-            }
-
-            return Ok(new { message = "Notify nhận OK", momoRes });
-        }
-
-        //======== _____ ========
+        //======== thanh-toan-cod ========
+        // POST : api/ThanhToan{ ThanhToanCODRequest }
         [HttpPost("thanh-toan-cod")]
         public async Task<IActionResult> ThanhToanCOD([FromBody] ThanhToanCODRequest request)
         {
@@ -169,6 +47,140 @@ namespace FashionStore.Controllers
             }
             var result = await _thanhToanRepo.ThanhToanCODAsync(request.MaKhachHang, request.MaVoucher);
             return StatusCode(result.StatusCode, result);
+        }
+
+        // POST : api/ThanhToan{ ThanhToanCODRequest }
+        [HttpPost("thanh-toan-vnpay")]
+        public async Task<IActionResult> TaoPaymentVNPAY([FromBody] ThanhToanCODRequest request)
+        {
+            if (request == null || request.MaKhachHang <= 0)
+                return Ok(_response.SetFail("Dữ liệu không hợp lệ!", 400));
+
+            var tinhTien = await TinhTienVaApVoucherAsync(request.MaKhachHang, request.MaVoucher);
+            if (!tinhTien.Success) return Ok(tinhTien);
+
+            var data = tinhTien.Data as dynamic;
+            string maDonHang = "DH" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
+            var paymentUrl = _vnPayService.CreatePaymentUrl(new PaymentInformationModel
+            {
+                OrderId = maDonHang,
+                Amount = data!.TongThanhToan,
+                OrderDescription = $"Thanh toan don hang {maDonHang} - Fashion Store",
+                Name = "Fashion Store"
+            }, HttpContext);
+
+            // Lưu tạm mã đơn vào Session để callback dùng (tránh tạo trùng)
+            HttpContext.Session.SetString("VNPAY_Pending_" + maDonHang, "true");
+
+            return Ok(_response.SetSuccess("Chuyển đến VNPAY thành công!", new
+            {
+                MaDonHang = maDonHang,
+                TongTien = data.TongThanhToan,
+                PaymentUrl = paymentUrl
+            }));
+        }
+
+        // VNPAY CALLBACK → XỬ LÝ THANH TOÁN + HOÀN TẤT ĐƠN
+        [HttpGet("payment/callback")]
+        public async Task<IActionResult> PaymentCallback()
+        {
+            var vnpayResult = _vnPayService.PaymentExecute(Request.Query);
+
+            string? orderId = Request.Query["vnp_TxnRef"].FirstOrDefault();
+            if (string.IsNullOrEmpty(orderId))
+            {
+                var orderInfo = Request.Query["vnp_OrderInfo"].FirstOrDefault() ?? "";
+                orderId = Regex.Match(orderInfo, @"DH\d{14,}").Value;
+            }
+
+            var response = new
+            {
+                Success = vnpayResult.Success,
+                OrderId = orderId,
+                ResponseCode = vnpayResult.Success ? "00" : "99",
+                Message = vnpayResult.Success ? "Thanh toán thành công!" : vnpayResult.Message ?? "Thanh toán thất bại!"
+            };
+
+            // CHỈ KHI VNPAY XÁC NHẬN THÀNH CÔNG + CHƯA TẠO ĐƠN → MỚI TẠO
+            if (vnpayResult.Success && !string.IsNullOrEmpty(orderId))
+            {
+                var daTonTai = await _context.DonHangs.AnyAsync(d => d.Ma_DonHang == orderId);
+                if (!daTonTai)
+                {
+                    // Lấy MaKhachHang từ Session hoặc từ giỏ hàng tạm (cách đơn giản nhất: lưu tạm lúc tạo URL)
+                    // Ở đây anh dùng cách lấy từ giỏ hàng còn tồn tại (nếu khách chưa xóa)
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0));
+
+                    if (gioHang != null)
+                    {
+                        var result = await _thanhToanRepo.TaoDonHangKhiVNPAYThanhCongAsync(
+                            orderId, gioHang.Ma_KhachHang, null);
+
+                        if (!result.Success)
+                        {
+                            _logger.LogError("Tạo đơn thất bại sau VNPAY thành công: {OrderId} - {Error}", orderId, result.Message);
+                        }
+                    }
+                }
+            }
+
+            return Ok(response);
+        }
+
+        // HÀM TÍNH TIỀN + ÁP VOUCHER (DÙNG CHUNG CHO COD & VNPAY)
+        private async Task<ResponseMessageResult> TinhTienVaApVoucherAsync(int maKhachHang, string? maVoucher)
+        {
+            try
+            {
+                var gioHang = await _context.GioHangs
+                    .Include(g => g.ChiTietGioHangs!)
+                        .ThenInclude(ct => ct.BienThe!)
+                            .ThenInclude(bt => bt!.SanPham!)
+                    .FirstOrDefaultAsync(g => g.Ma_KhachHang == maKhachHang);
+
+                if (gioHang == null || !gioHang.ChiTietGioHangs.Any(x => x.So_Luong > 0))
+                    return _response.SetFail("Giỏ hàng trống!", 400);
+
+                var chiTiet = gioHang.ChiTietGioHangs.Where(x => x.So_Luong > 0).ToList();
+
+                decimal tongGoc = 0;
+                decimal giamGia = 0;
+
+                foreach (var ct in chiTiet)
+                {
+                    var gia = ct.BienThe!.Gia_Giam ?? ct.BienThe.Gia_BienThe;
+                    tongGoc += gia * ct.So_Luong;
+                }
+
+                // Áp voucher (nếu có)
+                if (!string.IsNullOrEmpty(maVoucher))
+                {
+                    var voucher = await _context.Vouchers
+                        .FirstOrDefaultAsync(v => v.Ma_Voucher == maVoucher && v.So_LanDung > 0 && v.Ngay_KetThuc >= DateTime.Now);
+
+                    if (voucher != null)
+                    {
+                        giamGia = (decimal)voucher.GiaTri_ToiThieu!;
+                        voucher.So_LanDung -= 1; // giảm số lượng voucher
+                    }
+                }
+
+                decimal tongThanhToan = tongGoc - giamGia;
+                if (tongThanhToan < 0) tongThanhToan = 0;
+
+                return _response.SetSuccess("Tính tiền thành công!", new
+                {
+                    TongGoc = tongGoc,
+                    GiamGia = giamGia,
+                    TongThanhToan = tongThanhToan
+                });
+            }
+            catch (Exception ex)
+            {
+                return _response.SetFail("Lỗi tính tiền: " + ex.Message, 500);
+            }
         }
     }
 
