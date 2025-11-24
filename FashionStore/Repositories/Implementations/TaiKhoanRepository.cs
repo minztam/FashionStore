@@ -329,5 +329,96 @@ namespace FashionStore.Repositories.Implementations
             _context.TaiKhoans.Update(tk);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<TaiKhoan?> RegisterSaleAssistanceAsync(RegisterDTO dto)
+        {
+            // Kiểm tra trùng username
+            if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
+                return null;
+
+            // Kiểm tra trùng email
+            if (await _context.TaiKhoans.AnyAsync(x => x.Email == dto.Email))
+                return null;
+
+            if (string.IsNullOrWhiteSpace(dto.Mat_Khau))
+                return null;
+
+            // Hash mật khẩu
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Mat_Khau);
+
+            // Tạo token xác thực
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            // Tạo tài khoản
+            var taiKhoan = new TaiKhoan
+            {
+                Ten_DangNhap = dto.Ten_DangNhap,
+                Email = dto.Email,
+                Mat_Khau = dto.Mat_Khau,
+                Ma_VaiTro = "1111-2222-1111-2222", // khách hàng
+                Ma_XacThuc = token,
+                Han_XacThuc = DateTime.UtcNow.AddDays(1)
+            };
+
+            _context.TaiKhoans.Add(taiKhoan);
+            await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
+
+            // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
+            var nv = new NhanVien
+            {
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+            };
+
+            _context.NhanViens.Add(nv);
+            await _context.SaveChangesAsync();
+
+            return taiKhoan;
+        }
+
+        public async Task<TaiKhoan?> RegisterWarehouseAssistanceAsync(RegisterDTO dto)
+        {
+            // Kiểm tra trùng username
+            if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
+                return null;
+
+            // Kiểm tra trùng email
+            if (await _context.TaiKhoans.AnyAsync(x => x.Email == dto.Email))
+                return null;
+
+            if (string.IsNullOrWhiteSpace(dto.Mat_Khau))
+                return null;
+
+            // Hash mật khẩu
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Mat_Khau);
+
+            // Tạo token xác thực
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            // Tạo tài khoản
+            var taiKhoan = new TaiKhoan
+            {
+                Ten_DangNhap = dto.Ten_DangNhap,
+                Email = dto.Email,
+                Mat_Khau = dto.Mat_Khau,
+                Ma_VaiTro = "1111-3333-1111-3333", // khách hàng
+                Ma_XacThuc = token,
+                Han_XacThuc = DateTime.UtcNow.AddDays(1)
+            };
+
+            _context.TaiKhoans.Add(taiKhoan);
+            await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
+
+            // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
+            var nv = new NhanVien
+            {
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+            };
+
+            _context.NhanViens.Add(nv);
+            await _context.SaveChangesAsync();
+
+            return taiKhoan;
+
+        }
     }
 }
