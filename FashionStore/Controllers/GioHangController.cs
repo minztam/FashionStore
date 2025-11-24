@@ -24,12 +24,10 @@ namespace FashionStore.Controllers
         }
 
         [HttpPost("{maKhachHang}/add")]
-        public async Task<IActionResult> AddToCart(int maKhachHang,[FromBody] ChiTietGioHangDTO dto)
+        public async Task<IActionResult> AddToCart(int maKhachHang,string maSanPham,int soLuong,int maBienThe)
         {
-            if (dto == null)
-                return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
 
-            var result = await _gioHangRepo.AddToCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong, dto.Ma_BienThe);
+            var result = await _gioHangRepo.AddToCartAsync(maKhachHang,maSanPham, soLuong, maBienThe);
 
             if (result.Success)
                 return Ok(result);

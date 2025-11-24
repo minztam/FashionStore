@@ -40,7 +40,7 @@ namespace FashionStore.DataSeed
                     Mo_Ta = "Len mỏng nhẹ, dáng croptop tay dài, phối đồ mùa thu đông cực xinh, freesize từ 45-60kg.",
                     Trang_Thai = true
                 },
-                // Thêm 2 sản phẩm bonus cho đẹp
+                // sản phẩm 
                 new SanPham
                 {
                     Ma_SanPham = "SP005",
