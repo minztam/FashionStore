@@ -93,6 +93,74 @@ namespace FashionStore.Controllers
             });
         }
 
+        [HttpPost("SaleAssistanceRegistration")]
+        public async Task<IActionResult> SaleAssistanceRegistration([FromBody] RegisterDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Dữ liệu không hợp lệ.");
+
+            var taiKhoan = await _taiKhoanRepo.RegisterSaleAssistanceAsync(dto);
+
+            if (taiKhoan == null)
+                return BadRequest("Tên đăng nhập hoặc email đã tồn tại!");
+
+            // Gửi email chào mừng
+            await _emailService.SendWelcomeEmailAsync(dto.Email, dto.Ten_DangNhap);
+
+            // Tạo JWT token
+            var token = _jwtService.GenerateToken(
+                taiKhoan.Ten_DangNhap,
+                "NhanVienBanHang"
+            );
+
+            return Ok(new
+            {
+                message = "Đăng ký thành công!",
+                token,
+                user = new
+                {
+                    taiKhoan.Ma_TaiKhoan,
+                    taiKhoan.Ten_DangNhap,
+                    taiKhoan.Email,
+                    VaiTro = "NhanVienBanHang"
+                }
+            });
+        }
+
+        [HttpPost("WarehouseAssistanceRegistration")]
+        public async Task<IActionResult> WarehouseAssistanceRegistration([FromBody] RegisterDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Dữ liệu không hợp lệ.");
+
+            var taiKhoan = await _taiKhoanRepo.RegisterWarehouseAssistanceAsync(dto);
+
+            if (taiKhoan == null)
+                return BadRequest("Tên đăng nhập hoặc email đã tồn tại!");
+
+            // Gửi email chào mừng
+            await _emailService.SendWelcomeEmailAsync(dto.Email, dto.Ten_DangNhap);
+
+            // Tạo JWT token
+            var token = _jwtService.GenerateToken(
+                taiKhoan.Ten_DangNhap,
+                "NhanVienKho"
+            );
+
+            return Ok(new
+            {
+                message = "Đăng ký thành công!",
+                token,
+                user = new
+                {
+                    taiKhoan.Ma_TaiKhoan,
+                    taiKhoan.Ten_DangNhap,
+                    taiKhoan.Email,
+                    VaiTro = "NhanVienKho"
+                }
+            });
+        }
+
 
     }
 }
