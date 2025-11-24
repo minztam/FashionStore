@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251124081051_fix-chitietdonhang")]
+    partial class fixchitietdonhang
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -416,23 +419,6 @@ namespace FashionStore.Migrations
                     b.HasKey("Ma_PhuongThuc");
 
                     b.ToTable("PhuongThucThanhToans");
-
-                    b.HasData(
-                        new
-                        {
-                            Ma_PhuongThuc = 1,
-                            Ten_PhuongThuc = "Thanh toán khi nhận hàng (COD)"
-                        },
-                        new
-                        {
-                            Ma_PhuongThuc = 2,
-                            Ten_PhuongThuc = "Ví điện tử"
-                        },
-                        new
-                        {
-                            Ma_PhuongThuc = 3,
-                            Ten_PhuongThuc = "Chuyển khoản ngân hàng"
-                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.SanPham", b =>

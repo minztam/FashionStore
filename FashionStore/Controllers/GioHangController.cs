@@ -36,12 +36,11 @@ namespace FashionStore.Controllers
         }
 
         [HttpPut("{maKhachHang}/update")]
-        public async Task<IActionResult> UpdateCart(int maKhachHang, [FromBody] ChiTietGioHangDTO dto)
+        public async Task<IActionResult> UpdateCart(int maKhachHang, string maSanPham, int soLuong, int maBienThe)
         {
-            if (dto == null)
-                return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
+          
 
-            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, dto.Ma_SanPham, dto.So_Luong, dto.Ma_BienThe);
+            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, maSanPham, soLuong, maBienThe);
 
             if (result.Success)
                 return Ok(result);

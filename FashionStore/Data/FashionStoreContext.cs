@@ -60,18 +60,23 @@ namespace FashionStore.Data
             modelBuilder.Entity<KhachHang>()
                 .HasOne(k => k.TaiKhoan)
                 .WithOne(t => t.KhachHang)
-                .HasForeignKey<KhachHang>(k => k.Ma_TaiKhoan);
+                .HasForeignKey<KhachHang>(k => k.Ma_TaiKhoan)
+                .IsRequired(false);
 
             // ===============================
             // 5. KHÓA CHÍNH GHÉP: CHI TIẾT ĐƠN HÀNG
-            // ===============================
             modelBuilder.Entity<ChiTietDonHang>(entity =>
             {
-                entity.HasKey(ct => new { ct.Ma_DonHang, ct.Ma_SanPham });
+                // -----------------------------------------------------------
+                // 1. SỬA LẠI KHÓA CHÍNH TẠI ĐÂY
+                // Đổi từ Ma_SanPham sang Ma_BienThe để đảm bảo tính duy nhất
+                // -----------------------------------------------------------
+                entity.HasKey(ct => new { ct.Ma_DonHang, ct.Ma_BienThe });
 
                 entity.Property(ct => ct.Ma_BienThe)
-                      .IsRequired(); // Bắt buộc NOT NULL
+                      .IsRequired();
 
+                // Các quan hệ giữ nguyên
                 entity.HasOne(ct => ct.DonHang)
                       .WithMany(dh => dh.ChiTietDonHangs)
                       .HasForeignKey(ct => ct.Ma_DonHang)
@@ -82,11 +87,10 @@ namespace FashionStore.Data
                       .HasForeignKey(ct => ct.Ma_SanPham)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // DÒNG QUAN TRỌNG NHẤT – ÉP BUỘC KHÔNG DÙNG SET NULL!!!
                 entity.HasOne(ct => ct.BienThe)
                       .WithMany()
                       .HasForeignKey(ct => ct.Ma_BienThe)
-                      .OnDelete(DeleteBehavior.Restrict)   // hoặc NoAction
+                      .OnDelete(DeleteBehavior.Restrict)
                       .IsRequired();
             });
 
@@ -185,11 +189,16 @@ namespace FashionStore.Data
                 new VaiTro { Ma_VaiTro = "1111-3333-1111-3333", Ten_VaiTro = "Nhân viên kho" },
                 new VaiTro { Ma_VaiTro = "2222-2222-2222-2222", Ten_VaiTro = "Khách hàng" }
             );
+            modelBuilder.Entity<PhuongThucThanhToan>().HasData(
+      new PhuongThucThanhToan { Ma_PhuongThuc = 1, Ten_PhuongThuc = "Thanh toán khi nhận hàng (COD)" },
+      new PhuongThucThanhToan { Ma_PhuongThuc = 2, Ten_PhuongThuc = "Ví điện tử" },
+      new PhuongThucThanhToan { Ma_PhuongThuc = 3, Ten_PhuongThuc = "Chuyển khoản ngân hàng" }
+  );
 
             // ===============================
             // 13. SEED PHƯƠNG THỨC THANH TOÁN
             // ===============================
-            modelBuilder.Entity<PhuongThucThanhToan>(entity =>
+           modelBuilder.Entity<PhuongThucThanhToan>(entity =>
             {
                 entity.HasKey(e => e.Ma_PhuongThuc);
                 //entity.Property(e => e.Ma_PhuongThuc)
