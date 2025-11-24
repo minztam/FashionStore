@@ -30,179 +30,188 @@ namespace FashionStore.Repositories.Implementations
 
         public async Task<ResponseMessageResult> ThanhToanCODAsync(int maKhachHang, string? maVoucher = null)
         {
-            // 1. LẤY GIỎ HÀNG VÀ CHI TIẾT (ĐÚNG BIẾN THỂ)
-            var gioHang = await _context.GioHangs
-                .Include(g => g.ChiTietGioHangs)
-                    .ThenInclude(ct => ct.BienThe) // <-- ĐÚNG RỒI NÈ!!!
-                        .ThenInclude(bt => bt!.SanPham)
-                .FirstOrDefaultAsync(g => g.Ma_KhachHang == maKhachHang);
-
-            if (gioHang == null || !gioHang.ChiTietGioHangs.Any(x => x.So_Luong > 0))
-                return _response.SetFail("Giỏ hàng trống!", 400);
-
-            var chiTietGioHangs = gioHang.ChiTietGioHangs.Where(x => x.So_Luong > 0).ToList();
-            if (!chiTietGioHangs.Any())
-                return _response.SetFail("Không có sản phẩm hợp lệ!", 400);
-
+            // 1. Tạo Mã Đơn Hàng DUY NHẤT ngay từ đầu (để dùng chung cho Header và Detail)
             string maDonHang = "DH" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            var chiTietDonHangs = new List<ChiTietDonHang>();
-            decimal tongTienGoc = 0;
-            decimal giamGiaVoucher = 0;
-            string? tenVoucher = null;
 
-            // 2. KIỂM TRA KHO + TÍNH TIỀN CHÍNH XÁC
-            foreach (var ct in chiTietGioHangs)
-            {
-                if (ct.BienThe == null)
-                    return _response.SetFail($"Sản phẩm {ct.Ma_SanPham} không tồn tại biến thể!", 400);
-
-                if (ct.BienThe.So_Luong < ct.So_Luong)
-                    return _response.SetFail($"Sản phẩm {ct.BienThe.SanPham?.Ten_SanPham} ({ct.BienThe.Mau_Sac} - {ct.BienThe.Kich_Thuoc}) chỉ còn {ct.BienThe.So_Luong} cái!", 400);
-
-                decimal giaBan = ct.BienThe.Gia_Giam ?? ct.BienThe.Gia_BienThe;
-                decimal thanhTien = giaBan * ct.So_Luong;
-                tongTienGoc += thanhTien;
-
-                chiTietDonHangs.Add(new ChiTietDonHang
-                {
-                    Ma_DonHang = maDonHang,
-                    Ma_SanPham = ct.Ma_SanPham,
-                    Ma_BienThe = ct.BienThe.Id,
-                    So_Luong = ct.So_Luong,
-                    DonGia = giaBan
-                });
-            }
-
-            // 3. XỬ LÝ VOUCHER – SỬA LỖI CHẾT NGƯỜI!!!
-            if (!string.IsNullOrWhiteSpace(maVoucher))
-            {
-                var voucher = await _context.Vouchers
-                    .FirstOrDefaultAsync(v => v.Ma_Voucher == maVoucher
-                                           && v.Trang_Thai
-                                           && v.So_LanDung > 0
-                                           && v.Ngay_BatDau <= DateTime.Now
-                                           && v.Ngay_KetThuc >= DateTime.Now);
-
-                if (voucher != null && (voucher.GiaTri_ToiThieu == null || voucher.GiaTri_ToiThieu <= tongTienGoc))
-                {
-                    if (voucher.Giam_PhanTram.HasValue)
-                    {
-                        giamGiaVoucher = tongTienGoc * voucher.Giam_PhanTram.Value / 100m;
-                        // NẾU CÓ GIỚI HẠN GIẢM TỐI ĐA (thêm cột Giam_ToiDa vào Voucher nếu cần)
-                        // giamGiaVoucher = Math.Min(giamGiaVoucher, voucher.Giam_ToiDa ?? decimal.MaxValue);
-                    }
-                    else if (voucher.Giam_Tien.HasValue)
-                    {
-                        giamGiaVoucher = voucher.Giam_Tien.Value;
-                    }
-
-                    if (giamGiaVoucher > tongTienGoc) giamGiaVoucher = tongTienGoc; // Không âm tiền
-                    tenVoucher = voucher.Ma_Voucher;
-                }
-            }
-
-            decimal tongTienThanhToan = tongTienGoc - giamGiaVoucher;
-
-            var donHang = new DonHang
-            {
-                Ma_DonHang = maDonHang,
-                Ma_KhachHang = maKhachHang,
-                Ngay_Dat = DateTime.Now,
-                Tong_Tien = tongTienThanhToan,
-                Trang_Thai = "Chờ xác nhận",
-                Ma_PhuongThuc = 1, // COD
-                Ma_Voucher = string.IsNullOrEmpty(maVoucher) ? null : maVoucher
-            };
-
-            // 4. TRANSACTION + LOCK KHO (CHỐNG ÂM KHO 100%)
             using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             try
             {
+                // =================================================================================
+                // BƯỚC 1: LẤY DỮ LIỆU & GỘP TRÙNG LẶP (QUAN TRỌNG ĐỂ TRÁNH LỖI DUPLICATE KEY)
+                // =================================================================================
+                var gioHang = await _context.GioHangs
+                    .Include(g => g.ChiTietGioHangs!)
+                        .ThenInclude(ct => ct.BienThe!)
+                            .ThenInclude(bt => bt!.SanPham!)
+                                .ThenInclude(sp => sp.HinhAnhSanPhams) // Load ảnh để gửi mail
+                    .FirstOrDefaultAsync(g => g.Ma_KhachHang == maKhachHang);
+
+                if (gioHang == null || !gioHang.ChiTietGioHangs.Any(x => x.So_Luong > 0))
+                    return _response.SetFail("Giỏ hàng trống!", 400);
+
+                // LOGIC SỬA LỖI: Group các dòng trong giỏ hàng có cùng Mã Biến Thể
+                var listCartItems = gioHang.ChiTietGioHangs
+                    .Where(x => x.So_Luong > 0)
+                    .GroupBy(x => x.Ma_BienThe)
+                    .Select(g => new
+                    {
+                        EntityGoc = g.First(), // Giữ lại entity gốc để xóa sau này
+                        BienThe = g.First().BienThe,
+                        Ma_SanPham = g.First().Ma_SanPham,
+                        Ma_BienThe = g.Key,
+                        So_Luong = g.Sum(x => x.So_Luong) // Cộng dồn số lượng nếu bị trùng dòng
+                    })
+                    .ToList();
+
+                // =================================================================================
+                // BƯỚC 2: KIỂM KHO, TÍNH TIỀN & CHUẨN BỊ DỮ LIỆU
+                // =================================================================================
+                decimal tongTienGoc = 0;
+                var chiTietDonHangs = new List<ChiTietDonHang>();
+                var emailDetails = new List<ChiTietDonHangDTO>();
+
+                foreach (var item in listCartItems)
+                {
+                    // Validate dữ liệu
+                    if (item.BienThe == null)
+                        return _response.SetFail($"Sản phẩm ID {item.Ma_SanPham} bị lỗi dữ liệu (mất biến thể)!", 400);
+
+                    // Check tồn kho
+                    if (item.BienThe.So_Luong < item.So_Luong)
+                        return _response.SetFail($"Sản phẩm '{item.BienThe.SanPham?.Ten_SanPham}' ({item.BienThe.Mau_Sac}-{item.BienThe.Kich_Thuoc}) chỉ còn {item.BienThe.So_Luong}, bạn đặt {item.So_Luong}!", 400);
+
+                    // Tính giá
+                    decimal giaBan = item.BienThe.Gia_Giam ?? item.BienThe.Gia_BienThe;
+                    tongTienGoc += giaBan * item.So_Luong;
+
+                    // Tạo Chi Tiết Đơn Hàng (Entity)
+                    chiTietDonHangs.Add(new ChiTietDonHang
+                    {
+                        Ma_DonHang = maDonHang,
+                        Ma_SanPham = item.Ma_SanPham,
+                        Ma_BienThe = item.Ma_BienThe, // Key mới đã fix trong Migration
+                        So_Luong = item.So_Luong,
+                        DonGia = giaBan
+                    });
+
+                    // Trừ kho (EF Core sẽ tự track thay đổi này trên item.BienThe)
+                    item.BienThe.So_Luong -= item.So_Luong;
+
+                    // Map DTO cho Email (Làm ngay tại đây để tránh null reference sau này)
+                    emailDetails.Add(new ChiTietDonHangDTO
+                    {
+                        Ma_SanPham = item.Ma_SanPham,
+                        Ten_SanPham = item.BienThe.SanPham?.Ten_SanPham ?? "Sản phẩm",
+                        Mau_Sac = item.BienThe.Mau_Sac,
+                        Kich_Thuoc = item.BienThe.Kich_Thuoc,
+                        So_Luong = item.So_Luong,
+                        DonGia = giaBan,
+                        ThanhTien = giaBan * item.So_Luong,
+                        Hinh_Anh = item.BienThe.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan ?? ""
+                    });
+                }
+
+                // =================================================================================
+                // BƯỚC 3: XỬ LÝ VOUCHER
+                // =================================================================================
+                decimal giamGiaVoucher = 0;
+                string? tenVoucher = null;
+                if (!string.IsNullOrEmpty(maVoucher))
+                {
+                    var voucher = await _context.Vouchers
+                        .FirstOrDefaultAsync(v => v.Ma_Voucher == maVoucher && v.Trang_Thai && v.So_LanDung > 0);
+
+                    if (voucher != null && (voucher.GiaTri_ToiThieu == null || voucher.GiaTri_ToiThieu <= tongTienGoc))
+                    {
+                        if (voucher.Giam_PhanTram.HasValue)
+                            giamGiaVoucher = tongTienGoc * voucher.Giam_PhanTram.Value / 100m;
+                        else if (voucher.Giam_Tien.HasValue)
+                            giamGiaVoucher = Math.Min(voucher.Giam_Tien.Value, tongTienGoc);
+
+                        giamGiaVoucher = Math.Min(giamGiaVoucher, tongTienGoc); // Không giảm quá tổng tiền
+                        tenVoucher = voucher.Ma_Voucher;
+                        voucher.So_LanDung -= 1; // Trừ lượt dùng
+                    }
+                }
+
+                decimal tongTienThanhToan = tongTienGoc - giamGiaVoucher;
+
+                // =================================================================================
+                // BƯỚC 4: TẠO ĐƠN HÀNG (HEADER) & LƯU DB
+                // =================================================================================
+                var donHang = new DonHang
+                {
+                    Ma_DonHang = maDonHang,
+                    Ma_KhachHang = maKhachHang,
+                    Ngay_Dat = DateTime.Now,
+                    Tong_Tien = tongTienThanhToan,
+                    Trang_Thai = "Chờ xác nhận",
+                    Ma_PhuongThuc = 1, // COD
+                    Ma_Voucher = tenVoucher
+                };
+
+                // Xóa sạch chi tiết giỏ hàng cũ
+                _context.ChiTietGioHangs.RemoveRange(gioHang.ChiTietGioHangs);
+
+                // Thêm mới đơn hàng
                 _context.DonHangs.Add(donHang);
                 _context.ChiTietDonHangs.AddRange(chiTietDonHangs);
 
-                // TRỪ KHO (có lock)
-                foreach (var ct in chiTietGioHangs)
-                {
-                    ct.BienThe!.So_Luong -= ct.So_Luong;
-                }
-
-                // TRỪ VOUCHER
-                if (giamGiaVoucher > 0 && !string.IsNullOrEmpty(maVoucher))
-                {
-                    var voucher = await _context.Vouchers.FirstOrDefaultAsync(v => v.Ma_Voucher == maVoucher);
-                    if (voucher != null) voucher.So_LanDung -= 1;
-                }
-
-                // XÓA GIỎ HÀNG
-                _context.ChiTietGioHangs.RemoveRange(gioHang.ChiTietGioHangs);
-                _context.GioHangs.Remove(gioHang);
-
+                // Lưu xuống Database
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // 5. GỬI EMAIL HOÀN HẢO
-                var kh = await _context.KhachHangs
-                    .Include(k => k.TaiKhoan)
-                    .FirstOrDefaultAsync(k => k.Ma_KhachHang == maKhachHang);
+                // =================================================================================
+                // BƯỚC 5: GỬI EMAIL (BACKGROUND TASK - KHÔNG CHẶN RESPONSE)
+                // =================================================================================
+                var emailKhachHang = await _context.KhachHangs
+                    .Where(k => k.Ma_KhachHang == maKhachHang)
+                    .Select(k => k.TaiKhoan != null ? k.TaiKhoan.Email : null)
+                    .FirstOrDefaultAsync();
 
-                var phuongThuc = await _context.PhuongThucThanhToans
-                    .FirstOrDefaultAsync(p => p.Ma_PhuongThuc == donHang.Ma_PhuongThuc);
-                string tenPhuongThuc = phuongThuc?.Ten_PhuongThuc ?? "Thanh toán khi nhận hàng (COD)";
-
-                if (kh?.TaiKhoan?.Email != null)
+                if (!string.IsNullOrEmpty(emailKhachHang))
                 {
-                    var chiTietDto = chiTietDonHangs.Select(ct => new ChiTietDonHangDTO
-                    {
-                        Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm",
-                        Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan ?? "/images/no-image.jpg",
-                        Mau_Sac = ct.BienThe?.Mau_Sac,
-                        Kich_Thuoc = ct.BienThe?.Kich_Thuoc,
-                        So_Luong = ct.So_Luong,
-                        DonGia = ct.DonGia,
-                        ThanhTien = ct.DonGia * ct.So_Luong
-                    }).ToList();
-
                     var donHangDto = new DonHangDTO
                     {
                         Ma_DonHang = maDonHang,
                         Ngay_Dat = donHang.Ngay_Dat,
-                        Trang_Thai = donHang.Trang_Thai,
-                        Ten_PhuongThuc = tenPhuongThuc,
                         Tong_Tien = tongTienThanhToan,
-                        ChiTiet = chiTietDto
+                        Trang_Thai = donHang.Trang_Thai,
+                        Ten_PhuongThuc = "COD",
+                        Ma_Voucher = tenVoucher,
+                        ChiTiet = emailDetails
                     };
 
-                    _ = Task.Run(async () => // Gửi mail không block
+                    // Fire & Forget: Chạy luồng riêng để gửi mail, không bắt khách chờ
+                    _ = Task.Run(async () =>
                     {
-                        try { await _emailService.SendOrderEmailAsync(kh.TaiKhoan.Email!, donHangDto); }
-                        catch { /* Không làm gì nếu lỗi mail */ }
+                        try { await _emailService.SendOrderEmailAsync(emailKhachHang, donHangDto); }
+                        catch { /* Log lỗi email nếu cần, không throw ra ngoài */ }
                     });
                 }
 
-                return _response.SetSuccess("Đặt hàng COD thành công!", new
+                return _response.SetSuccess("Đặt hàng thành công!", new
                 {
                     maDonHang,
                     tongTienGoc,
-                    giamGiaVoucher,
-                    tenVoucher,
-                    tongTienThanhToan,
-                    phuongThuc = "Thanh toán khi nhận hàng (COD)",
-                    ngayDat = donHang.Ngay_Dat,
-                    loiNho = giamGiaVoucher > 0
-                        ? $"Tiết kiệm {giamGiaVoucher:N0}đ với mã {tenVoucher}!"
-                        : "Chuẩn bị tiền lẻ khi nhận hàng nhé!"
+                    giamGia = giamGiaVoucher,
+                    tongThanhToan = tongTienThanhToan
                 });
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                // LOG LỖI (rất quan trọng)
-                Console.WriteLine($"Lỗi đặt hàng COD: {ex.Message}");
-                return _response.SetFail("Đặt hàng thất bại! Vui lòng thử lại.", 500);
+
+                // QUAN TRỌNG: Lấy InnerException để biết chính xác SQL lỗi gì
+                var realError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                Console.WriteLine($"[Lỗi Đặt Hàng]: {realError}");
+
+                return _response.SetFail("Đặt hàng thất bại: " + realError, 500);
             }
         }
-      
+
+
+
         public async Task<ResponseMessageResult> TaoDonHangKhiVNPAYThanhCongAsync(string maDonHang, int maKhachHang, string? maVoucher = null)
         {
             using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);

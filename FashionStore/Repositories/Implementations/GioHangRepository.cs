@@ -159,7 +159,7 @@ namespace FashionStore.Repositories.Implementations
             return _response.SetSuccess("Thêm vào giỏ hàng thành công", gioHangDto);
         }
 
-        public async Task<ResponseMessageResult> UpdateCartAsync(int maKhachHang, string maSanPham, int maBienThe, int soLuong)
+        public async Task<ResponseMessageResult> UpdateCartAsync(int maKhachHang, string maSanPham, int soLuong, int maBienThe)
         {
             // 1. Lấy giỏ hàng + chi tiết đầy đủ
             var gioHang = await _context.GioHangs

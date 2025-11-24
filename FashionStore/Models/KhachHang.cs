@@ -8,7 +8,7 @@ namespace FashionStore.Models
     {
         [Key]
         public int Ma_KhachHang { get; set; }
-        public int Ma_TaiKhoan { get; set; }
+        public int? Ma_TaiKhoan { get; set; }
         public string? HoTen { get; set; }
         public string? SoDienThoai { get; set; }
         public string? DiaChi { get; set; }
