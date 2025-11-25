@@ -17,5 +17,7 @@ namespace FashionStore.Models
         // Navigation property
         [ForeignKey("Ma_TaiKhoan")]
         public TaiKhoan? TaiKhoan { get; set; }
+        public ICollection<DiaChiGiaoHang> DiaChiGiaoHangs { get; set; } = new List<DiaChiGiaoHang>();
+
     }
 }

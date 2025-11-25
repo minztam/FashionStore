@@ -187,6 +187,7 @@ namespace FashionStore.Controllers
     // Request model
     public class ThanhToanCODRequest
     {
+    
         public int MaKhachHang { get; set; }
         public string? MaVoucher { get; set; }
     }

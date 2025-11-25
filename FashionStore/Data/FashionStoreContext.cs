@@ -23,7 +23,7 @@ namespace FashionStore.Data
         public DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; }
         public DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
-
+        public DbSet<DiaChiGiaoHang> DiaChiGiaoHangs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -179,6 +179,22 @@ namespace FashionStore.Data
             modelBuilder.Entity<Voucher>()
                 .Property(p => p.Giam_Tien)
                 .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<DiaChiGiaoHang>(entity =>
+            {
+                entity.HasKey(dc => dc.Ma_DiaChi);
+
+                entity.HasOne(dc => dc.KhachHang)
+                      .WithMany(kh => kh.DiaChiGiaoHangs)
+                      .HasForeignKey(dc => dc.Ma_KhachHang)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<DonHang>()
+    .HasOne(dh => dh.DiaChiGiaoHang)
+    .WithMany()
+    .HasForeignKey(dh => dh.Ma_DiaChi)
+    .OnDelete(DeleteBehavior.Restrict);
+
 
             // ===============================
             // 12. SEED ROLE

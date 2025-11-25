@@ -24,5 +24,7 @@ namespace FashionStore.Models
         public Voucher? Voucher { get; set; }
 
         public ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
+        public int? Ma_DiaChi { get; set; }
+        public DiaChiGiaoHang? DiaChiGiaoHang { get; set; }
     }
 }

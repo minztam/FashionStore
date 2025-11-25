@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251125034550_add_diachidonhang")]
+    partial class add_diachidonhang
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,6 +177,12 @@ namespace FashionStore.Migrations
                     b.Property<string>("Ma_DonHang")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("DiaChi_GiaoHang")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GhiChu_DiaChi")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("Ma_DiaChi")
                         .HasColumnType("int");
 
@@ -188,6 +197,12 @@ namespace FashionStore.Migrations
 
                     b.Property<DateTime>("Ngay_Dat")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("SoDienThoai_Nhan")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ten_NguoiNhan")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Tong_Tien")
                         .HasColumnType("decimal(18,2)");
