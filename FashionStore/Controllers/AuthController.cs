@@ -31,25 +31,56 @@ namespace FashionStore.Controllers
             if (taiKhoan == null)
                 return Unauthorized("Sai tên đăng nhập hoặc mật khẩu!");
 
-            var role = taiKhoan.VaiTro?.Ten_VaiTro ?? "KhachHang"; // mặc định KhachHang nếu null
+            // Role thực tế từ DB
+            var role = taiKhoan.VaiTro?.Ten_VaiTro ?? "KhachHang";
+
+            // Tạo token
             var token = _jwtService.GenerateToken(taiKhoan.Ten_DangNhap, role);
 
-            // Response chỉ phân biệt Admin và KhachHang
-            object userResponse = role == "Admin"
-                ? new
-                {
-                    taiKhoan.Ma_TaiKhoan,
-                    taiKhoan.Ten_DangNhap,
-                    VaiTro = role,
-                    Trang = "/admin" // ví dụ link trang admin
-                }
-                : new
-                {
-                    taiKhoan.Ma_TaiKhoan,
-                    taiKhoan.Ten_DangNhap,
-                    VaiTro = "KhachHang",
-                    Trang = "/" // ví dụ trang chính khách hàng
-                };
+            // Response theo từng role
+            object userResponse;
+
+            switch (role)
+            {
+                case "Admin":
+                    userResponse = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        VaiTro = "Admin",
+                        Trang = "/admin"
+                    };
+                    break;
+
+                case "Nhân viên bán hàng":
+                    userResponse = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        VaiTro = "Nhân viên bán hàng",
+                        Trang = "/staff/dashboard"
+                    };
+                    break;
+                case "Nhân viên kho":
+                    userResponse = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        VaiTro = "Nhân viên kho",
+                        Trang = "/staff/dashboard"
+                    };
+                    break ;
+
+                default: // KhachHang
+                    userResponse = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        VaiTro = "KhachHang",
+                        Trang = "/"
+                    };
+                    break;
+            }
 
             return Ok(new
             {
@@ -58,6 +89,7 @@ namespace FashionStore.Controllers
                 user = userResponse
             });
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
