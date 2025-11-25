@@ -2,6 +2,7 @@
 {
     public class SanPhamBienTheDTO
     {
+        public int Id { get; set; }
         public string Mau_Sac { get; set; } = string.Empty;
         public string Kich_Thuoc { get; set; } = string.Empty;
         public int So_Luong { get; set; }

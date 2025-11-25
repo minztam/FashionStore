@@ -123,7 +123,7 @@ namespace FashionStore.Controllers
             kh.HoTen = dto.Ho_Ten!;
             kh.SoDienThoai = dto.So_Dien_Thoai!;
             kh.DiaChi = dto.Dia_Chi!;
-
+            kh.Hinh_Anh = dto.Hinh_Anh!;
             var success = await _khachHangRepo.UpdateAsync(kh);
             if (!success) return StatusCode(500, "Cập nhật thất bại.");
 
