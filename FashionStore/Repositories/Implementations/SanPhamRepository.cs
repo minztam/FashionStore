@@ -45,6 +45,7 @@ namespace FashionStore.Repositories.Implementations
                         }).ToList(),
                         BienThes = sp.BienThes?.Select(bt => new SanPhamBienTheDTO
                         {
+                            Id = bt.Id,
                             Mau_Sac = bt.Mau_Sac,
                             Kich_Thuoc = bt.Kich_Thuoc,
                             So_Luong = bt.So_Luong,
@@ -93,6 +94,7 @@ namespace FashionStore.Repositories.Implementations
                         }).ToList(),
                         BienThes = sp.BienThes?.Select(bt => new SanPhamBienTheDTO
                         {
+                            Id = bt.Id,
                             Mau_Sac = bt.Mau_Sac,
                             Kich_Thuoc = bt.Kich_Thuoc,
                             So_Luong = bt.So_Luong,
