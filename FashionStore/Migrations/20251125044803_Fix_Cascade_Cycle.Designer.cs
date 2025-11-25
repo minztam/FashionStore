@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251125044803_Fix_Cascade_Cycle")]
+    partial class Fix_Cascade_Cycle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,10 +220,15 @@ namespace FashionStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ma_GioHang"));
 
+                    b.Property<int>("Ma_DiaChi")
+                        .HasColumnType("int");
+
                     b.Property<int>("Ma_KhachHang")
                         .HasColumnType("int");
 
                     b.HasKey("Ma_GioHang");
+
+                    b.HasIndex("Ma_DiaChi");
 
                     b.HasIndex("Ma_KhachHang")
                         .IsUnique();
@@ -975,11 +983,19 @@ namespace FashionStore.Migrations
 
             modelBuilder.Entity("FashionStore.Models.GioHang", b =>
                 {
+                    b.HasOne("FashionStore.Models.DiaChiGiaoHang", "DiaChiGiaoHang")
+                        .WithMany()
+                        .HasForeignKey("Ma_DiaChi")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("FashionStore.Models.KhachHang", "KhachHang")
                         .WithOne("GioHang")
                         .HasForeignKey("FashionStore.Models.GioHang", "Ma_KhachHang")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DiaChiGiaoHang");
 
                     b.Navigation("KhachHang");
                 });

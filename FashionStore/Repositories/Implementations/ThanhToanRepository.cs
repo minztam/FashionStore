@@ -28,7 +28,7 @@ namespace FashionStore.Repositories.Implementations
             _httpContext = httpContext;
         }
 
-        public async Task<ResponseMessageResult> ThanhToanCODAsync(int maKhachHang, string? maVoucher = null)
+        public async Task<ResponseMessageResult> ThanhToanCODAsync(int maKhachHang, int maDiaChi, string? maVoucher = null)
         {
             // 1. Tạo Mã Đơn Hàng DUY NHẤT ngay từ đầu (để dùng chung cho Header và Detail)
             string maDonHang = "DH" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
@@ -143,11 +143,12 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_DonHang = maDonHang,
                     Ma_KhachHang = maKhachHang,
+                    Ma_DiaChi = maDiaChi,
                     Ngay_Dat = DateTime.Now,
                     Tong_Tien = tongTienThanhToan,
                     Trang_Thai = "Chờ xác nhận",
                     Ma_PhuongThuc = 1, // COD
-                    Ma_Voucher = tenVoucher
+                    Ma_Voucher = tenVoucher,
                 };
 
                 // Xóa sạch chi tiết giỏ hàng cũ
@@ -174,6 +175,7 @@ namespace FashionStore.Repositories.Implementations
                     var donHangDto = new DonHangDTO
                     {
                         Ma_DonHang = maDonHang,
+                        Ma_DiaChi = maDiaChi,
                         Ngay_Dat = donHang.Ngay_Dat,
                         Tong_Tien = tongTienThanhToan,
                         Trang_Thai = donHang.Trang_Thai,
@@ -211,12 +213,23 @@ namespace FashionStore.Repositories.Implementations
         }
 
 
-
-        public async Task<ResponseMessageResult> TaoDonHangKhiVNPAYThanhCongAsync(string maDonHang, int maKhachHang, string? maVoucher = null)
+        public async Task<ResponseMessageResult> TaoDonHangKhiVNPAYThanhCongAsync(
+            string maDonHang,
+            int maKhachHang,
+            int maDiaChi,
+            string? maVoucher = null)
         {
             using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             try
             {
+                // Kiểm tra địa chỉ
+                var diaChi = await _context.DiaChiGiaoHangs
+                    .FirstOrDefaultAsync(d => d.Ma_DiaChi == maDiaChi && d.Ma_KhachHang == maKhachHang);
+
+                if (diaChi == null)
+                    return _response.SetFail("Địa chỉ giao hàng không hợp lệ!", 400);
+
+                // Lấy giỏ hàng
                 var gioHang = await _context.GioHangs
                     .Include(g => g.ChiTietGioHangs!)
                         .ThenInclude(ct => ct.BienThe!)
@@ -226,7 +239,7 @@ namespace FashionStore.Repositories.Implementations
                 if (gioHang == null || !gioHang.ChiTietGioHangs.Any(x => x.So_Luong > 0))
                     return _response.SetFail("Giỏ hàng trống hoặc đã bị xóa!", 400);
 
-                // Kiểm tra tồn kho trước khi tạo đơn
+                // Kiểm tra tồn kho
                 foreach (var ct in gioHang.ChiTietGioHangs.Where(x => x.So_Luong > 0))
                 {
                     if (ct.BienThe!.So_Luong < ct.So_Luong)
@@ -245,11 +258,10 @@ namespace FashionStore.Repositories.Implementations
                         DonGia = ct.BienThe!.Gia_Giam ?? ct.BienThe.Gia_BienThe
                     }).ToList();
 
-                // Tính tiền ban đầu
                 decimal tongTienBanDau = chiTietDonHangs.Sum(x => x.So_Luong * x.DonGia);
                 decimal tongTienSauGiam = tongTienBanDau;
 
-                // Áp dụng voucher
+                // Áp dụng voucher nếu có
                 if (!string.IsNullOrEmpty(maVoucher))
                 {
                     var voucher = await _context.Vouchers
@@ -273,13 +285,11 @@ namespace FashionStore.Repositories.Implementations
 
                         if (voucher.Giam_PhanTram.HasValue && voucher.Giam_PhanTram > 0)
                         {
-                            decimal giamPhanTram = voucher.Giam_PhanTram.Value;
-                            tongTienSauGiam = tongTienBanDau - (tongTienBanDau * giamPhanTram / 100);
+                            tongTienSauGiam = tongTienBanDau - (tongTienBanDau * voucher.Giam_PhanTram.Value / 100);
                         }
                         else if (voucher.Giam_Tien.HasValue && voucher.Giam_Tien > 0)
                         {
-                            decimal giamTien = voucher.Giam_Tien.Value;
-                            tongTienSauGiam = tongTienBanDau - Math.Min(giamTien, tongTienBanDau);
+                            tongTienSauGiam = tongTienBanDau - Math.Min(voucher.Giam_Tien.Value, tongTienBanDau);
                         }
 
                         voucher.So_LanDung -= 1;
@@ -293,6 +303,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_DonHang = maDonHang,
                     Ma_KhachHang = maKhachHang,
+                    Ma_DiaChi = maDiaChi,
                     Ngay_Dat = DateTime.Now,
                     Tong_Tien = tongTienSauGiam,
                     Trang_Thai = "Đang xử lý",
@@ -317,9 +328,8 @@ namespace FashionStore.Repositories.Implementations
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // Load email và Ten_PhuongThuc trước khi dispose context
-                var kh = await _context.KhachHangs
-                    .Include(k => k.TaiKhoan)
+                // Lấy email và tên phương thức thanh toán
+                var kh = await _context.KhachHangs.Include(k => k.TaiKhoan)
                     .FirstOrDefaultAsync(k => k.Ma_KhachHang == maKhachHang);
                 string? email = kh?.TaiKhoan?.Email;
 
@@ -327,16 +337,17 @@ namespace FashionStore.Repositories.Implementations
                     .FirstOrDefaultAsync(p => p.Ma_PhuongThuc == donHang.Ma_PhuongThuc);
                 string tenPhuongThuc = phuongThuc?.Ten_PhuongThuc ?? "VNPAY";
 
-                // Tạo DonHangDTO để gửi email
+                // Tạo DTO gửi email
                 var donHangDto = new DonHangDTO
                 {
                     Ma_DonHang = maDonHang,
                     Ma_KhachHang = maKhachHang,
+                    Ma_DiaChi = maDiaChi,
                     Ngay_Dat = donHang.Ngay_Dat,
                     Tong_Tien = tongTienSauGiam,
                     Trang_Thai = donHang.Trang_Thai,
                     Ma_PhuongThuc = donHang.Ma_PhuongThuc,
-                    Ten_PhuongThuc = tenPhuongThuc,  // Set đúng
+                    Ten_PhuongThuc = tenPhuongThuc,
                     Ma_Voucher = maVoucher,
                     ChiTiet = chiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                     {
@@ -351,25 +362,22 @@ namespace FashionStore.Repositories.Implementations
                     }).ToList()
                 };
 
-                // Gửi email (background) - Sử dụng email đã load
+                // Gửi email bất đồng bộ
                 _ = Task.Run(async () =>
                 {
                     try
                     {
                         if (!string.IsNullOrEmpty(email))
-                        {
                             await _emailService.SendOrderEmailAsync(email, donHangDto);
-                        }
                     }
-                    catch { /* Không crash nếu mail lỗi */ }
+                    catch { }
                 });
 
                 return _response.SetSuccess("Thanh toán thành công! Đơn hàng đã được tạo.", new { maDonHang, tongTienSauGiam });
             }
-            catch (Exception )
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
-                //_logger.LogError(ex, "Lỗi tạo đơn hàng sau VNPAY thành công: {MaDonHang}", maDonHang);
                 return _response.SetFail("Lỗi hệ thống khi tạo đơn hàng!", 500);
             }
         }

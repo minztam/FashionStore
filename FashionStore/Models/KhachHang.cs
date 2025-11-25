@@ -18,6 +18,7 @@ namespace FashionStore.Models
         [ForeignKey("Ma_TaiKhoan")]
         public TaiKhoan? TaiKhoan { get; set; }
         public ICollection<DiaChiGiaoHang> DiaChiGiaoHangs { get; set; } = new List<DiaChiGiaoHang>();
+        public GioHang? GioHang { get; set; }
 
     }
 }

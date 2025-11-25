@@ -180,20 +180,22 @@ namespace FashionStore.Data
                 .Property(p => p.Giam_Tien)
                 .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<DiaChiGiaoHang>(entity =>
-            {
-                entity.HasKey(dc => dc.Ma_DiaChi);
+            // KhachHang – DiaChi: Cascade (HỢP LÝ)
+            modelBuilder.Entity<DiaChiGiaoHang>()
+                .HasOne(dc => dc.KhachHang)
+                .WithMany(kh => kh.DiaChiGiaoHangs)
+                .HasForeignKey(dc => dc.Ma_KhachHang)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(dc => dc.KhachHang)
-                      .WithMany(kh => kh.DiaChiGiaoHangs)
-                      .HasForeignKey(dc => dc.Ma_KhachHang)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
+            // GioHang – DiaChi: RESTRICT (không xóa Giỏ hàng nếu địa chỉ bị xóa)
+
+            // DonHang – DiaChi: RESTRICT (không xóa Đơn hàng nếu địa chỉ bị xóa)
             modelBuilder.Entity<DonHang>()
-    .HasOne(dh => dh.DiaChiGiaoHang)
-    .WithMany()
-    .HasForeignKey(dh => dh.Ma_DiaChi)
-    .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(dh => dh.DiaChiGiaoHang)
+                .WithMany()
+                .HasForeignKey(dh => dh.Ma_DiaChi)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
 
             // ===============================

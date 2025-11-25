@@ -45,7 +45,7 @@ namespace FashionStore.Controllers
             {
                 return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu không hợp lệ!"));
             }
-            var result = await _thanhToanRepo.ThanhToanCODAsync(request.MaKhachHang, request.MaVoucher);
+            var result = await _thanhToanRepo.ThanhToanCODAsync(request.MaKhachHang, request.MaDiaChi,request.MaVoucher);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -94,6 +94,13 @@ namespace FashionStore.Controllers
                 orderId = Regex.Match(orderInfo, @"DH\d{14,}").Value;
             }
 
+            string? maDiaChiStr = Request.Query["maDiaChi"].FirstOrDefault();
+            if (string.IsNullOrEmpty(maDiaChiStr) || !int.TryParse(maDiaChiStr, out int maDiaChi))
+            {
+                return BadRequest("Mã địa chỉ không hợp lệ");
+            }
+
+
             var response = new
             {
                 Success = vnpayResult.Success,
@@ -102,21 +109,22 @@ namespace FashionStore.Controllers
                 Message = vnpayResult.Success ? "Thanh toán thành công!" : vnpayResult.Message ?? "Thanh toán thất bại!"
             };
 
-            // CHỈ KHI VNPAY XÁC NHẬN THÀNH CÔNG + CHƯA TẠO ĐƠN → MỚI TẠO
             if (vnpayResult.Success && !string.IsNullOrEmpty(orderId))
             {
                 var daTonTai = await _context.DonHangs.AnyAsync(d => d.Ma_DonHang == orderId);
                 if (!daTonTai)
                 {
-                    // Lấy MaKhachHang từ Session hoặc từ giỏ hàng tạm (cách đơn giản nhất: lưu tạm lúc tạo URL)
-                    // Ở đây anh dùng cách lấy từ giỏ hàng còn tồn tại (nếu khách chưa xóa)
+                    // Lấy MaKhachHang từ giỏ hàng còn tồn tại
                     var gioHang = await _context.GioHangs
                         .FirstOrDefaultAsync(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0));
 
                     if (gioHang != null)
                     {
                         var result = await _thanhToanRepo.TaoDonHangKhiVNPAYThanhCongAsync(
-                            orderId, gioHang.Ma_KhachHang, null);
+                            orderId,
+                            gioHang.Ma_KhachHang,
+                            maDiaChi // dùng Ma_DiaChi từ frontend
+                        );
 
                         if (!result.Success)
                         {
@@ -190,5 +198,6 @@ namespace FashionStore.Controllers
     
         public int MaKhachHang { get; set; }
         public string? MaVoucher { get; set; }
+         public int MaDiaChi { get; set; }
     }
 }

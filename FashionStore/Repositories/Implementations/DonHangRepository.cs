@@ -7,6 +7,7 @@ using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System.Text;
 
 namespace FashionStore.Repositories.Implementations
@@ -26,13 +27,14 @@ namespace FashionStore.Repositories.Implementations
         public async Task<ResponseMessageResult> GetAllDonHangAsync()
         {
             var donHangs = await _context.DonHangs
-                 .Include(d => d.ChiTietDonHangs)
-                     .ThenInclude(ct => ct.SanPham)
-                         .ThenInclude(sp => sp!.HinhAnhSanPhams)
-                 .Include(d => d.ChiTietDonHangs)
-                     .ThenInclude(ct => ct.BienThe)
-                 .Include(d => d.PhuongThucThanhToan)
-                 .ToListAsync();
+                .Include(d => d.ChiTietDonHangs)
+                    .ThenInclude(ct => ct.SanPham)
+                        .ThenInclude(sp => sp!.HinhAnhSanPhams)
+                .Include(d => d.ChiTietDonHangs)
+                    .ThenInclude(ct => ct.BienThe)
+                .Include(d => d.PhuongThucThanhToan)
+                .Include(d => d.DiaChiGiaoHang) // <-- include DiaChi
+                .ToListAsync();
 
             var dtos = donHangs.Select(dh => new DonHangDTO
             {
@@ -44,21 +46,23 @@ namespace FashionStore.Repositories.Implementations
                 Ma_PhuongThuc = dh.Ma_PhuongThuc,
                 Ten_PhuongThuc = dh.PhuongThucThanhToan?.Ten_PhuongThuc,
                 Ma_Voucher = dh.Ma_Voucher,
-                ChiTiet = dh.ChiTietDonHangs.Select(x => new ChiTietDonHangDTO
+                DiaChi = dh.DiaChiGiaoHang ,
+                ChiTiet = dh.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
-                    Ma_SanPham = x.Ma_SanPham,
-                    Ten_SanPham = x.SanPham!.Ten_SanPham,
-                    Hinh_Anh = x.SanPham.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
-                    Mau_Sac = x.BienThe?.Mau_Sac ?? string.Empty,
-                    Kich_Thuoc = x.BienThe?.Kich_Thuoc ?? string.Empty,
-                    So_Luong = x.So_Luong,
-                    DonGia = x.DonGia,
-                    ThanhTien = x.DonGia * x.So_Luong
+                    Ma_SanPham = ct.Ma_SanPham,
+                    Ten_SanPham = ct.SanPham!.Ten_SanPham,
+                    Hinh_Anh = ct.SanPham.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
+                    Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
+                    Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
+                    So_Luong = ct.So_Luong,
+                    DonGia = ct.DonGia,
+                    ThanhTien = ct.DonGia * ct.So_Luong
                 }).ToList()
             }).ToList();
 
             return _response.SetSuccess("Lấy danh sách đơn hàng thành công!", dtos);
         }
+
         public async Task<ResponseMessageResult> GetChiTietDonHangAsync(string maDonHang)
         {
             if (string.IsNullOrWhiteSpace(maDonHang))
@@ -74,7 +78,7 @@ namespace FashionStore.Repositories.Implementations
                     .ThenInclude(ct => ct.SanPham!)
                         .ThenInclude(sp => sp.HinhAnhSanPhams!)
                 .Include(d => d.ChiTietDonHangs!)
-                    .ThenInclude(ct => ct.BienThe!)
+                    .ThenInclude(ct => ct.BienThe!).Include(d => d.DiaChiGiaoHang)
                 .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
 
             if (donHang == null)
@@ -84,12 +88,14 @@ namespace FashionStore.Repositories.Implementations
             {
                 Ma_DonHang = donHang.Ma_DonHang,
                 Ma_KhachHang = donHang.Ma_KhachHang,
+                Ma_DiaChi=donHang.Ma_DiaChi,
                 Ngay_Dat = donHang.Ngay_Dat,
                 Tong_Tien = donHang.Tong_Tien,
                 Trang_Thai = donHang.Trang_Thai,
                 Ma_PhuongThuc = donHang.Ma_PhuongThuc,
                 Ten_PhuongThuc = donHang.PhuongThucThanhToan?.Ten_PhuongThuc ?? "Chưa xác định",
                 Ma_Voucher = donHang.Ma_Voucher,
+                DiaChi=donHang.DiaChiGiaoHang,
                 ChiTiet = donHang.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
                     Ma_SanPham = ct.Ma_SanPham,
@@ -189,6 +195,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_DonHang = maDH,
                     Ma_KhachHang = request.Ma_KhachHang,
+                    Ma_DiaChi =request.Ma_DiaChi,
                     Ngay_Dat = DateTime.Now,
                     Tong_Tien = tongCuoi,
                     Trang_Thai = trangThai,
@@ -414,12 +421,14 @@ namespace FashionStore.Repositories.Implementations
                 var donHangs = await _context.DonHangs
                     .Where(d => d.Ma_KhachHang == maKhachHang)
                     .OrderByDescending(d => d.Ngay_Dat)
+                      .Include(d => d.DiaChiGiaoHang)
                     .Select(d => new
                     {
                         d.Ma_DonHang,
                         d.Ngay_Dat,
                         d.Tong_Tien,
                         d.Trang_Thai,
+                        d.DiaChiGiaoHang,
                         ChiTiet = d.ChiTietDonHangs.Select(ct => new
                         {
                             ct.Ma_SanPham,
@@ -783,6 +792,7 @@ namespace FashionStore.Repositories.Implementations
     {
         public int Ma_KhachHang { get; set; }
         public int Ma_PhuongThuc { get; set; }
+        public int Ma_DiaChi { get; set; }
         public string? Ma_Voucher { get; set; }
         public List<TaoChiTietDonHangItem> ChiTiet { get; set; } = new();
     }
