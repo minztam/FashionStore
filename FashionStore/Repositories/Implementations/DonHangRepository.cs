@@ -51,9 +51,9 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham!.Ten_SanPham,
-                    Hinh_Anh = ct.SanPham.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
                     Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
+                    Hinh_Anh=ct.BienThe?.HinhAnh ?? string.Empty,
                     So_Luong = ct.So_Luong,
                     DonGia = ct.DonGia,
                     ThanhTien = ct.DonGia * ct.So_Luong
@@ -76,7 +76,6 @@ namespace FashionStore.Repositories.Implementations
                 .Include(d => d.Voucher)
                 .Include(d => d.ChiTietDonHangs!)
                     .ThenInclude(ct => ct.SanPham!)
-                        .ThenInclude(sp => sp.HinhAnhSanPhams!)
                 .Include(d => d.ChiTietDonHangs!)
                     .ThenInclude(ct => ct.BienThe!).Include(d => d.DiaChiGiaoHang)
                 .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
@@ -100,8 +99,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm đã xóa",
-                    Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan
-                               ?? "/images/no-image.jpg",
+                    Hinh_Anh = ct.BienThe?.HinhAnh??"không có hình ảnh",
                     Mau_Sac = ct.BienThe?.Mau_Sac ?? "Không có",
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? "Freesize",
                     So_Luong = ct.So_Luong,
@@ -225,7 +223,7 @@ namespace FashionStore.Repositories.Implementations
                         {
                             Ma_SanPham = ct.Ma_SanPham,
                             Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm",
-                            Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan ?? "/images/no-image.jpg",
+                            Hinh_Anh = ct.BienThe?.HinhAnh?? "/images/no-image.jpg",
                             Mau_Sac = ct.BienThe?.Mau_Sac,
                             Kich_Thuoc = ct.BienThe?.Kich_Thuoc,
                             So_Luong = ct.So_Luong,
@@ -274,7 +272,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm",
-                    Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan,
+                    Hinh_Anh = ct.BienThe?.HinhAnh,
                     Mau_Sac = ct.BienThe?.Mau_Sac,
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc,
                     So_Luong = ct.So_Luong,
@@ -436,9 +434,8 @@ namespace FashionStore.Repositories.Implementations
                             ct.So_Luong,
                             ct.DonGia,
                             Ten_SanPham = ct.SanPham!.Ten_SanPham,
-                            HinhAnh = ct.SanPham.HinhAnhSanPhams.FirstOrDefault() != null
-                                ? ct.SanPham.HinhAnhSanPhams.First().DuongDan
-                                : "/images/no-image.jpg",
+                            HinhAnh = ct.BienThe.HinhAnh
+                                ?? "/images/no-image.jpg",
                             Mau_Sac = ct.BienThe.Mau_Sac,
                             Kich_Thuoc = ct.BienThe.Kich_Thuoc
                         }).ToList()

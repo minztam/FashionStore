@@ -23,11 +23,21 @@ namespace FashionStore.Repositories.Implementations
             try
             {
                 var sanphams = await _context.SanPhams
-                    .Include(x => x.HinhAnhSanPhams)
-                    .Include(x => x.DanhMuc)
-                    .Include(x => x.BienThes)
-                    .AsNoTracking()
-                    .ToListAsync();
+    .Include(x => x.DanhMuc)
+    .Select(sp => new
+    {
+        sp.Ma_SanPham,
+        sp.Ten_SanPham,
+        sp.Mo_Ta,
+        sp.Trang_Thai,
+       sp.Ma_DanhMuc,
+        BienThes = sp.BienThes
+            .Where(bt => bt.Trang_Thai) // chỉ lấy biến thể active
+            .ToList()
+    })
+    .AsNoTracking()
+    .ToListAsync();
+
 
                 if (sanphams != null)
                 {
@@ -39,10 +49,7 @@ namespace FashionStore.Repositories.Implementations
                         Ma_DanhMuc = sp.Ma_DanhMuc,
                         Mo_Ta = sp.Mo_Ta,
                         Trang_Thai = sp.Trang_Thai,
-                        HinhAnhs = sp.HinhAnhSanPhams?.Select(h => new HinhAnhDTO
-                        {
-                            DuongDan = h.DuongDan ?? string.Empty
-                        }).ToList(),
+                     
                         BienThes = sp.BienThes?.Select(bt => new SanPhamBienTheDTO
                         {
                             Id = bt.Id,
@@ -51,7 +58,9 @@ namespace FashionStore.Repositories.Implementations
                             So_Luong = bt.So_Luong,
                             Gia_BienThe = bt.Gia_BienThe,
                             Gia_Giam = bt.Gia_Giam,
-                            PhanTramGiam = bt.PhanTramGiam
+                            PhanTramGiam = bt.PhanTramGiam,
+                            HinhAnh= bt.HinhAnh,
+                            Trang_Thai= bt.Trang_Thai,
                         }).ToList()
                     }).ToList();
 
@@ -73,10 +82,19 @@ namespace FashionStore.Repositories.Implementations
             try
             {
                 var sp = await _context.SanPhams
-                    .Include(sp => sp.DanhMuc)
-                    .Include(sp => sp.HinhAnhSanPhams)
-                    .Include(sp => sp.BienThes)
-                    .AsNoTracking()
+     .Include(x => x.DanhMuc)
+     .Select(sp => new
+     {
+         sp.Ma_SanPham,
+         sp.Ten_SanPham,
+         sp.Mo_Ta,
+         sp.Trang_Thai,
+         sp.Ma_DanhMuc,
+         BienThes = sp.BienThes
+             .Where(bt => bt.Trang_Thai) // chỉ lấy biến thể active
+             .ToList()
+     })
+     .AsNoTracking()
                     .FirstOrDefaultAsync(sp => sp.Ma_SanPham == id);
 
                 if (sp != null)
@@ -88,10 +106,7 @@ namespace FashionStore.Repositories.Implementations
                         Ma_DanhMuc = sp.Ma_DanhMuc,
                         Mo_Ta = sp.Mo_Ta,
                         Trang_Thai = sp.Trang_Thai,
-                        HinhAnhs = sp.HinhAnhSanPhams?.Select(h => new HinhAnhDTO
-                        {
-                            DuongDan = h.DuongDan ?? string.Empty
-                        }).ToList(),
+                      
                         BienThes = sp.BienThes?.Select(bt => new SanPhamBienTheDTO
                         {
                             Id = bt.Id,
@@ -100,7 +115,9 @@ namespace FashionStore.Repositories.Implementations
                             So_Luong = bt.So_Luong,
                             Gia_BienThe = bt.Gia_BienThe,
                             Gia_Giam = bt.Gia_Giam,
-                            PhanTramGiam = bt.PhanTramGiam
+                            PhanTramGiam = bt.PhanTramGiam,
+                            HinhAnh = bt.HinhAnh,
+                            Trang_Thai= bt.Trang_Thai,
                         }).ToList()
                     };
 
@@ -117,7 +134,7 @@ namespace FashionStore.Repositories.Implementations
             }
         }
 
-        public async Task<ResponseMessageResult> CreateAsync(SanPham sp, List<HinhAnhDTO>? hinhAnhs, List<SanPhamBienTheDTO>? bienThes = null)
+        public async Task<ResponseMessageResult> CreateAsync(SanPham sp,  List<SanPhamBienTheDTO>? bienThes = null)
         {
             if (sp == null)
                 return _response.SetFail("Sản phẩm không được null", 400);
@@ -144,21 +161,7 @@ namespace FashionStore.Repositories.Implementations
                     await _context.SanPhams.AddAsync(sp);
                     await _context.SaveChangesAsync();
 
-                    // Thêm hình ảnh (nếu có)
-                    if (hinhAnhs != null && hinhAnhs.Any())
-                    {
-                        var listHinhAnh = hinhAnhs
-                            .Where(h => !string.IsNullOrWhiteSpace(h.DuongDan))
-                            .Select(h => new HinhAnhSanPham
-                            {
-                                Ma_SanPham = sp.Ma_SanPham,
-                                DuongDan = h.DuongDan.Trim()
-                            });
-
-                        await _context.HinhAnhSanPhams.AddRangeAsync(listHinhAnh);
-                        await _context.SaveChangesAsync();
-                    }
-
+                   
                     // Thêm biến thể (nếu có)
                     if (bienThes != null && bienThes.Any())
                     {
@@ -172,7 +175,8 @@ namespace FashionStore.Repositories.Implementations
                                 So_Luong = bt.So_Luong,
                                 Gia_BienThe = bt.Gia_BienThe,
                                 Gia_Giam = bt.Gia_Giam,
-                                PhanTramGiam = bt.PhanTramGiam
+                                PhanTramGiam = bt.PhanTramGiam,
+                                HinhAnh = bt.HinhAnh,
                             });
 
                         await _context.SanPhamBienThes.AddRangeAsync(listBienThe);
@@ -198,86 +202,136 @@ namespace FashionStore.Repositories.Implementations
 
         public async Task<ResponseMessageResult> UpdateAsync(string maSanPham, SanPhamDTO dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var existing = await _context.SanPhams
-                    .Include(sp => sp.HinhAnhSanPhams)
+                // 1️⃣ Lấy sản phẩm và các biến thể
+                var sanPham = await _context.SanPhams
                     .Include(sp => sp.BienThes)
                     .FirstOrDefaultAsync(sp => sp.Ma_SanPham == maSanPham);
 
-                if (existing == null)
+                if (sanPham == null)
                     return _response.SetFail("Sản phẩm không tồn tại", 404);
 
-                using var transaction = await _context.Database.BeginTransactionAsync();
+                // 2️⃣ Cập nhật sản phẩm cha
+                sanPham.Ten_SanPham = dto.Ten_SanPham?.Trim() ?? sanPham.Ten_SanPham;
+                sanPham.Mo_Ta = dto.Mo_Ta?.Trim();
+                sanPham.Ma_DanhMuc = dto.Ma_DanhMuc;
+                sanPham.Trang_Thai = dto.Trang_Thai;
 
-                try
+                // 3️⃣ Xử lý biến thể cũ
+                foreach (var oldBt in sanPham.BienThes)
                 {
-                    // Cập nhật sản phẩm
-                    if (!string.IsNullOrWhiteSpace(dto.Ten_SanPham))
-                        existing.Ten_SanPham = dto.Ten_SanPham.Trim();
-                    if (!string.IsNullOrWhiteSpace(dto.Mo_Ta))
-                        existing.Mo_Ta = dto.Mo_Ta.Trim();
-                    existing.Trang_Thai = dto.Trang_Thai;
-                    existing.Ma_DanhMuc = dto.Ma_DanhMuc;
+                    // Kiểm tra biến thể đã bán (chi tiết đơn hàng đã thanh toán)
+                    bool daBan = await _context.ChiTietDonHangs
+                        .AnyAsync(x => x.Ma_BienThe == oldBt.Id && x.DonHang.Trang_Thai != "Pending");
 
-                    // Cập nhật biến thể
-                    if (dto.BienThes != null)
+                    // Kiểm tra biến thể có trong giỏ hàng
+                    bool trongGioHang = await _context.ChiTietGioHangs.AnyAsync(x => x.Ma_BienThe == oldBt.Id);
+
+                    var updatedBtDto = dto.BienThes?.FirstOrDefault(bt => bt.Id == oldBt.Id);
+
+                    if (daBan || trongGioHang)
                     {
-                        _context.SanPhamBienThes.RemoveRange(existing.BienThes);
+                        // Biến thể đang dùng → không xóa, chỉ khóa
+                        oldBt.Trang_Thai = false;
 
-                        var newBienThes = dto.BienThes.Select(bt => new SanPhamBienThe
+                        if (updatedBtDto != null)
+                        {
+                            oldBt.Mau_Sac = updatedBtDto.Mau_Sac.Trim();
+                            oldBt.Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim();
+                            oldBt.HinhAnh = updatedBtDto.HinhAnh;
+                            oldBt.Gia_BienThe = updatedBtDto.Gia_BienThe;
+                            oldBt.PhanTramGiam = updatedBtDto.PhanTramGiam;
+                            oldBt.Gia_Giam = CalculateGiaGiam(updatedBtDto.Gia_BienThe, updatedBtDto.PhanTramGiam);
+                        }
+                    }
+                    else
+                    {
+                        if (updatedBtDto != null)
+                        {
+                            // Biến thể chưa bán → cập nhật đầy đủ
+                            oldBt.Mau_Sac = updatedBtDto.Mau_Sac.Trim();
+                            oldBt.Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim();
+                            oldBt.So_Luong = updatedBtDto.So_Luong;
+                            oldBt.Gia_BienThe = updatedBtDto.Gia_BienThe;
+                            oldBt.PhanTramGiam = updatedBtDto.PhanTramGiam;
+                            oldBt.Gia_Giam = CalculateGiaGiam(updatedBtDto.Gia_BienThe, updatedBtDto.PhanTramGiam);
+                            oldBt.HinhAnh = updatedBtDto.HinhAnh;
+                            oldBt.Trang_Thai = updatedBtDto.Trang_Thai ?? true;
+                        }
+                        else
+                        {
+                            // Biến thể chưa bán & không còn DTO → xóa
+                            _context.SanPhamBienThes.Remove(oldBt);
+                        }
+                    }
+                }
+
+                // 4️⃣ Thêm biến thể mới (Id = 0)
+                if (dto.BienThes != null)
+                {
+                    var newBienThes = dto.BienThes
+                        .Where(bt => bt.Id == 0)
+                        .Select(bt => new SanPhamBienThe
                         {
                             Ma_SanPham = maSanPham,
                             Mau_Sac = bt.Mau_Sac.Trim(),
                             Kich_Thuoc = bt.Kich_Thuoc.Trim(),
                             So_Luong = bt.So_Luong,
                             Gia_BienThe = bt.Gia_BienThe,
-                            Gia_Giam = bt.Gia_Giam,
-                            PhanTramGiam = bt.PhanTramGiam
-                        }).ToList();
+                            PhanTramGiam = bt.PhanTramGiam,
+                            Gia_Giam = CalculateGiaGiam(bt.Gia_BienThe, bt.PhanTramGiam),
+                            HinhAnh = bt.HinhAnh,
+                            Trang_Thai = true
+                        });
 
-                        await _context.SanPhamBienThes.AddRangeAsync(newBienThes);
-                    }
-
-                    // Cập nhật hình ảnh
-                    if (dto.HinhAnhs != null && dto.HinhAnhs.Any())
-                    {
-                        _context.HinhAnhSanPhams.RemoveRange(existing.HinhAnhSanPhams);
-
-                        var newImages = dto.HinhAnhs
-                            .Where(h => !string.IsNullOrWhiteSpace(h.DuongDan))
-                            .Select(h => new HinhAnhSanPham
-                            {
-                                Ma_SanPham = maSanPham,
-                                DuongDan = h.DuongDan.Trim()
-                            }).ToList();
-
-                        await _context.HinhAnhSanPhams.AddRangeAsync(newImages);
-                    }
-
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return _response.SetSuccess("Cập nhật sản phẩm thành công");
+                    await _context.SanPhamBienThes.AddRangeAsync(newBienThes);
                 }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    Console.WriteLine($"❌ Lỗi khi cập nhật sản phẩm: {ex.Message}");
-                    return _response.SetFail("Có lỗi khi cập nhật sản phẩm", 500);
-                }
+
+                // 5️⃣ Lưu thay đổi và commit
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return _response.SetSuccess("Cập nhật sản phẩm thành công");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return _response.SetFail("Có lỗi không mong muốn", 500);
+                await transaction.RollbackAsync();
+                Console.WriteLine("❌ UpdateAsync error: " + ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return _response.SetFail("Có lỗi khi cập nhật sản phẩm", 500);
             }
         }
+
+
+
+
+
+
+
+
+        // Hàm tính giá giảm
+
+
+
+        // Hàm tính giá sau giảm
+        private decimal? CalculateGiaGiam(decimal gia, int? phanTram)
+        {
+            if (phanTram.HasValue && phanTram.Value > 0)
+            {
+                return gia * (100 - phanTram.Value) / 100;
+            }
+            return null;
+        }
+
+
 
         public async Task<ResponseMessageResult> DeleteAsync(string id)
         {
             try
             {
                 var sp = await _context.SanPhams
-                    .Include(s => s.HinhAnhSanPhams)
                     .Include(s => s.BienThes)
                     .FirstOrDefaultAsync(s => s.Ma_SanPham == id);
 
@@ -289,7 +343,6 @@ namespace FashionStore.Repositories.Implementations
                 try
                 {
                     _context.SanPhamBienThes.RemoveRange(sp.BienThes);
-                    _context.HinhAnhSanPhams.RemoveRange(sp.HinhAnhSanPhams);
                     _context.SanPhams.Remove(sp);
 
                     await _context.SaveChangesAsync();
@@ -309,44 +362,44 @@ namespace FashionStore.Repositories.Implementations
             }
         }
 
-        public async Task<ResponseMessageResult> AddImageAsync(HinhAnhSanPham img)
-        {
-            if (img == null || string.IsNullOrWhiteSpace(img.Ma_SanPham))
-                return _response.SetFail("Thông tin hình ảnh không hợp lệ", 400);
+        //public async Task<ResponseMessageResult> AddImageAsync(HinhAnhSanPham img)
+        //{
+        //    if (img == null || string.IsNullOrWhiteSpace(img.Ma_SanPham))
+        //        return _response.SetFail("Thông tin hình ảnh không hợp lệ", 400);
 
-            try
-            {
-                var spExists = await _context.SanPhams.AnyAsync(s => s.Ma_SanPham == img.Ma_SanPham);
-                if (!spExists)
-                    return _response.SetFail($"Sản phẩm {img.Ma_SanPham} không tồn tại.", 404);
+        //    try
+        //    {
+        //        var spExists = await _context.SanPhams.AnyAsync(s => s.Ma_SanPham == img.Ma_SanPham);
+        //        if (!spExists)
+        //            return _response.SetFail($"Sản phẩm {img.Ma_SanPham} không tồn tại.", 404);
 
-                await _context.HinhAnhSanPhams.AddAsync(img);
-                await _context.SaveChangesAsync();
-                return _response.SetSuccess("Thêm hình ảnh thành công");
-            }
-            catch (Exception)
-            {
-                return _response.SetFail("Có lỗi khi thêm hình ảnh", 500);
-            }
-        }
+        //        await _context.HinhAnhSanPhams.AddAsync(img);
+        //        await _context.SaveChangesAsync();
+        //        return _response.SetSuccess("Thêm hình ảnh thành công");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return _response.SetFail("Có lỗi khi thêm hình ảnh", 500);
+        //    }
+        //}
 
-        public async Task<ResponseMessageResult> DeleteImageAsync(int id)
-        {
-            try
-            {
-                var img = await _context.HinhAnhSanPhams.FindAsync(id);
-                if (img == null)
-                    return _response.SetFail("Hình ảnh không tồn tại", 404);
+        //public async Task<ResponseMessageResult> DeleteImageAsync(int id)
+        //{
+        //    try
+        //    {
+        //        var img = await _context.HinhAnhSanPhams.FindAsync(id);
+        //        if (img == null)
+        //            return _response.SetFail("Hình ảnh không tồn tại", 404);
 
-                _context.HinhAnhSanPhams.Remove(img);
-                await _context.SaveChangesAsync();
-                return _response.SetSuccess("Xóa hình ảnh thành công");
-            }
-            catch (Exception)
-            {
-                return _response.SetFail("Có lỗi khi xóa hình ảnh", 500);
-            }
-        }
+        //        _context.HinhAnhSanPhams.Remove(img);
+        //        await _context.SaveChangesAsync();
+        //        return _response.SetSuccess("Xóa hình ảnh thành công");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return _response.SetFail("Có lỗi khi xóa hình ảnh", 500);
+        //    }
+        //}
 
         public async Task<ResponseMessageResult> PatchAsync(string id, SanPhamDTO dto)
         {
@@ -390,21 +443,6 @@ namespace FashionStore.Repositories.Implementations
                         await _context.SanPhamBienThes.AddRangeAsync(newBienThes);
                     }
 
-                    // Xử lý hình ảnh
-                    if (dto.HinhAnhs != null && dto.HinhAnhs.Any())
-                    {
-                        _context.HinhAnhSanPhams.RemoveRange(sp.HinhAnhSanPhams);
-
-                        var newImages = dto.HinhAnhs
-                            .Where(h => !string.IsNullOrWhiteSpace(h.DuongDan))
-                            .Select(h => new HinhAnhSanPham
-                            {
-                                Ma_SanPham = sp.Ma_SanPham,
-                                DuongDan = h.DuongDan.Trim()
-                            });
-
-                        await _context.HinhAnhSanPhams.AddRangeAsync(newImages);
-                    }
 
                     _context.SanPhams.Update(sp);
                     await _context.SaveChangesAsync();
@@ -534,13 +572,14 @@ namespace FashionStore.Repositories.Implementations
                         p.Mo_Ta,
                         p.Trang_Thai,
                         DanhMuc = p.DanhMuc!.Ten_DanhMuc,
-                        HinhAnh = p.HinhAnhSanPhams.Select(h => h.DuongDan).ToList(),
+                      
 
                         // giá thấp nhất trong biến thể
                         GiaThapNhat = p.BienThes.Any() ? p.BienThes.Min(b => b.Gia_BienThe) : 0,
                         BienThes = p.BienThes.Select(b => new {
                             b.Id,
                             b.Mau_Sac,
+                            b.HinhAnh,
                             b.Kich_Thuoc,
                             b.So_Luong,
                             b.Gia_BienThe,

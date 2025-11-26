@@ -17,9 +17,9 @@ namespace FashionStore.Controllers
         }
 
         [HttpGet("view")]
-        public async Task<IActionResult> GetCart(int maTaiKhoan)
+        public async Task<IActionResult> GetCart(int maKhachHang)
         {
-            var result = await _gioHangRepo.GetCartAsync(maTaiKhoan);
+            var result = await _gioHangRepo.GetCartAsync(maKhachHang);
             return StatusCode(result.StatusCode, result);
         }
 

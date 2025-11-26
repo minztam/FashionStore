@@ -61,6 +61,16 @@ namespace FashionStore.Controllers
                         Trang = "/staff/dashboard"
                     };
                     break;
+                case "Shipper":
+                    userResponse = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        VaiTro = "Shipper",
+                        Trang = "/shipper"
+                    };
+                    break;
+
                 case "Nhân viên kho":
                     userResponse = new
                     {
@@ -76,6 +86,7 @@ namespace FashionStore.Controllers
                     {
                         taiKhoan.Ma_TaiKhoan,
                         taiKhoan.Ten_DangNhap,
+                        taiKhoan.KhachHang?.Ma_KhachHang,
                         VaiTro = "KhachHang",
                         Trang = "/"
                     };

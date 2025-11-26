@@ -9,12 +9,14 @@ namespace FashionStore.Models
         [Key]
         public int Id { get; set; }
         public string Ma_SanPham { get; set; } = null!;
+        public string? HinhAnh { get; set; }
         public string Mau_Sac { get; set; } = null!;
         public string Kich_Thuoc { get; set; } = null!;
         public int So_Luong { get; set; }
         public decimal Gia_BienThe { get; set; }
         public decimal? Gia_Giam { get; set; } // giá sau khi giảm (optional)
         public int? PhanTramGiam { get; set; } // giảm %
+        public bool Trang_Thai { get; set; } = true;
 
         // Navigation property
         [ForeignKey("Ma_SanPham")]

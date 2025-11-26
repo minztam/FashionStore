@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251126105425_xoahinhanh")]
+    partial class xoahinhanh
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +49,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietDonHang", (string)null);
+                    b.ToTable("ChiTietDonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.ChiTietGioHang", b =>
@@ -69,7 +72,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietGioHang", (string)null);
+                    b.ToTable("ChiTietGioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.DanhMuc", b =>
@@ -91,7 +94,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_DanhMucCha");
 
-                    b.ToTable("DanhMuc", (string)null);
+                    b.ToTable("DanhMuc");
 
                     b.HasData(
                         new
@@ -166,7 +169,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_KhachHang");
 
-                    b.ToTable("DiaChiGiaoHangs", (string)null);
+                    b.ToTable("DiaChiGiaoHangs");
                 });
 
             modelBuilder.Entity("FashionStore.Models.DonHang", b =>
@@ -211,7 +214,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_Voucher");
 
-                    b.ToTable("DonHang", (string)null);
+                    b.ToTable("DonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.GioHang", b =>
@@ -230,7 +233,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_KhachHang")
                         .IsUnique();
 
-                    b.ToTable("GioHang", (string)null);
+                    b.ToTable("GioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.HinhAnhSanPham", b =>
@@ -251,7 +254,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("HinhAnhSanPham", (string)null);
+                    b.ToTable("HinhAnhSanPham");
                 });
 
             modelBuilder.Entity("FashionStore.Models.KhachHang", b =>
@@ -283,7 +286,7 @@ namespace FashionStore.Migrations
                         .IsUnique()
                         .HasFilter("[Ma_TaiKhoan] IS NOT NULL");
 
-                    b.ToTable("KhachHang", (string)null);
+                    b.ToTable("KhachHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.NhanVien", b =>
@@ -314,7 +317,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_TaiKhoan")
                         .IsUnique();
 
-                    b.ToTable("NhanVien", (string)null);
+                    b.ToTable("NhanVien");
                 });
 
             modelBuilder.Entity("FashionStore.Models.PhuongThucThanhToan", b =>
@@ -331,7 +334,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_PhuongThuc");
 
-                    b.ToTable("PhuongThucThanhToans", (string)null);
+                    b.ToTable("PhuongThucThanhToans");
 
                     b.HasData(
                         new
@@ -374,7 +377,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_DanhMuc");
 
-                    b.ToTable("SanPham", (string)null);
+                    b.ToTable("SanPham");
 
                     b.HasData(
                         new
@@ -469,7 +472,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("SanPhamBienThe", (string)null);
+                    b.ToTable("SanPhamBienThe");
 
                     b.HasData(
                         new
@@ -699,7 +702,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_TaiKhoan")
                         .IsUnique();
 
-                    b.ToTable("Shippers", (string)null);
+                    b.ToTable("Shippers");
                 });
 
             modelBuilder.Entity("FashionStore.Models.TaiKhoan", b =>
@@ -744,7 +747,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_VaiTro");
 
-                    b.ToTable("TaiKhoan", (string)null);
+                    b.ToTable("TaiKhoan");
                 });
 
             modelBuilder.Entity("FashionStore.Models.VaiTro", b =>
@@ -758,7 +761,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_VaiTro");
 
-                    b.ToTable("VaiTro", (string)null);
+                    b.ToTable("VaiTro");
 
                     b.HasData(
                         new
@@ -816,7 +819,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_Voucher");
 
-                    b.ToTable("Vouchers", (string)null);
+                    b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("FashionStore.Models.ChiTietDonHang", b =>

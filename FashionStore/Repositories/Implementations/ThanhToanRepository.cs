@@ -107,7 +107,7 @@ namespace FashionStore.Repositories.Implementations
                         So_Luong = item.So_Luong,
                         DonGia = giaBan,
                         ThanhTien = giaBan * item.So_Luong,
-                        Hinh_Anh = item.BienThe.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan ?? ""
+                        Hinh_Anh = item.BienThe.HinhAnh ?? "không có hình ảnh "
                     });
                 }
 
@@ -353,7 +353,7 @@ namespace FashionStore.Repositories.Implementations
                     {
                         Ma_SanPham = ct.Ma_SanPham,
                         Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                        Hinh_Anh = ct.SanPham?.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
+                        Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
                         Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
                         Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
                         So_Luong = ct.So_Luong,

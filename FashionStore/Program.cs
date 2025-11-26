@@ -93,6 +93,8 @@ namespace FashionStore
             builder.Services.AddScoped<IVnPayService, VnPayService>();
             builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
             builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
+            builder.Services.AddScoped<IShipperRepository, ShipperRepository>();
+
             builder.Services.AddScoped<IDiaChiGiaoHangRepository, DiaChiGiaoHangRepository>();
 
             builder.Services.AddHttpContextAccessor();

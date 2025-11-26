@@ -243,6 +243,7 @@ namespace FashionStore.Repositories.Implementations
         {
             return await _context.TaiKhoans 
                 .Include(t => t.VaiTro)
+                .Include(kh=>kh.KhachHang)
                 .FirstOrDefaultAsync(t => t.Ten_DangNhap == username && t.Mat_Khau == password);
         }
 
@@ -419,6 +420,51 @@ namespace FashionStore.Repositories.Implementations
 
             return taiKhoan;
 
+        }
+
+        public async Task<TaiKhoan?> RegisterShipperAsync(RegisterDTO dto)
+        {
+            // Kiểm tra trùng username
+            if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
+                return null;
+
+            // Kiểm tra trùng email
+            if (await _context.TaiKhoans.AnyAsync(x => x.Email == dto.Email))
+                return null;
+
+            if (string.IsNullOrWhiteSpace(dto.Mat_Khau))
+                return null;
+
+            // Hash mật khẩu
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Mat_Khau);
+
+            // Tạo token xác thực
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            // Tạo tài khoản
+            var taiKhoan = new TaiKhoan
+            {
+                Ten_DangNhap = dto.Ten_DangNhap,
+                Email = dto.Email,
+                Mat_Khau = dto.Mat_Khau,
+                Ma_VaiTro = "3333-3333-3333-3333", // shipper
+                Ma_XacThuc = token,
+                Han_XacThuc = DateTime.UtcNow.AddDays(1)
+            };
+
+            _context.TaiKhoans.Add(taiKhoan);
+            await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
+
+            // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
+            var sp = new Shipper
+            {
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+            };
+
+            _context.Shippers.Add(sp);
+            await _context.SaveChangesAsync();
+
+            return taiKhoan;
         }
     }
 }

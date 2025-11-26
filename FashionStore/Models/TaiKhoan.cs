@@ -27,5 +27,6 @@ namespace FashionStore.Models
         public NhanVien? NhanVien { get; set; }
         [JsonIgnore]
         public KhachHang? KhachHang { get; set; }
+        public Shipper? Shipper { get; set; }
     }
 }

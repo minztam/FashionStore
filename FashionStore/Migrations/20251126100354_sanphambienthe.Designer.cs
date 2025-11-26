@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251126100354_sanphambienthe")]
+    partial class sanphambienthe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +49,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietDonHang", (string)null);
+                    b.ToTable("ChiTietDonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.ChiTietGioHang", b =>
@@ -69,7 +72,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("ChiTietGioHang", (string)null);
+                    b.ToTable("ChiTietGioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.DanhMuc", b =>
@@ -91,7 +94,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_DanhMucCha");
 
-                    b.ToTable("DanhMuc", (string)null);
+                    b.ToTable("DanhMuc");
 
                     b.HasData(
                         new
@@ -166,7 +169,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_KhachHang");
 
-                    b.ToTable("DiaChiGiaoHangs", (string)null);
+                    b.ToTable("DiaChiGiaoHangs");
                 });
 
             modelBuilder.Entity("FashionStore.Models.DonHang", b =>
@@ -211,7 +214,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_Voucher");
 
-                    b.ToTable("DonHang", (string)null);
+                    b.ToTable("DonHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.GioHang", b =>
@@ -230,7 +233,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_KhachHang")
                         .IsUnique();
 
-                    b.ToTable("GioHang", (string)null);
+                    b.ToTable("GioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.HinhAnhSanPham", b =>
@@ -251,7 +254,135 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("HinhAnhSanPham", (string)null);
+                    b.ToTable("HinhAnhSanPham");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_HinhAnh = 1,
+                            DuongDan = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 2,
+                            DuongDan = "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 3,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 4,
+                            DuongDan = "https://images.unsplash.com/photo-1617114919317-8f6dce8e9df5?w=800",
+                            Ma_SanPham = "SP001"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 5,
+                            DuongDan = "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 6,
+                            DuongDan = "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 7,
+                            DuongDan = "https://images.unsplash.com/photo-1550616541-96cf6efa3c5e?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 8,
+                            DuongDan = "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800",
+                            Ma_SanPham = "SP002"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 9,
+                            DuongDan = "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 10,
+                            DuongDan = "https://images.unsplash.com/photo-1602293589930-45aad59ba3e4?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 11,
+                            DuongDan = "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800",
+                            Ma_SanPham = "SP003"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 12,
+                            DuongDan = "https://images.unsplash.com/photo-1611318440154-8f60a0b9f512?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 13,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 14,
+                            DuongDan = "https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?w=800",
+                            Ma_SanPham = "SP004"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 15,
+                            DuongDan = "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 16,
+                            DuongDan = "https://images.unsplash.com/photo-1612902376491-7a8a9b42425f?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 17,
+                            DuongDan = "https://images.unsplash.com/photo-1622473596033-9d8d1e7e6a5a?w=800",
+                            Ma_SanPham = "SP005"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 18,
+                            DuongDan = "https://images.unsplash.com/photo-1551029506-0807df4e2031?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 19,
+                            DuongDan = "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 20,
+                            DuongDan = "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800",
+                            Ma_SanPham = "SP006"
+                        },
+                        new
+                        {
+                            Ma_HinhAnh = 21,
+                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
+                            Ma_SanPham = "SP006"
+                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.KhachHang", b =>
@@ -283,7 +414,7 @@ namespace FashionStore.Migrations
                         .IsUnique()
                         .HasFilter("[Ma_TaiKhoan] IS NOT NULL");
 
-                    b.ToTable("KhachHang", (string)null);
+                    b.ToTable("KhachHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.NhanVien", b =>
@@ -314,7 +445,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_TaiKhoan")
                         .IsUnique();
 
-                    b.ToTable("NhanVien", (string)null);
+                    b.ToTable("NhanVien");
                 });
 
             modelBuilder.Entity("FashionStore.Models.PhuongThucThanhToan", b =>
@@ -331,7 +462,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_PhuongThuc");
 
-                    b.ToTable("PhuongThucThanhToans", (string)null);
+                    b.ToTable("PhuongThucThanhToans");
 
                     b.HasData(
                         new
@@ -374,7 +505,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_DanhMuc");
 
-                    b.ToTable("SanPham", (string)null);
+                    b.ToTable("SanPham");
 
                     b.HasData(
                         new
@@ -462,14 +593,11 @@ namespace FashionStore.Migrations
                     b.Property<int>("So_Luong")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Trang_Thai")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Ma_SanPham");
 
-                    b.ToTable("SanPhamBienThe", (string)null);
+                    b.ToTable("SanPhamBienThe");
 
                     b.HasData(
                         new
@@ -482,8 +610,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP001",
                             Mau_Sac = "Trắng",
                             PhanTramGiam = 11,
-                            So_Luong = 80,
-                            Trang_Thai = true
+                            So_Luong = 80
                         },
                         new
                         {
@@ -495,8 +622,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP001",
                             Mau_Sac = "Trắng",
                             PhanTramGiam = 11,
-                            So_Luong = 100,
-                            Trang_Thai = true
+                            So_Luong = 100
                         },
                         new
                         {
@@ -508,8 +634,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP001",
                             Mau_Sac = "Xanh Navy",
                             PhanTramGiam = 11,
-                            So_Luong = 60,
-                            Trang_Thai = true
+                            So_Luong = 60
                         },
                         new
                         {
@@ -519,8 +644,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP002",
                             Mau_Sac = "Vàng Nhạt",
-                            So_Luong = 40,
-                            Trang_Thai = true
+                            So_Luong = 40
                         },
                         new
                         {
@@ -530,8 +654,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP002",
                             Mau_Sac = "Vàng Nhạt",
-                            So_Luong = 55,
-                            Trang_Thai = true
+                            So_Luong = 55
                         },
                         new
                         {
@@ -543,8 +666,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP002",
                             Mau_Sac = "Xanh Mint",
                             PhanTramGiam = 10,
-                            So_Luong = 35,
-                            Trang_Thai = true
+                            So_Luong = 35
                         },
                         new
                         {
@@ -556,8 +678,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP003",
                             Mau_Sac = "Đen",
                             PhanTramGiam = 15,
-                            So_Luong = 70,
-                            Trang_Thai = true
+                            So_Luong = 70
                         },
                         new
                         {
@@ -568,8 +689,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "30",
                             Ma_SanPham = "SP003",
                             Mau_Sac = "Đen",
-                            So_Luong = 90,
-                            Trang_Thai = true
+                            So_Luong = 90
                         },
                         new
                         {
@@ -579,8 +699,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "31",
                             Ma_SanPham = "SP003",
                             Mau_Sac = "Xanh Đậm",
-                            So_Luong = 50,
-                            Trang_Thai = true
+                            So_Luong = 50
                         },
                         new
                         {
@@ -592,8 +711,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP004",
                             Mau_Sac = "Be",
                             PhanTramGiam = 15,
-                            So_Luong = 120,
-                            Trang_Thai = true
+                            So_Luong = 120
                         },
                         new
                         {
@@ -603,8 +721,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "Freesize",
                             Ma_SanPham = "SP004",
                             Mau_Sac = "Đỏ Rượu",
-                            So_Luong = 80,
-                            Trang_Thai = true
+                            So_Luong = 80
                         },
                         new
                         {
@@ -616,8 +733,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP005",
                             Mau_Sac = "Trắng Kẻ Xanh",
                             PhanTramGiam = 13,
-                            So_Luong = 100,
-                            Trang_Thai = true
+                            So_Luong = 100
                         },
                         new
                         {
@@ -629,8 +745,7 @@ namespace FashionStore.Migrations
                             Ma_SanPham = "SP006",
                             Mau_Sac = "Xanh Rêu",
                             PhanTramGiam = 14,
-                            So_Luong = 60,
-                            Trang_Thai = true
+                            So_Luong = 60
                         },
                         new
                         {
@@ -641,8 +756,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP006",
                             Mau_Sac = "Xanh Rêu",
-                            So_Luong = 80,
-                            Trang_Thai = true
+                            So_Luong = 80
                         },
                         new
                         {
@@ -652,8 +766,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP006",
                             Mau_Sac = "Đen",
-                            So_Luong = 45,
-                            Trang_Thai = true
+                            So_Luong = 45
                         },
                         new
                         {
@@ -663,8 +776,7 @@ namespace FashionStore.Migrations
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP006",
                             Mau_Sac = "Be",
-                            So_Luong = 55,
-                            Trang_Thai = true
+                            So_Luong = 55
                         });
                 });
 
@@ -699,7 +811,7 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_TaiKhoan")
                         .IsUnique();
 
-                    b.ToTable("Shippers", (string)null);
+                    b.ToTable("Shippers");
                 });
 
             modelBuilder.Entity("FashionStore.Models.TaiKhoan", b =>
@@ -744,7 +856,7 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_VaiTro");
 
-                    b.ToTable("TaiKhoan", (string)null);
+                    b.ToTable("TaiKhoan");
                 });
 
             modelBuilder.Entity("FashionStore.Models.VaiTro", b =>
@@ -758,7 +870,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_VaiTro");
 
-                    b.ToTable("VaiTro", (string)null);
+                    b.ToTable("VaiTro");
 
                     b.HasData(
                         new
@@ -816,7 +928,7 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_Voucher");
 
-                    b.ToTable("Vouchers", (string)null);
+                    b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("FashionStore.Models.ChiTietDonHang", b =>
@@ -949,7 +1061,8 @@ namespace FashionStore.Migrations
                 {
                     b.HasOne("FashionStore.Models.SanPham", "SanPham")
                         .WithMany("HinhAnhSanPhams")
-                        .HasForeignKey("Ma_SanPham");
+                        .HasForeignKey("Ma_SanPham")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("SanPham");
                 });

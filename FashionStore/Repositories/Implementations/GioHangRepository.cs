@@ -55,7 +55,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                    Hinh_Anh = ct.SanPham?.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
+                    Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
                     Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
                     Gia_Goc = ct.BienThe!.Gia_BienThe,
@@ -146,7 +146,7 @@ namespace FashionStore.Repositories.Implementations
                     {
                         Ma_SanPham = ct.Ma_SanPham,
                         Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                        Hinh_Anh = ct.SanPham?.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
+                        Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
                         Mau_Sac = bienTheCt.Mau_Sac,
                         Kich_Thuoc = bienTheCt.Kich_Thuoc,
                         Gia_Goc = giaGoc,
@@ -214,7 +214,7 @@ namespace FashionStore.Repositories.Implementations
                     {
                         Ma_SanPham = ct.Ma_SanPham,
                         Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                        Hinh_Anh = ct.SanPham?.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
+                        Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
                         Mau_Sac = bienTheCt.Mau_Sac,
                         Kich_Thuoc = bienTheCt.Kich_Thuoc,
                         Gia_Goc = giaGoc,
