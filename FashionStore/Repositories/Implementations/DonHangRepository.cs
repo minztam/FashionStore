@@ -28,10 +28,9 @@ namespace FashionStore.Repositories.Implementations
         {
             var donHangs = await _context.DonHangs
                 .Include(d => d.ChiTietDonHangs)
-                    .ThenInclude(ct => ct.SanPham)
-                        .ThenInclude(sp => sp!.HinhAnhSanPhams)
+                .ThenInclude(ct => ct.SanPham)
                 .Include(d => d.ChiTietDonHangs)
-                    .ThenInclude(ct => ct.BienThe)
+                .ThenInclude(ct => ct.BienThe)
                 .Include(d => d.PhuongThucThanhToan)
                 .Include(d => d.DiaChiGiaoHang) // <-- include DiaChi
                 .ToListAsync();
@@ -43,7 +42,6 @@ namespace FashionStore.Repositories.Implementations
                 Ngay_Dat = dh.Ngay_Dat,
                 Tong_Tien = dh.Tong_Tien,
                 Trang_Thai = dh.Trang_Thai,
-                Ma_PhuongThuc = dh.Ma_PhuongThuc,
                 Ten_PhuongThuc = dh.PhuongThucThanhToan?.Ten_PhuongThuc,
                 Ma_Voucher = dh.Ma_Voucher,
                 DiaChi = dh.DiaChiGiaoHang ,
@@ -92,7 +90,6 @@ namespace FashionStore.Repositories.Implementations
                 Ngay_Dat = donHang.Ngay_Dat,
                 Tong_Tien = donHang.Tong_Tien,
                 Trang_Thai = donHang.Trang_Thai,
-                Ma_PhuongThuc = donHang.Ma_PhuongThuc,
                 Ten_PhuongThuc = donHang.PhuongThucThanhToan?.Ten_PhuongThuc ?? "Chưa xác định",
                 Ma_Voucher = donHang.Ma_Voucher,
                 DiaChi=donHang.DiaChiGiaoHang,
@@ -466,18 +463,7 @@ namespace FashionStore.Repositories.Implementations
 
                 donHang.Trang_Thai = trangThaiMoi;
 
-                // Nếu đơn có shipper, cập nhật trạng thái shipper
-                if (donHang.Ma_Shipper.HasValue)
-                {
-                    var shipper = await _context.Shippers.FindAsync(donHang.Ma_Shipper.Value);
-                    if (shipper != null)
-                    {
-                        if (trangThaiMoi == "Đang giao")
-                            shipper.TrangThai = "Đang giao"; // Ship bận
-                        else if (trangThaiMoi == "Đã giao" || trangThaiMoi == "Đã hủy")
-                            shipper.TrangThai = "online"; // Ship rảnh trở lại
-                    }
-                }
+            
 
                 await _context.SaveChangesAsync();
 
@@ -818,12 +804,14 @@ namespace FashionStore.Repositories.Implementations
                     .Where(d => d.Ma_Shipper == maShipper && d.Trang_Thai== "Đang chờ shipper tới nhận hàng" ||d.Trang_Thai=="Đang giao" || d.Trang_Thai=="Đã giao")
                     .OrderByDescending(d => d.Ngay_Dat)
                       .Include(d => d.DiaChiGiaoHang)
+                      .Include(pt=>pt.PhuongThucThanhToan)
                     .Select(d => new
                     {
                         d.Ma_DonHang,
                         d.Ngay_Dat,
                         d.Tong_Tien,
                         d.Trang_Thai,
+                        d.PhuongThucThanhToan.Ten_PhuongThuc,
                         d.DiaChiGiaoHang,
                         ChiTiet = d.ChiTietDonHangs.Select(ct => new
                         {
