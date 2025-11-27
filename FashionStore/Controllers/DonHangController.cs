@@ -1,4 +1,5 @@
 ﻿using FashionStore.DTO;
+using FashionStore.Models;
 using FashionStore.Repositories.Implementations;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Repositories.ResponseMessage;
@@ -66,7 +67,12 @@ namespace FashionStore.Controllers
             var result = await _donHangRepo.GetDonHangByKhachHangAsync(maKhachHang);
             return StatusCode(result.StatusCode, result);
         }
-
+        [HttpGet("shipper/{maShipper}")]
+        public async Task<IActionResult> GetDonHangShipper(int maShipper)
+        {
+            var result = await _donHangRepo.GetDonHangByShipperAsync(maShipper);
+            return StatusCode(result.StatusCode, result);
+        }
         [HttpPatch("cap-nhat-trang-thai")]
         public async Task<IActionResult> CapNhatTrangThai([FromQuery] string maDonHang, [FromQuery] string trangThaiMoi)
         {
@@ -79,6 +85,19 @@ namespace FashionStore.Controllers
         {
             var html = await _donHangRepo.GenerateInvoiceHtmlAsync(maDonHang);
             return Content(html, "text/html", Encoding.UTF8);
+        }
+        [HttpPost("gan-shipper-random/{maDonHang}")]
+        public async Task<IActionResult> GanDonHangChoShipperRandom([FromRoute] string maDonHang)
+        {
+            if (string.IsNullOrEmpty(maDonHang))
+                return BadRequest(new ResponseMessageResult().SetFail("Mã đơn hàng không hợp lệ!", 400));
+
+            var result = await _donHangRepo.GanDonHangChoShipperAsync(maDonHang);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, result);
+
+            return Ok(result);
         }
 
 

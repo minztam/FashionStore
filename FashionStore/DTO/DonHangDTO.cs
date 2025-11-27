@@ -7,6 +7,7 @@ namespace FashionStore.DTO
         public string? Ma_DonHang { get; set; }
         public int Ma_KhachHang { get; set; }
         public int Ma_DiaChi { get; set; }
+        public int? Ma_Shipper { get; set; }
         public DateTime Ngay_Dat { get; set; }
         public decimal Tong_Tien { get; set; }
         public string Trang_Thai { get; set; } = string.Empty;

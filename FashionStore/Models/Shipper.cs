@@ -13,7 +13,7 @@ namespace FashionStore.Models
         public string? SoDienThoai { get; set; }
         public string? BienSoXe { get; set; }
 
-        public bool TrangThai { get; set; } = true;
+        public string? TrangThai { get; set; } 
 
         // Navigation
         public TaiKhoan TaiKhoan { get; set; } = null!;

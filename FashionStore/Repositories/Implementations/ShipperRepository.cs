@@ -105,7 +105,7 @@ namespace FashionStore.Repositories.Implementations
                     Ten_DayDu = dto.Ten_DayDu,
                     SoDienThoai = dto.SoDienThoai,
                     BienSoXe = dto.BienSoXe,
-                    TrangThai = true
+                    TrangThai = "offline"
                 };
 
                 await _context.Shippers.AddAsync(shipper);
@@ -182,17 +182,19 @@ namespace FashionStore.Repositories.Implementations
                 if (shipper == null)
                     return _response.SetFail("Không tìm thấy shipper", 404);
 
-                shipper.TrangThai = !shipper.TrangThai;
+                // Toggle trạng thái
+                shipper.TrangThai = shipper.TrangThai == "online" ? "offline" : "online";
                 await _context.SaveChangesAsync();
 
-                return _response.SetSuccess(
-                    shipper.TrangThai ? "Kích hoạt shipper" : "Vô hiệu hóa shipper"
-                );
+                string message = shipper.TrangThai == "online" ? "Kích hoạt shipper" : "Vô hiệu hóa shipper";
+                return _response.SetSuccess(message);
             }
             catch
             {
                 return _response.SetFail("Có lỗi khi đổi trạng thái shipper", 500);
             }
         }
+
     }
 }
+

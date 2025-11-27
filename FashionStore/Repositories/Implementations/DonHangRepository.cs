@@ -47,6 +47,7 @@ namespace FashionStore.Repositories.Implementations
                 Ten_PhuongThuc = dh.PhuongThucThanhToan?.Ten_PhuongThuc,
                 Ma_Voucher = dh.Ma_Voucher,
                 DiaChi = dh.DiaChiGiaoHang ,
+                Ma_Shipper = dh.Ma_Shipper,
                 ChiTiet = dh.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
                     Ma_SanPham = ct.Ma_SanPham,
@@ -459,12 +460,25 @@ namespace FashionStore.Repositories.Implementations
                 if (donHang == null)
                     return _response.SetFail("Đơn hàng không tồn tại!", 404);
 
-                // Kiểm tra trạng thái hiện tại, ví dụ:
                 // Không cho cập nhật nếu đơn đã giao hoặc đã hủy
                 if (donHang.Trang_Thai == "Đã giao" || donHang.Trang_Thai == "Đã hủy")
                     return _response.SetFail($"Không thể cập nhật trạng thái đơn hàng đã '{donHang.Trang_Thai}'!", 400);
 
                 donHang.Trang_Thai = trangThaiMoi;
+
+                // Nếu đơn có shipper, cập nhật trạng thái shipper
+                if (donHang.Ma_Shipper.HasValue)
+                {
+                    var shipper = await _context.Shippers.FindAsync(donHang.Ma_Shipper.Value);
+                    if (shipper != null)
+                    {
+                        if (trangThaiMoi == "Đang giao")
+                            shipper.TrangThai = "Đang giao"; // Ship bận
+                        else if (trangThaiMoi == "Đã giao" || trangThaiMoi == "Đã hủy")
+                            shipper.TrangThai = "online"; // Ship rảnh trở lại
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 return _response.SetSuccess("Cập nhật trạng thái thành công!", new
@@ -478,6 +492,7 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi cập nhật trạng thái: " + ex.Message, 500);
             }
         }
+
         public async Task<DonHang?> GetDonHangForInvoiceAsync(string maDonHang)
         {
             return await _context.DonHangs
@@ -491,6 +506,36 @@ namespace FashionStore.Repositories.Implementations
                     .ThenInclude(ct => ct.BienThe!)
                 .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
         }
+        public async Task<ResponseMessageResult> GanDonHangChoShipperAsync( string maDonHang)
+        {
+            // 1️⃣ Lấy đơn hàng
+            var donHang = await _context.DonHangs.FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
+            if (donHang == null)
+                return _response.SetFail("Đơn hàng không tồn tại", 404);
+
+            // 2️⃣ Lấy danh sách shipper khả dụng
+            var availableShippers = await _context.Shippers
+                .Where(s => s.TrangThai == "online") // trạng thái shipper khả dụng
+                .ToListAsync();
+
+            if (!availableShippers.Any())
+                return _response.SetFail("Hiện không có shipper khả dụng", 404);
+
+            // 3️⃣ Random 1 shipper từ danh sách khả dụng
+            var random = new Random();
+            var shipper = availableShippers[random.Next(availableShippers.Count)];
+
+            // 4️⃣ Gán shipper vào đơn hàng
+            donHang.Ma_Shipper = shipper.Ma_Shipper;
+            donHang.Trang_Thai = "Đang chờ shipper tới nhận hàng";
+
+            await _context.SaveChangesAsync();
+
+            return _response.SetSuccess($"Đơn hàng {maDonHang} đã được gán cho shipper {shipper.Ten_DayDu}, biển số xe shipper là {shipper.BienSoXe} với số điện thoại là {shipper.SoDienThoai}");
+
+        }
+
+
         public async Task<string> GenerateInvoiceHtmlAsync(string maDonHang)
         {
             var donHang = await GetDonHangForInvoiceAsync(maDonHang);
@@ -763,6 +808,44 @@ namespace FashionStore.Repositories.Implementations
             }).Take(20).ToListAsync();
 
             return _response.SetSuccess("Tìm khách hàng thành công!", result);
+        }
+
+        public async Task<ResponseMessageResult> GetDonHangByShipperAsync(int maShipper)
+        {
+            try
+            {
+                var donHangs = await _context.DonHangs
+                    .Where(d => d.Ma_Shipper == maShipper && d.Trang_Thai== "Đang chờ shipper tới nhận hàng" ||d.Trang_Thai=="Đang giao" || d.Trang_Thai=="Đã giao")
+                    .OrderByDescending(d => d.Ngay_Dat)
+                      .Include(d => d.DiaChiGiaoHang)
+                    .Select(d => new
+                    {
+                        d.Ma_DonHang,
+                        d.Ngay_Dat,
+                        d.Tong_Tien,
+                        d.Trang_Thai,
+                        d.DiaChiGiaoHang,
+                        ChiTiet = d.ChiTietDonHangs.Select(ct => new
+                        {
+                            ct.Ma_SanPham,
+                            ct.Ma_BienThe,
+                            ct.So_Luong,
+                            ct.DonGia,
+                            Ten_SanPham = ct.SanPham!.Ten_SanPham,
+                            HinhAnh = ct.BienThe.HinhAnh
+                                ?? "/images/no-image.jpg",
+                            Mau_Sac = ct.BienThe.Mau_Sac,
+                            Kich_Thuoc = ct.BienThe.Kich_Thuoc
+                        }).ToList()
+                    })
+                    .ToListAsync();
+
+                return _response.SetSuccess("Lấy danh sách đơn hàng thành công!", donHangs);
+            }
+            catch (Exception ex)
+            {
+                return _response.SetFail("Lỗi khi lấy danh sách đơn hàng: " + ex.Message, 500);
+            }
         }
 
         // 4. LỊCH SỬ TRẠNG THÁI ĐƠN HÀNG
