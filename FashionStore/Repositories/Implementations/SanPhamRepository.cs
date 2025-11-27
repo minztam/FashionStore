@@ -205,65 +205,92 @@ namespace FashionStore.Repositories.Implementations
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1️⃣ Lấy sản phẩm và các biến thể
+                // 1️⃣ Load sản phẩm + biến thể
                 var sanPham = await _context.SanPhams
-                    .Include(sp => sp.BienThes)
-                    .FirstOrDefaultAsync(sp => sp.Ma_SanPham == maSanPham);
+                    .Include(x => x.BienThes)
+                    .FirstOrDefaultAsync(x => x.Ma_SanPham == maSanPham);
 
                 if (sanPham == null)
                     return _response.SetFail("Sản phẩm không tồn tại", 404);
 
-                // 2️⃣ Cập nhật sản phẩm cha
+                // 2️⃣ Update sản phẩm cha
                 sanPham.Ten_SanPham = dto.Ten_SanPham?.Trim() ?? sanPham.Ten_SanPham;
                 sanPham.Mo_Ta = dto.Mo_Ta?.Trim();
                 sanPham.Ma_DanhMuc = dto.Ma_DanhMuc;
                 sanPham.Trang_Thai = dto.Trang_Thai;
 
-                // 3️⃣ Xử lý biến thể cũ
-                foreach (var oldBt in sanPham.BienThes)
+                // 3️⃣ Xử lý biến thể
+                foreach (var oldBt in sanPham.BienThes.ToList())
                 {
-                    // Kiểm tra biến thể đã bán (chi tiết đơn hàng đã thanh toán)
-                    bool daBan = await _context.ChiTietDonHangs
-                        .AnyAsync(x => x.Ma_BienThe == oldBt.Id && x.DonHang.Trang_Thai != "Pending");
+                    var updatedBtDto = dto.BienThes?.FirstOrDefault(x => x.Id == oldBt.Id);
 
-                    // Kiểm tra biến thể có trong giỏ hàng
-                    bool trongGioHang = await _context.ChiTietGioHangs.AnyAsync(x => x.Ma_BienThe == oldBt.Id);
+                    bool daTungLenDon = await _context.ChiTietDonHangs
+                        .AnyAsync(x => x.Ma_BienThe == oldBt.Id);
 
-                    var updatedBtDto = dto.BienThes?.FirstOrDefault(bt => bt.Id == oldBt.Id);
+                    bool daThanhToan = await _context.ChiTietDonHangs
+                        .AnyAsync(x => x.Ma_BienThe == oldBt.Id &&
+                                       x.DonHang.Trang_Thai == "Completed");
 
-                    if (daBan || trongGioHang)
+                    bool coTrongGioHang = await _context.ChiTietGioHangs
+                        .AnyAsync(x => x.Ma_BienThe == oldBt.Id);
+
+                    // 🔒 CASE 1: ĐÃ THANH TOÁN → KHÓA + CLONE
+                    if (daThanhToan)
                     {
-                        // Biến thể đang dùng → không xóa, chỉ khóa
                         oldBt.Trang_Thai = false;
+
+                        // invalidate cart
+                        await InvalidateCartAsync(oldBt.Id);
 
                         if (updatedBtDto != null)
                         {
-                            oldBt.Mau_Sac = updatedBtDto.Mau_Sac.Trim();
-                            oldBt.Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim();
-                            oldBt.HinhAnh = updatedBtDto.HinhAnh;
-                            oldBt.Gia_BienThe = updatedBtDto.Gia_BienThe;
-                            oldBt.PhanTramGiam = updatedBtDto.PhanTramGiam;
-                            oldBt.Gia_Giam = CalculateGiaGiam(updatedBtDto.Gia_BienThe, updatedBtDto.PhanTramGiam);
+                            await _context.SanPhamBienThes.AddAsync(new SanPhamBienThe
+                            {
+                                Ma_SanPham = maSanPham,
+                                Mau_Sac = updatedBtDto.Mau_Sac.Trim(),
+                                Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim(),
+                                So_Luong = updatedBtDto.So_Luong,
+                                Gia_BienThe = updatedBtDto.Gia_BienThe,
+                                PhanTramGiam = updatedBtDto.PhanTramGiam,
+                                Gia_Giam = CalculateGiaGiam(
+                                    updatedBtDto.Gia_BienThe,
+                                    updatedBtDto.PhanTramGiam),
+                                HinhAnh = updatedBtDto.HinhAnh,
+                                Trang_Thai = true
+                            });
                         }
+
+                        continue;
+                    }
+
+                    // ✅ CASE 2: CHƯA THANH TOÁN
+                    if (updatedBtDto != null)
+                    {
+                        // update trực tiếp (kể cả đang ở giỏ)
+                        oldBt.Mau_Sac = updatedBtDto.Mau_Sac.Trim();
+                        oldBt.Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim();
+                        oldBt.So_Luong = updatedBtDto.So_Luong;
+                        oldBt.Gia_BienThe = updatedBtDto.Gia_BienThe;
+                        oldBt.PhanTramGiam = updatedBtDto.PhanTramGiam;
+                        oldBt.Gia_Giam = CalculateGiaGiam(
+                            updatedBtDto.Gia_BienThe,
+                            updatedBtDto.PhanTramGiam);
+                        oldBt.HinhAnh = updatedBtDto.HinhAnh;
+                        oldBt.Trang_Thai = updatedBtDto.Trang_Thai ?? true;
                     }
                     else
                     {
-                        if (updatedBtDto != null)
+                        // ❌ DTO không gửi biến thể này
+                        if (!daTungLenDon && !coTrongGioHang)
                         {
-                            // Biến thể chưa bán → cập nhật đầy đủ
-                            oldBt.Mau_Sac = updatedBtDto.Mau_Sac.Trim();
-                            oldBt.Kich_Thuoc = updatedBtDto.Kich_Thuoc.Trim();
-                            oldBt.So_Luong = updatedBtDto.So_Luong;
-                            oldBt.Gia_BienThe = updatedBtDto.Gia_BienThe;
-                            oldBt.PhanTramGiam = updatedBtDto.PhanTramGiam;
-                            oldBt.Gia_Giam = CalculateGiaGiam(updatedBtDto.Gia_BienThe, updatedBtDto.PhanTramGiam);
-                            oldBt.HinhAnh = updatedBtDto.HinhAnh;
-                            oldBt.Trang_Thai = updatedBtDto.Trang_Thai ?? true;
+                            // ✅ delete an toàn
+                            _context.SanPhamBienThes.Remove(oldBt);
                         }
                         else
                         {
-                            // Biến thể chưa bán & không còn DTO → xóa
-                            _context.SanPhamBienThes.Remove(oldBt);
+                            // 🔒 Không được delete → khóa
+                            oldBt.Trang_Thai = false;
+                            await InvalidateCartAsync(oldBt.Id);
                         }
                     }
                 }
@@ -272,24 +299,24 @@ namespace FashionStore.Repositories.Implementations
                 if (dto.BienThes != null)
                 {
                     var newBienThes = dto.BienThes
-                        .Where(bt => bt.Id == 0)
-                        .Select(bt => new SanPhamBienThe
+                        .Where(x => x.Id == 0)
+                        .Select(x => new SanPhamBienThe
                         {
                             Ma_SanPham = maSanPham,
-                            Mau_Sac = bt.Mau_Sac.Trim(),
-                            Kich_Thuoc = bt.Kich_Thuoc.Trim(),
-                            So_Luong = bt.So_Luong,
-                            Gia_BienThe = bt.Gia_BienThe,
-                            PhanTramGiam = bt.PhanTramGiam,
-                            Gia_Giam = CalculateGiaGiam(bt.Gia_BienThe, bt.PhanTramGiam),
-                            HinhAnh = bt.HinhAnh,
+                            Mau_Sac = x.Mau_Sac.Trim(),
+                            Kich_Thuoc = x.Kich_Thuoc.Trim(),
+                            So_Luong = x.So_Luong,
+                            Gia_BienThe = x.Gia_BienThe,
+                            PhanTramGiam = x.PhanTramGiam,
+                            Gia_Giam = CalculateGiaGiam(x.Gia_BienThe, x.PhanTramGiam),
+                            HinhAnh = x.HinhAnh,
                             Trang_Thai = true
                         });
 
                     await _context.SanPhamBienThes.AddRangeAsync(newBienThes);
                 }
 
-                // 5️⃣ Lưu thay đổi và commit
+                // 5️⃣ Save
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -298,9 +325,21 @@ namespace FashionStore.Repositories.Implementations
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                Console.WriteLine("❌ UpdateAsync error: " + ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex);
                 return _response.SetFail("Có lỗi khi cập nhật sản phẩm", 500);
+            }
+        }
+
+        private async Task InvalidateCartAsync(int maBienThe)
+        {
+            var carts = await _context.ChiTietGioHangs
+                .Where(x => x.Ma_BienThe == maBienThe && !x.IsInvalid)
+                .ToListAsync();
+
+            foreach (var item in carts)
+            {
+                item.IsInvalid = true;
+                item.InvalidReason = "Sản phẩm đã thay đổi, vui lòng chọn lại";
             }
         }
 

@@ -49,12 +49,11 @@ namespace FashionStore.Controllers
         }
 
         [HttpDelete("{maKhachHang}/remove")]
-        public async Task<IActionResult> RemoveFromCart(int maKhachHang, [FromBody] ChiTietGioHangDTO dto)
+        public async Task<IActionResult> RemoveFromCart(int maKhachHang, string maSanPham,int maBienThe)
         {
-            if (dto == null)
-                return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
+          
 
-            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, dto.Ma_SanPham, dto.Ma_BienThe);
+            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, maSanPham, maBienThe);
 
             if (result.Success)
                 return Ok(result);

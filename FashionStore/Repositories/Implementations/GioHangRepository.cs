@@ -61,7 +61,11 @@ namespace FashionStore.Repositories.Implementations
                     Gia_Goc = ct.BienThe!.Gia_BienThe,
                     Gia_Giam = ct.BienThe.Gia_Giam,
                     So_Luong = ct.So_Luong,
-                    Ma_BienThe = ct.Ma_BienThe
+                    Ma_BienThe = ct.Ma_BienThe,
+                    InvalidReason = ct.InvalidReason,
+                    IsInvalid=ct.IsInvalid,
+                    
+                   
                 })
                 .OrderBy(x => x.Ten_SanPham)
                 .ToList();

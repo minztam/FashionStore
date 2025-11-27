@@ -11,6 +11,8 @@ namespace FashionStore.Models
         public required string Ma_SanPham { get; set; }
         public int Ma_BienThe { get; set; }
         public int So_Luong { get; set; }
+        public bool IsInvalid { get; set; } = false;
+        public string? InvalidReason { get; set; }
 
         // Navigation property
         [ForeignKey("Ma_GioHang")]
