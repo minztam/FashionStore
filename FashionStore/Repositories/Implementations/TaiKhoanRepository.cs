@@ -244,6 +244,7 @@ namespace FashionStore.Repositories.Implementations
             return await _context.TaiKhoans 
                 .Include(t => t.VaiTro)
                 .Include(kh=>kh.KhachHang)
+                .Include(s=>s.Shipper)
                 .FirstOrDefaultAsync(t => t.Ten_DangNhap == username && t.Mat_Khau == password);
         }
 

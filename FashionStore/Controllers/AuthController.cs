@@ -66,6 +66,7 @@ namespace FashionStore.Controllers
                     {
                         taiKhoan.Ma_TaiKhoan,
                         taiKhoan.Ten_DangNhap,
+                        taiKhoan.Shipper?.Ma_Shipper,
                         VaiTro = "Shipper",
                         Trang = "/shipper/dashboard"
                     };
