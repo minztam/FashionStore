@@ -36,10 +36,10 @@ namespace FashionStore.Controllers
         }
 
         // DELETE: api/DiaChiGiaoHang/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{maDiaChi}")]
+        public async Task<IActionResult> Delete(int maDiaChi)
         {
-            var result = await _dmRepo.DeleteAddress(id);
+            var result = await _dmRepo.DeleteAddress(maDiaChi);
             return Ok(result);
         }
     }
