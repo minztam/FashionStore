@@ -29,6 +29,7 @@ namespace FashionStore.Repositories.Implementations
         {
             var entity = new DiaChiGiaoHang
             {
+                IsActive = true,
                 HoTen_NguoiNhan = model.TenNguoiNhan,
                 SoDienThoai = model.SDT,
                 DiaChi_ChiTiet = model.Dia_Chi,
