@@ -15,7 +15,7 @@ namespace FashionStore.Repositories.Interfaces
         Task<TaiKhoan?> LoginAsync(string username, string password);
         Task<TaiKhoan?> RegisterCustomerAsync(RegisterDTO dto);
         Task<TaiKhoan?> RegisterShipperAsync(RegisterDTO dto);
-        Task<TaiKhoan?> RegisterSaleAssistanceAsync(RegisterDTO dto);
+        Task<TaiKhoan?> RegisterEmployeeAsync(SaleRegisterDTO dto);
         Task<TaiKhoan?> RegisterWarehouseAssistanceAsync(RegisterDTO dto);
 
         Task<bool> AssignRoleAsync(int taiKhoanId, string roleId);

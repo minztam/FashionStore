@@ -101,7 +101,6 @@ namespace FashionStore.Repositories.Implementations
             {
                 var shipper = new Shipper
                 {
-                    Ma_TaiKhoan = dto.Ma_TaiKhoan,
                     Ten_DayDu = dto.Ten_DayDu,
                     SoDienThoai = dto.SoDienThoai,
                     BienSoXe = dto.BienSoXe,
@@ -125,27 +124,44 @@ namespace FashionStore.Repositories.Implementations
         // ----------------------------------
         public async Task<ResponseMessageResult> UpdateAsync(int maShipper, ShipperRequestDTO shipper)
         {
+            if (shipper == null)
+                return _response.SetFail("Dữ liệu cập nhật không hợp lệ", 400);
+
             try
             {
                 var existing = await _context.Shippers
                     .FirstOrDefaultAsync(s => s.Ma_Shipper == maShipper);
 
                 if (existing == null)
-                    return _response.SetFail("Không tìm thấy shipper", 404);
+                    return _response.SetFail($"Không tìm thấy shipper với mã {maShipper}", 404);
 
-                existing.Ten_DayDu = shipper.Ten_DayDu;
-                existing.SoDienThoai = shipper.SoDienThoai;
-                existing.BienSoXe = shipper.BienSoXe;
+                // Chỉ cập nhật trường nếu có giá trị (tránh overwrite null)
+                if (!string.IsNullOrWhiteSpace(shipper.Ten_DayDu))
+                    existing.Ten_DayDu = shipper.Ten_DayDu;
+
+                if (!string.IsNullOrWhiteSpace(shipper.SoDienThoai))
+                    existing.SoDienThoai = shipper.SoDienThoai;
+
+                if (!string.IsNullOrWhiteSpace(shipper.BienSoXe))
+                    existing.BienSoXe = shipper.BienSoXe;
+
+                if (shipper.TrangThai != null)
+                    existing.TrangThai = shipper.TrangThai;
 
                 await _context.SaveChangesAsync();
 
                 return _response.SetSuccess("Cập nhật shipper thành công", existing);
             }
-            catch
+            catch (DbUpdateConcurrencyException)
             {
-                return _response.SetFail("Có lỗi khi cập nhật shipper", 500);
+                return _response.SetFail("Dữ liệu đã bị thay đổi bởi người khác. Vui lòng thử lại.", 409);
+            }
+            catch (Exception ex)
+            {
+                return _response.SetFail($"Có lỗi xảy ra: {ex.Message}", 500);
             }
         }
+
 
         // ----------------------------------
         // DELETE

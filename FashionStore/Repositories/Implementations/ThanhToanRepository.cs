@@ -145,6 +145,7 @@ namespace FashionStore.Repositories.Implementations
                     Tong_Tien = tongThanhToan,
                     Trang_Thai = "Chờ xác nhận",
                     Ma_PhuongThuc = 1, // COD
+                    
                     Ma_Voucher = tenVoucher,
                 };
 

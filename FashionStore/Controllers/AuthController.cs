@@ -120,7 +120,7 @@ namespace FashionStore.Controllers
             // Tạo JWT token
             var token = _jwtService.GenerateToken(
                 taiKhoan.Ten_DangNhap,
-                "KhachHang"
+                "Khách hàng"
             );
 
             return Ok(new
@@ -130,6 +130,7 @@ namespace FashionStore.Controllers
                 user = new
                 {
                     taiKhoan.Ma_TaiKhoan,
+                    Ma_KhachHang= taiKhoan.KhachHang.Ma_KhachHang,
                     taiKhoan.Ten_DangNhap,
                     taiKhoan.Email,
                     VaiTro = "KhachHang"
@@ -138,35 +139,51 @@ namespace FashionStore.Controllers
         }
 
         [HttpPost("SaleAssistanceRegistration")]
-        public async Task<IActionResult> SaleAssistanceRegistration([FromBody] RegisterDTO dto)
+        public async Task<IActionResult> EmployeeRegistration([FromBody] SaleRegisterDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Dữ liệu không hợp lệ.");
 
-            var taiKhoan = await _taiKhoanRepo.RegisterSaleAssistanceAsync(dto);
+            var taiKhoan = await _taiKhoanRepo.RegisterEmployeeAsync(dto);
 
             if (taiKhoan == null)
                 return BadRequest("Tên đăng nhập hoặc email đã tồn tại!");
 
-            // Gửi email chào mừng
+            // Gửi mail
             await _emailService.SendWelcomeEmailAsync(dto.Email, dto.Ten_DangNhap);
 
-            // Tạo JWT token
-            var token = _jwtService.GenerateToken(
-                taiKhoan.Ten_DangNhap,
-                "NhanVienBanHang"
-            );
+            // PHÂN NHÁNH THEO VAI TRÒ
+            if (taiKhoan.Ma_VaiTro == "3333-3333-3333-3333") // Shipper
+            {
+                var token = _jwtService.GenerateToken(taiKhoan.Ten_DangNhap, "shipper");
+
+                return Ok(new
+                {
+                    message = "Đăng ký shipper thành công!",
+                    token,
+                    user = new
+                    {
+                        taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.Ten_DangNhap,
+                        taiKhoan.Email,
+                        role = "shipper"
+                    }
+                });
+            }
+
+            // MẶC ĐỊNH: NHÂN VIÊN BÁN HÀNG / SALE ASSISTANT
+            var tokenEmployee = _jwtService.GenerateToken(taiKhoan.Ten_DangNhap, "Nhân viên bán hàng");
 
             return Ok(new
             {
-                message = "Đăng ký thành công!",
-                token,
+                message = "Đăng ký nhân viên thành công!",
+                token = tokenEmployee,
                 user = new
                 {
                     taiKhoan.Ma_TaiKhoan,
                     taiKhoan.Ten_DangNhap,
                     taiKhoan.Email,
-                    VaiTro = "NhanVienBanHang"
+                    role = "Nhân viên bán hàng"
                 }
             });
         }

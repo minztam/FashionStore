@@ -23,6 +23,8 @@ namespace FashionStore.Repositories.Implementations
         {
             var list = await _context.TaiKhoans
                 .Include(t => t.VaiTro)
+                .Include(nv=>nv.NhanVien)
+                .Include(s=>s.Shipper)
                 .ToListAsync();
 
             if (list == null || list.Count == 0)
@@ -38,10 +40,19 @@ namespace FashionStore.Repositories.Implementations
                 t.Email,
                 t.Ngay_Tao,
                 TrangThai = t.Trang_Thai == true ? "Hoạt động" : "Tạm khóa",
-                TenVaiTro = t.VaiTro != null ? t.VaiTro.Ten_VaiTro : "Không xác định",
+                TenVaiTro = t.VaiTro?.Ten_VaiTro ?? "Không xác định",
                 MaVaiTro = t.Ma_VaiTro,
-                t.Da_XacThuc
-            });
+
+                // Ép fullname + phone dựa trên loại tài khoản có dữ liệu
+                HoTen = t.NhanVien?.HoTen ?? t.Shipper?.Ten_DayDu ?? "Chưa cập nhật",
+                SoDienThoai = t.NhanVien?.SoDienThoai ?? t.Shipper?.SoDienThoai ?? "Chưa có",
+                HinhAnh = t.NhanVien?.Hinh_Anh ?? t.Shipper?.HinhAnh,
+                BienSoXe = t.Shipper?.BienSoXe,
+                Da_XacThuc = t.Da_XacThuc
+            }).ToList();
+
+
+
 
             return _response.SetSuccess("Lấy danh sách tài khoản thành công!", result);
         }
@@ -284,7 +295,9 @@ namespace FashionStore.Repositories.Implementations
             // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
             var kh = new KhachHang
             {
-                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                HoTen=dto.HoTen,
+                SoDienThoai=dto.SoDienThoai
             };
 
             _context.KhachHangs.Add(kh);
@@ -332,7 +345,7 @@ namespace FashionStore.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<TaiKhoan?> RegisterSaleAssistanceAsync(RegisterDTO dto)
+        public async Task<TaiKhoan?> RegisterEmployeeAsync(SaleRegisterDTO dto)
         {
             // Kiểm tra trùng username
             if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
@@ -357,7 +370,7 @@ namespace FashionStore.Repositories.Implementations
                 Ten_DangNhap = dto.Ten_DangNhap,
                 Email = dto.Email,
                 Mat_Khau = dto.Mat_Khau,
-                Ma_VaiTro = "1111-2222-1111-2222", // khách hàng
+                Ma_VaiTro = dto?.Ma_VaiTro, // khách hàng
                 Ma_XacThuc = token,
                 Han_XacThuc = DateTime.UtcNow.AddDays(1)
             };
@@ -366,12 +379,33 @@ namespace FashionStore.Repositories.Implementations
             await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
 
             // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
-            var nv = new NhanVien
+            if (dto.Ma_VaiTro == "3333-3333-3333-3333") // SHIPPER
             {
-                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
-            };
+                var shipper = new Shipper
+                {
+                    Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                    Ten_DayDu = dto.HoTen,
+                    BienSoXe = dto.BienSoXe,
+                    SoDienThoai = dto.SoDienThoai,
+                    HinhAnh = dto.Hinh_Anh
+                };
 
-            _context.NhanViens.Add(nv);
+                _context.Shippers.Add(shipper);
+            }
+            else if(dto.Ma_VaiTro == "1111-2222-1111-2222") // SALE / NHÂN VIÊN
+            {
+                var nv = new NhanVien
+                {
+                    Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                    HoTen = dto.HoTen,
+                    DiaChi = dto.DiaChi,
+                    Hinh_Anh = dto.Hinh_Anh,
+                    SoDienThoai = dto.SoDienThoai
+                };
+
+                _context.NhanViens.Add(nv);
+            }
+
             await _context.SaveChangesAsync();
 
             return taiKhoan;
