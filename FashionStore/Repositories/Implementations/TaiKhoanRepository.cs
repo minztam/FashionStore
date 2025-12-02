@@ -63,6 +63,8 @@ namespace FashionStore.Repositories.Implementations
         {
             return (await _context.TaiKhoans
                                     .Include(t => t.VaiTro)
+                                    .Include(nv=>nv.NhanVien)
+                                    .Include(s=>s.Shipper)
                                     .SingleOrDefaultAsync(t => t.Ma_TaiKhoan == maTaiKhoan));
         }
 
@@ -138,48 +140,51 @@ namespace FashionStore.Repositories.Implementations
         }
 
         // Cập nhật toàn bộ thông tin tài khoản
-        public async Task<bool> UpdateAsync(int maTaiKhoan, string? tenDangNhap, string? matKhau, string? maVaiTro, string? email)
+        public async Task UpdateAsync(TaiKhoan taiKhoan)
         {
-            var taiKhoan = await _context.TaiKhoans.FindAsync(maTaiKhoan);
-            if (taiKhoan == null)
-                return false;
+            // Kiểm tra entity đã được attach chưa
+            var existing = await _context.TaiKhoans
+                .Include(t => t.NhanVien)
+                .Include(t => t.Shipper)
+                .FirstOrDefaultAsync(t => t.Ma_TaiKhoan == taiKhoan.Ma_TaiKhoan);
 
-            // Cập nhật tên đăng nhập nếu có truyền vào
-            if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            if (existing == null)
+                throw new Exception("Tài khoản không tồn tại.");
+
+            // Cập nhật các trường cơ bản
+            existing.Ten_DangNhap = taiKhoan.Ten_DangNhap;
+            existing.Email = taiKhoan.Email;
+            existing.Mat_Khau = taiKhoan.Mat_Khau;
+            existing.Ma_VaiTro = taiKhoan.Ma_VaiTro;
+            existing.Trang_Thai = taiKhoan.Trang_Thai;
+
+            // Cập nhật thông tin nhân viên
+            if (taiKhoan.NhanVien != null)
             {
-                // Kiểm tra trùng tên đăng nhập
-                if (await _context.TaiKhoans.AnyAsync(t => t.Ten_DangNhap == tenDangNhap && t.Ma_TaiKhoan != maTaiKhoan))
-                    throw new InvalidOperationException("Tên đăng nhập đã tồn tại!");
-                taiKhoan.Ten_DangNhap = tenDangNhap;
+                if (existing.NhanVien == null)
+                    existing.NhanVien = new NhanVien { Ma_TaiKhoan = existing.Ma_TaiKhoan };
+
+                existing.NhanVien.HoTen = taiKhoan.NhanVien.HoTen;
+                existing.NhanVien.SoDienThoai = taiKhoan.NhanVien.SoDienThoai;
+                existing.NhanVien.DiaChi = taiKhoan.NhanVien.DiaChi;
             }
 
-            // Cập nhật mật khẩu nếu có
-            if (!string.IsNullOrWhiteSpace(matKhau))
-                taiKhoan.Mat_Khau = matKhau;
-
-            // Cập nhật vai trò nếu có
-            if (!string.IsNullOrWhiteSpace(maVaiTro))
+            // Cập nhật thông tin shipper
+            if (taiKhoan.Shipper != null)
             {
-                var vaiTro = await _context.VaiTros.FindAsync(maVaiTro);
-                if (vaiTro == null)
-                    throw new InvalidOperationException("Vai trò không tồn tại!");
-                taiKhoan.Ma_VaiTro = maVaiTro;
-                taiKhoan.VaiTro = vaiTro;
+                if (existing.Shipper == null)
+                    existing.Shipper = new Shipper { Ma_TaiKhoan = existing.Ma_TaiKhoan };
+
+                existing.Shipper.Ten_DayDu = taiKhoan.Shipper.Ten_DayDu;
+                existing.Shipper.SoDienThoai = taiKhoan.Shipper.SoDienThoai;
+                existing.Shipper.BienSoXe = taiKhoan.Shipper.BienSoXe;
+                existing.Shipper.HinhAnh = taiKhoan.Shipper.HinhAnh;
+                existing.Shipper.TrangThai = taiKhoan.Shipper.TrangThai;
             }
 
-            // Cập nhật email nếu có
-            if (!string.IsNullOrWhiteSpace(email))
-            {
-                // Kiểm tra trùng email
-                if (await _context.TaiKhoans.AnyAsync(t => t.Email == email && t.Ma_TaiKhoan != maTaiKhoan))
-                    throw new InvalidOperationException("Email đã tồn tại!");
-                taiKhoan.Email = email;
-            }
-
-            _context.TaiKhoans.Update(taiKhoan);
-            return await _context.SaveChangesAsync() > 0;
+            _context.TaiKhoans.Update(existing);
+            await _context.SaveChangesAsync();
         }
-
         //Cập nhật một phần thông tin tài khoản (PATCH)
         public async Task<bool> UpdatePartialAsync(int maTaiKhoan, TaiKhoanDTO dto)
         {

@@ -4,6 +4,7 @@ using FashionStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStore.Migrations
 {
     [DbContext(typeof(FashionStoreContext))]
-    partial class FashionStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251202105526_addNewData")]
+    partial class addNewData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -377,7 +380,7 @@ namespace FashionStore.Migrations
                             Ma_NhanVien = 2,
                             DiaChi = "Sài Gòn",
                             Hinh_Anh = "https://cdn.24h.com.vn/upload/2-2021/images/2021-04-09/untitled-8-1617960812-512-width650height900.jpg",
-                            HoTen = "Nguyễn Đình Văn",
+                            HoTen = "Ngô Đình Văn",
                             Ma_TaiKhoan = 3,
                             SoDienThoai = "0982343544"
                         });
@@ -447,7 +450,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP001",
                             Ma_DanhMuc = "DM001A",
-                            Mo_Ta = "Form rộng chuẩn street style, vải dày dặn không xù lông, mặc cực mát\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m70, Nặng < 68kg\r\nSize XL: Cao < 1m75, Nặng < 75kg\r\nSize XXL: Cao < 1m80, Nặng < 85kg",
+                            Mo_Ta = "Form rộng chuẩn street style, vải dày dặn không xù lông, mặc cực mát",
                             Ten_SanPham = "Áo Thun Trơn Basic Unisex 100% Cotton 4 Chiều",
                             Trang_Thai = true
                         },
@@ -455,7 +458,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP002",
                             Ma_DanhMuc = "DM001A",
-                            Mo_Ta = "Vải Pima cotton siêu mềm, cổ bẻ đứng form, logo thêu nổi bật\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 50–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–70kg\r\nSize XL: Cao 1m72–1m78, Nặng 70–78kg\r\nSize XXL: Cao 1m78–1m82, Nặng 78–85kg",
+                            Mo_Ta = "Vải Pima cotton siêu mềm, cổ bẻ đứng form, logo thêu nổi bật",
                             Ten_SanPham = "Áo Polo Nam Cao Cấp Pima Cotton Form Chuẩn",
                             Trang_Thai = true
                         },
@@ -463,7 +466,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP003",
                             Ma_DanhMuc = "DM001B",
-                            Mo_Ta = "Vải cotton thoáng mát, form chuẩn công sở, không nhăn\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 48–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–68kg\r\nSize XL: Cao 1m72–1m78, Nặng 68–75kg\r\nSize XXL: Cao 1m78–1m85, Nặng 75–85kg",
+                            Mo_Ta = "Vải cotton thoáng mát, form chuẩn công sở, không nhăn",
                             Ten_SanPham = "Sơ Mi Nam Oxford Dài Tay Cao Cấp Form Chuẩn",
                             Trang_Thai = true
                         },
@@ -471,7 +474,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP004",
                             Ma_DanhMuc = "DM001C",
-                            Mo_Ta = "Nỉ chân cua dày dặn, ấm áp mùa đông, form rộng cực chất\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m68, Nặng < 68kg\r\nSize XL: Cao < 1m75, Nặng < 78kg\r\nSize XXL: Cao < 1m82, Nặng < 90kg",
+                            Mo_Ta = "Nỉ chân cua dày dặn, ấm áp mùa đông, form rộng cực chất",
                             Ten_SanPham = "Áo Hoodie Unisex Form Rộng Nỉ Bông 380GSM",
                             Trang_Thai = true
                         },
@@ -479,7 +482,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP005",
                             Ma_DanhMuc = "DM001D",
-                            Mo_Ta = "Jeans cao cấp co giãn 4 chiều, form ôm tôn dáng, bền đẹp\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m65, Nặng < 70kg\r\nSize XL: Cao < 1m70, Nặng < 76kg\r\nSize XXL: Cao < 1m75, Nặng < 80kg",
+                            Mo_Ta = "Jeans cao cấp co giãn 4 chiều, form ôm tôn dáng, bền đẹp",
                             Ten_SanPham = "Quần Jeans Nam Slimfit Co Giãn 4 Chiều",
                             Trang_Thai = true
                         },
@@ -487,7 +490,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP006",
                             Ma_DanhMuc = "DM001E",
-                            Mo_Ta = "Hot trend 2025, nhiều túi tiện lợi, chất kaki dày dặn\r\nBảng size:\r\nSize M:  Eo 70–75cm\r\nSize L:  Eo 76–82cm\r\nSize XL: Eo 83–90cm\r\nSize XXL: Eo 90–100cm",
+                            Mo_Ta = "Hot trend 2025, nhiều túi tiện lợi, chất kaki dày dặn",
                             Ten_SanPham = "Quần Short Kaki Nam Ống Rộng Cargo 6 Túi",
                             Trang_Thai = true
                         },
@@ -495,7 +498,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP023",
                             Ma_DanhMuc = "DM001E",
-                            Mo_Ta = "Mặc nhà hoặc thể thao đều thoải mái, form đẹp\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 48–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–70kg\r\nSize XL: Cao 1m72–1m78, Nặng 70–78kg\r\nSize XXL: Cao 1m78–1m85, Nặng 78–90kg",
+                            Mo_Ta = "Mặc nhà hoặc thể thao đều thoải mái, form đẹp",
                             Ten_SanPham = "Quần Jogger Nam Thun Bo Gấu Co Giãn",
                             Trang_Thai = true
                         },
@@ -503,7 +506,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP007",
                             Ma_DanhMuc = "DM002A",
-                            Mo_Ta = "Oversize cực xinh, mix đồ nào cũng đẹp, vải cotton mềm mại\r\nBảng size:\r\nSize S:  Cao < 1m55, Nặng < 48kg\r\nSize M:  Cao < 1m60, Nặng < 55kg\r\nSize L:  Cao < 1m65, Nặng < 62kg\r\nSize XL: Cao < 1m70, Nặng < 70kg",
+                            Mo_Ta = "Oversize cực xinh, mix đồ nào cũng đẹp, vải cotton mềm mại",
                             Ten_SanPham = "Áo Croptop Nữ Tay Lỡ Form Rộng Cotton",
                             Trang_Thai = true
                         },
@@ -511,7 +514,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP022",
                             Ma_DanhMuc = "DM002A",
-                            Mo_Ta = "Mặc đi làm đi chơi đều sang chảnh, chất voan lụa mát\r\nBảng size:\r\nSize S:  Cao 1m50–1m58, Nặng 40–48kg\r\nSize M:  Cao 1m58–1m62, Nặng 48–55kg\r\nSize L:  Cao 1m62–1m68, Nặng 55–62kg\r\nSize XL: Cao 1m68–1m72, Nặng 62–70kg",
+                            Mo_Ta = "Mặc đi làm đi chơi đều sang chảnh, chất voan lụa mát",
                             Ten_SanPham = "Áo Sơ Mi Nữ Form Rộng Voan Lụa Cao Cấp",
                             Trang_Thai = true
                         },
@@ -519,7 +522,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP008",
                             Ma_DanhMuc = "DM002B",
-                            Mo_Ta = "Che bụng mỡ cực tốt, mặc đi làm đi chơi đều hợp, freesize\r\nBảng size:\r\nFreesize: phù hợp Cao 1m50–1m68, Nặng 40–60kg",
+                            Mo_Ta = "Che bụng mỡ cực tốt, mặc đi làm đi chơi đều hợp, freesize",
                             Ten_SanPham = "Váy Đầm Nữ Dáng A Babydoll Xinh Xắn",
                             Trang_Thai = true
                         },
@@ -527,7 +530,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP009",
                             Ma_DanhMuc = "DM002C",
-                            Mo_Ta = "Vải cotton dày dặn, nâng mông tự nhiên, tôn dáng cực đẹp\r\nBảng size:\r\nSize S:  Eo 55–62cm\r\nSize M:  Eo 63–70cm\r\nSize L:  Eo 71–78cm\r\nSize XL: Eo 79–88cm",
+                            Mo_Ta = "Vải cotton dày dặn, nâng mông tự nhiên, tôn dáng cực đẹp",
                             Ten_SanPham = "Quần Legging Nữ Lưng Cao Độn Mông",
                             Trang_Thai = true
                         },
@@ -535,7 +538,7 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP010",
                             Ma_DanhMuc = "DM002D",
-                            Mo_Ta = "Form rộng đẹp, đi mưa nhẹ thoải mái, chống gió lạnh tốt\r\nBảng size:\r\nSize M:  Cao 1m50–1m58, Nặng 40–52kg\r\nSize L:  Cao 1m58–1m65, Nặng 52–60kg\r\nSize XL: Cao 1m65–1m72, Nặng 60–70kg\r\nSize XXL: Cao 1m70–1m75, Nặng 70–78kg",
+                            Mo_Ta = "Form rộng đẹp, đi mưa nhẹ thoải mái, chống gió lạnh tốt",
                             Ten_SanPham = "Áo Khoác Gió Nữ 2 Lớp Chống Nước Có Mũ",
                             Trang_Thai = true
                         });
@@ -590,6 +593,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 1,
                             Gia_BienThe = 189000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://dosi-in.com/file/detailed/42/CDL10_1.jpg?w=670&h=670&fit=fill&fm=webp",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP001",
@@ -602,6 +606,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 2,
                             Gia_BienThe = 189000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://dosi-in.com/file/detailed/42/CDL10_3.jpg?w=1000&h=1000&fit=fill&fm=webp",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP001",
@@ -614,6 +619,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 3,
                             Gia_BienThe = 189000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/10/1-kem-ld9233.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP001",
@@ -626,6 +632,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 4,
                             Gia_BienThe = 189000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/10/ao-thun-tron-tay-ngan-dep-ld9233.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP001",
@@ -638,6 +645,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 5,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP002",
@@ -650,6 +658,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 6,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP002",
@@ -662,6 +671,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 7,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP002",
@@ -674,6 +684,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 8,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_xanh_den_1_c691c6dc769d483e860b6a1805be1b6f.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP002",
@@ -686,6 +697,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 9,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_xanh_den_1_c691c6dc769d483e860b6a1805be1b6f.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP002",
@@ -698,6 +710,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 10,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP002",
@@ -710,6 +723,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 11,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP002",
@@ -722,6 +736,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 12,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP002",
@@ -734,6 +749,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 13,
                             Gia_BienThe = 299000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
                             Kich_Thuoc = "2XL",
                             Ma_SanPham = "SP002",
@@ -746,6 +762,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 14,
                             Gia_BienThe = 359000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP003",
@@ -758,6 +775,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 15,
                             Gia_BienThe = 359000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP003",
@@ -770,6 +788,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 16,
                             Gia_BienThe = 359000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP003",
@@ -782,6 +801,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 17,
                             Gia_BienThe = 359000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/1-den-8024.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP003",
@@ -794,6 +814,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 18,
                             Gia_BienThe = 359000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/1-den-8024.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP003",
@@ -806,6 +827,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 19,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP004",
@@ -818,6 +840,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 20,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP004",
@@ -830,6 +853,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 21,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP004",
@@ -842,6 +866,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 22,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP004",
@@ -854,6 +879,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 23,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP004",
@@ -866,6 +892,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 24,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP004",
@@ -878,6 +905,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 25,
                             Gia_BienThe = 429000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP004",
@@ -890,6 +918,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 26,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP005",
@@ -902,6 +931,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 27,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP005",
@@ -914,6 +944,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 28,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP005",
@@ -926,6 +957,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 29,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/1-XANHDAM-LD4142.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP005",
@@ -938,6 +970,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 30,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/4-DEN-LD4142.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP005",
@@ -950,6 +983,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 31,
                             Gia_BienThe = 489000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/4-DEN-LD4142.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP005",
@@ -962,6 +996,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 32,
                             Gia_BienThe = 279000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP006",
@@ -974,6 +1009,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 33,
                             Gia_BienThe = 279000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP006",
@@ -986,6 +1022,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 34,
                             Gia_BienThe = 279000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP006",
@@ -998,6 +1035,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 35,
                             Gia_BienThe = 279000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/2-KEM-LD4176.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP006",
@@ -1010,6 +1048,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 36,
                             Gia_BienThe = 279000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/2-KEM-LD4176.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP006",
@@ -1022,6 +1061,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 37,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP023",
@@ -1034,6 +1074,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 38,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP023",
@@ -1046,6 +1087,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 39,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP023",
@@ -1058,6 +1100,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 40,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP023",
@@ -1070,6 +1113,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 41,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP023",
@@ -1082,6 +1126,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 42,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP023",
@@ -1094,6 +1139,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 43,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP023",
@@ -1106,6 +1152,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 44,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP023",
@@ -1118,6 +1165,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 45,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP023",
@@ -1130,6 +1178,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 46,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP023",
@@ -1142,6 +1191,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 47,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_xam_mon_1_af3a5dc03b574c6a981694529db928e1.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP023",
@@ -1154,6 +1204,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 48,
                             Gia_BienThe = 329000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_xam_mon_1_af3a5dc03b574c6a981694529db928e1.jpg",
                             Kich_Thuoc = "XL",
                             Ma_SanPham = "SP023",
@@ -1166,6 +1217,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 49,
                             Gia_BienThe = 159000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-3.jpg?v=1627743163683",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP007",
@@ -1178,6 +1230,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 50,
                             Gia_BienThe = 159000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-3.jpg?v=1627743163683",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP007",
@@ -1190,6 +1243,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 51,
                             Gia_BienThe = 159000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-4.jpg?v=1627743163683",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP007",
@@ -1202,6 +1256,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 52,
                             Gia_BienThe = 349000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP022",
@@ -1214,6 +1269,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 53,
                             Gia_BienThe = 349000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP022",
@@ -1226,6 +1282,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 54,
                             Gia_BienThe = 349000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP022",
@@ -1238,6 +1295,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 55,
                             Gia_BienThe = 349000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-kem-1_35fc1acf16f34bb9b2e141488e05a6e7_master.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP022",
@@ -1250,6 +1308,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 56,
                             Gia_BienThe = 349000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-kem-1_35fc1acf16f34bb9b2e141488e05a6e7_master.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP022",
@@ -1262,6 +1321,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 57,
                             Gia_BienThe = 399000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
                             Kich_Thuoc = "S",
                             Ma_SanPham = "SP008",
@@ -1274,6 +1334,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 58,
                             Gia_BienThe = 399000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP008",
@@ -1286,6 +1347,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 59,
                             Gia_BienThe = 399000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP008",
@@ -1298,6 +1360,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 60,
                             Gia_BienThe = 229000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "https://product.hstatic.net/200000900543/product/4062049265679_7a27ad55fa3a47fabe3d8077fd16d555_master.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP009",
@@ -1310,6 +1373,7 @@ namespace FashionStore.Migrations
                         {
                             Id = 61,
                             Gia_BienThe = 459000m,
+                            Gia_Giam = 0m,
                             HinhAnh = "http://www.wetrek.vn/pic/products/ao-khoacd-gio-2-ldaop-gothiar-2l-ja_63844192522421_638979609463833850.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP010",

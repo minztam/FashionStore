@@ -35,6 +35,12 @@ namespace FashionStore.Data
             modelBuilder.Entity<DanhMuc>().HasData(DanhMucSeedData.GetSeedData());
             modelBuilder.Entity<SanPham>().HasData(SanPhamSeedData.GetSeedData());
             modelBuilder.Entity<SanPhamBienThe>().HasData(SanPhamBienTheSeedData.GetSeedData());
+            modelBuilder.Entity<KhachHang>().HasData(KhachHangSeedData.GetSeedData());
+            modelBuilder.Entity<Shipper>().HasData(ShipperSeedData.GetSeedData());
+            modelBuilder.Entity<TaiKhoan>().HasData(TaiKhoanSeedData.GetSeedData());
+            modelBuilder.Entity<NhanVien>().HasData(NhanVienSeedData.GetSeedData());
+
+
 
             // ===============================
             // 2. QUAN HỆ VAI TRÒ – TÀI KHOẢN

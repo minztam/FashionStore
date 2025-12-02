@@ -90,42 +90,42 @@ namespace FashionStore.Controllers
         }
 
         // PUT api/TaiKhoan/{maTaiKhoan}
-        [HttpPut("{maTaiKhoan}")]
-        public async Task<IActionResult> UpdateAccount(int maTaiKhoan, [FromBody] TaiKhoanDTO dto)
-        {
-            try
-            {
-                // Kiểm tra tồn tại tài khoản
-                var taiKhoan = await _taikhoanRepo.GetByIdAsync(maTaiKhoan);
-                if (taiKhoan == null)
-                    return NotFound($"Không tìm thấy tài khoản với ID: {maTaiKhoan}");
+        //[HttpPut("{maTaiKhoan}")]
+        //public async Task<IActionResult> UpdateAccount(int maTaiKhoan, [FromBody] TaiKhoanDTO dto)
+        //{
+        //    try
+        //    {
+        //        // Kiểm tra tồn tại tài khoản
+        //        var taiKhoan = await _taikhoanRepo.GetByIdAsync(maTaiKhoan);
+        //        if (taiKhoan == null)
+        //            return NotFound($"Không tìm thấy tài khoản với ID: {maTaiKhoan}");
 
-                // Thực hiện cập nhật
-                var result = await _taikhoanRepo.UpdateAsync(
-                    maTaiKhoan,
-                    dto.Ten_DangNhap,
-                    dto.Mat_Khau,
-                    dto.Ma_VaiTro,
-                    dto.Email
-                );
+        //        // Thực hiện cập nhật
+        //        var result = await _taikhoanRepo.UpdateAsync(
+        //            maTaiKhoan,
+        //            dto.Ten_DangNhap,
+        //            dto.Mat_Khau,
+        //            dto.Ma_VaiTro,
+        //            dto.Email
+        //        );
 
-                if (!result)
-                    return BadRequest("Cập nhật thất bại!");
+        //        if (!result)
+        //            return BadRequest("Cập nhật thất bại!");
 
-                // Gửi email nếu vai trò là khách hàng và có email
-                bool isKhachHang = dto.Ma_VaiTro == "2222-2222-2222-2222" || taiKhoan.Ma_VaiTro == "2222-2222-2222-2222";
-                if (isKhachHang && !string.IsNullOrWhiteSpace(dto.Email))
-                {
-                    await _emailService.SendAccountUpdatedEmailAsync(dto.Email!, dto.Ten_DangNhap!);
-                }
+        //        // Gửi email nếu vai trò là khách hàng và có email
+        //        bool isKhachHang = dto.Ma_VaiTro == "2222-2222-2222-2222" || taiKhoan.Ma_VaiTro == "2222-2222-2222-2222";
+        //        if (isKhachHang && !string.IsNullOrWhiteSpace(dto.Email))
+        //        {
+        //            await _emailService.SendAccountUpdatedEmailAsync(dto.Email!, dto.Ten_DangNhap!);
+        //        }
 
-                return Ok("Cập nhật tài khoản thành công!");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
-            }
-        }
+        //        return Ok("Cập nhật tài khoản thành công!");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
+        //    }
+        //}
 
         // PATCH api/TaiKhoan/{maTaiKhoan}
         [HttpPatch("{maTaiKhoan:int}")]

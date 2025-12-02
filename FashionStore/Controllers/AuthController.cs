@@ -1,4 +1,5 @@
 ﻿using FashionStore.DTO;
+using FashionStore.Models;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Http;
@@ -137,6 +138,84 @@ namespace FashionStore.Controllers
                 }
             });
         }
+        [HttpPut("UpdateEmployee/{id}")]
+        public async Task<IActionResult> UpdateEmployee(int id, [FromBody] SaleRegisterDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Dữ liệu không hợp lệ.");
+
+            var taiKhoan = await _taiKhoanRepo.GetByIdAsync(id);
+            if (taiKhoan == null)
+                return NotFound("Tài khoản không tồn tại.");
+
+            // Cập nhật thông tin chung
+            if (!string.IsNullOrEmpty(dto.Ten_DangNhap))
+                taiKhoan.Ten_DangNhap = dto.Ten_DangNhap;
+
+            if (!string.IsNullOrEmpty(dto.Email))
+                taiKhoan.Email = dto.Email;
+
+            if (!string.IsNullOrEmpty(dto.Mat_Khau))
+                taiKhoan.Mat_Khau = dto.Mat_Khau;
+
+            // Cập nhật vai trò nếu được cung cấp
+            if (!string.IsNullOrEmpty(dto.Ma_VaiTro))
+                taiKhoan.Ma_VaiTro = dto.Ma_VaiTro;
+
+            // Cập nhật theo vai trò
+            if (taiKhoan.Ma_VaiTro == "3333-3333-3333-3333") // shipper
+            {
+                if (taiKhoan.Shipper == null)
+                    taiKhoan.Shipper = new Shipper { Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan };
+
+                if (!string.IsNullOrEmpty(dto.HoTen))
+                    taiKhoan.Shipper.Ten_DayDu = dto.HoTen;
+
+                if (!string.IsNullOrEmpty(dto.SoDienThoai))
+                    taiKhoan.Shipper.SoDienThoai = dto.SoDienThoai;
+
+                if (!string.IsNullOrEmpty(dto.Hinh_Anh))
+                    taiKhoan.Shipper.HinhAnh = dto.Hinh_Anh;
+
+                if (!string.IsNullOrEmpty(dto.BienSoXe))
+                    taiKhoan.Shipper.BienSoXe = dto.BienSoXe;
+            }
+            else // Nhân viên bán hàng
+            {
+                if (taiKhoan.NhanVien == null)
+                    taiKhoan.NhanVien = new NhanVien { Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan };
+
+                if (!string.IsNullOrEmpty(dto.HoTen))
+                    taiKhoan.NhanVien.HoTen = dto.HoTen;
+
+                if (!string.IsNullOrEmpty(dto.SoDienThoai))
+                    taiKhoan.NhanVien.SoDienThoai = dto.SoDienThoai;
+
+                if (!string.IsNullOrEmpty(dto.DiaChi))
+                    taiKhoan.NhanVien.DiaChi = dto.DiaChi;
+
+                
+            }
+
+            await _taiKhoanRepo.UpdateAsync(taiKhoan);
+
+            string roleName = taiKhoan.Ma_VaiTro == "3333-3333-3333-3333" ? "shipper" : "Nhân viên bán hàng";
+            var token = _jwtService.GenerateToken(taiKhoan.Ten_DangNhap, roleName);
+
+            return Ok(new
+            {
+                message = "Cập nhật thông tin thành công!",
+                token,
+                user = new
+                {
+                    taiKhoan.Ma_TaiKhoan,
+                    taiKhoan.Ten_DangNhap,
+                    taiKhoan.Email,
+                    role = roleName
+                }
+            });
+        }
+
 
         [HttpPost("SaleAssistanceRegistration")]
         public async Task<IActionResult> EmployeeRegistration([FromBody] SaleRegisterDTO dto)
