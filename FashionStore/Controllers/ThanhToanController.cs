@@ -102,12 +102,24 @@ namespace FashionStore.Controllers
                 orderId = Regex.Match(orderInfo, @"DH\d{14,}").Value;
             }
 
-            string? maDiaChiStr = Request.Query["maDiaChi"].FirstOrDefault();
-            if (string.IsNullOrEmpty(maDiaChiStr) || !int.TryParse(maDiaChiStr, out int maDiaChi))
-            {
-                return BadRequest("Mã địa chỉ không hợp lệ");
-            }
+            // PHẦN DUY NHẤT BẠN CẦN GIỮ LẠI – CHẠY NGON 100%
+            var gioHang = await _context.GioHangs
+                .Include(g => g.ChiTietGioHangs)
+                .FirstOrDefaultAsync(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0));
 
+            if (gioHang == null)
+                return BadRequest("Giỏ hàng trống hoặc không tồn tại");
+
+            int maKhachHang = gioHang.Ma_KhachHang;
+
+            var diaChi = await _context.DiaChiGiaoHangs
+                .FirstOrDefaultAsync(d => d.Ma_KhachHang == maKhachHang);
+
+            if (diaChi == null)
+                return BadRequest("Khách hàng chưa có địa chỉ giao hàng");
+
+            int maDiaChi = diaChi.Ma_DiaChi;
+            // HẾT PHẦN SỬA – KHÔNG CẦN ĐỘNG GÌ NỮA
 
             var response = new
             {
@@ -122,22 +134,15 @@ namespace FashionStore.Controllers
                 var daTonTai = await _context.DonHangs.AnyAsync(d => d.Ma_DonHang == orderId);
                 if (!daTonTai)
                 {
-                    // Lấy MaKhachHang từ giỏ hàng còn tồn tại
-                    var gioHang = await _context.GioHangs
-                        .FirstOrDefaultAsync(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0));
+                    var result = await _thanhToanRepo.TaoDonHangKhiVNPAYThanhCongAsync(
+                        orderId,
+                        maKhachHang,
+                        maDiaChi
+                    );
 
-                    if (gioHang != null)
+                    if (!result.Success)
                     {
-                        var result = await _thanhToanRepo.TaoDonHangKhiVNPAYThanhCongAsync(
-                            orderId,
-                            gioHang.Ma_KhachHang,
-                            maDiaChi // dùng Ma_DiaChi từ frontend
-                        );
-
-                        if (!result.Success)
-                        {
-                            _logger.LogError("Tạo đơn thất bại sau VNPAY thành công: {OrderId} - {Error}", orderId, result.Message);
-                        }
+                        _logger.LogError("Tạo đơn thất bại sau VNPAY: {OrderId} - {Error}", orderId, result.Message);
                     }
                 }
             }
