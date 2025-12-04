@@ -42,7 +42,7 @@ namespace FashionStore.Repositories.Implementations
                 TrangThai = t.Trang_Thai == true ? "Hoạt động" : "Tạm khóa",
                 TenVaiTro = t.VaiTro?.Ten_VaiTro ?? "Không xác định",
                 MaVaiTro = t.Ma_VaiTro,
-
+                DiaChi=t.NhanVien?.DiaChi,
                 // Ép fullname + phone dựa trên loại tài khoản có dữ liệu
                 HoTen = t.NhanVien?.HoTen ?? t.Shipper?.Ten_DayDu ?? "Chưa cập nhật",
                 SoDienThoai = t.NhanVien?.SoDienThoai ?? t.Shipper?.SoDienThoai ?? "Chưa có",
@@ -260,6 +260,7 @@ namespace FashionStore.Repositories.Implementations
             return await _context.TaiKhoans 
                 .Include(t => t.VaiTro)
                 .Include(kh=>kh.KhachHang)
+                .Include(nv=>nv.NhanVien)
                 .Include(s=>s.Shipper)
                 .FirstOrDefaultAsync(t => t.Ten_DangNhap == username && t.Mat_Khau == password);
         }

@@ -74,9 +74,9 @@ namespace FashionStore.Controllers
             return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("cap-nhat-trang-thai")]
-        public async Task<IActionResult> CapNhatTrangThai([FromQuery] string maDonHang, [FromQuery] string trangThaiMoi)
+        public async Task<IActionResult> CapNhatTrangThai([FromQuery] int? maShipper,[FromQuery]int? maNhanVien, [FromQuery] string maDonHang, [FromQuery] string trangThaiMoi)
         {
-            var result = await _donHangRepo.CapNhatTrangThaiAsync(maDonHang, trangThaiMoi);
+            var result = await _donHangRepo.CapNhatTrangThaiAsync(maShipper,maNhanVien,maDonHang, trangThaiMoi);
             return StatusCode(result.StatusCode, result);
         }
 

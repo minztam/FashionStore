@@ -14,7 +14,7 @@ namespace FashionStore.Repositories.Interfaces
         Task<ResponseMessageResult> GetDonHangByKhachHangAsync(int maKhachHang);
         Task<ResponseMessageResult> GetDonHangByShipperAsync(int maShipper);
 
-        Task<ResponseMessageResult> CapNhatTrangThaiAsync(string maDonHang, string trangThaiMoi);
+        Task<ResponseMessageResult> CapNhatTrangThaiAsync(int? maShipper,int? maNhanVien,string maDonHang, string trangThaiMoi);
         Task<string> GenerateInvoiceHtmlAsync(string maDonHang);
         Task<ResponseMessageResult> GanDonHangChoShipperAsync(string maDonHang);
     }

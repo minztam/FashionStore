@@ -57,6 +57,7 @@ namespace FashionStore.Controllers
                     userResponse = new
                     {
                         taiKhoan.Ma_TaiKhoan,
+                        taiKhoan.NhanVien?.Ma_NhanVien,
                         taiKhoan.Ten_DangNhap,
                         VaiTro = "Nhân viên bán hàng",
                         Trang = "/staff/dashboard"
@@ -161,6 +162,7 @@ namespace FashionStore.Controllers
             // Cập nhật vai trò nếu được cung cấp
             if (!string.IsNullOrEmpty(dto.Ma_VaiTro))
                 taiKhoan.Ma_VaiTro = dto.Ma_VaiTro;
+                taiKhoan.Ngay_Tao = DateTime.Now;
 
             // Cập nhật theo vai trò
             if (taiKhoan.Ma_VaiTro == "3333-3333-3333-3333") // shipper

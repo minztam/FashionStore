@@ -15,7 +15,10 @@ namespace FashionStore.Models
         public int Ma_PhuongThuc { get; set; }
         public string? Ma_Voucher { get; set; }
         public int? Ma_Shipper { get; set; }
+        public int? Ma_NhanVien { get; set; }
         public Shipper? Shipper { get; set; }
+        [ForeignKey("Ma_NhanVien")]
+        public NhanVien? NhanVien { get; set; }
         // Navigation
         [ForeignKey("Ma_KhachHang")]
         public KhachHang? KhachHang { get; set; }

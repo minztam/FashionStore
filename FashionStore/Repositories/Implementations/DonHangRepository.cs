@@ -27,6 +27,8 @@ namespace FashionStore.Repositories.Implementations
         public async Task<ResponseMessageResult> GetAllDonHangAsync()
         {
             var donHangs = await _context.DonHangs
+                .Include(nv => nv.NhanVien)
+                .Include(s=>s.Shipper)
                 .Include(d => d.ChiTietDonHangs)
                 .ThenInclude(ct => ct.SanPham)
                 .Include(d => d.ChiTietDonHangs)
@@ -45,7 +47,8 @@ namespace FashionStore.Repositories.Implementations
                 Ten_PhuongThuc = dh.PhuongThucThanhToan?.Ten_PhuongThuc,
                 Ma_Voucher = dh.Ma_Voucher,
                 DiaChi = dh.DiaChiGiaoHang ,
-                Ma_Shipper = dh.Ma_Shipper,
+                Shipper = dh.Shipper,
+                NhanVien =dh.NhanVien,
                 ChiTiet = dh.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
                     Ma_SanPham = ct.Ma_SanPham,
@@ -447,7 +450,7 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi khi lấy danh sách đơn hàng: " + ex.Message, 500);
             }
         }
-        public async Task<ResponseMessageResult> CapNhatTrangThaiAsync(string maDonHang, string trangThaiMoi)
+        public async Task<ResponseMessageResult> CapNhatTrangThaiAsync(int? maShipper,int? maNhanVien,string maDonHang, string trangThaiMoi)
         {
             try
             {
@@ -462,9 +465,15 @@ namespace FashionStore.Repositories.Implementations
                     return _response.SetFail($"Không thể cập nhật trạng thái đơn hàng đã '{donHang.Trang_Thai}'!", 400);
 
                 donHang.Trang_Thai = trangThaiMoi;
+                if (maNhanVien != null)
+                {
+                    donHang.Ma_NhanVien = maNhanVien;
 
-            
-
+                }
+                if (maNhanVien != null)
+                {
+                    donHang.Ma_Shipper = maShipper;
+                }
                 await _context.SaveChangesAsync();
 
                 return _response.SetSuccess("Cập nhật trạng thái thành công!", new
