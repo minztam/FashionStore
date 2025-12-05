@@ -203,12 +203,12 @@ namespace FashionStore.Repositories.Implementations
         }
 
 
-      
+
         public async Task<ResponseMessageResult> TaoDonHangKhiVNPAYThanhCongAsync(
-            string maDonHang,
-            int maKhachHang,
-            int maDiaChi,
-            string? maVoucher = null)
+         string maDonHang,
+         int maKhachHang,
+         int maDiaChi,
+         string? maVoucher = null)
         {
             using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             try
@@ -220,39 +220,45 @@ namespace FashionStore.Repositories.Implementations
                 if (diaChi == null)
                     return _response.SetFail("Địa chỉ giao hàng không hợp lệ!", 400);
 
-                // Lấy giỏ hàng
+                // Lấy giỏ hàng + chỉ lấy sản phẩm được chọn thanh toán
                 var gioHang = await _context.GioHangs
                     .Include(g => g.ChiTietGioHangs!)
                         .ThenInclude(ct => ct.BienThe!)
                             .ThenInclude(bt => bt!.SanPham!)
                     .FirstOrDefaultAsync(g => g.Ma_KhachHang == maKhachHang);
 
-                if (gioHang == null || !gioHang.ChiTietGioHangs.Any(x => x.So_Luong > 0))
-                    return _response.SetFail("Giỏ hàng trống hoặc đã bị xóa!", 400);
+                if (gioHang == null)
+                    return _response.SetFail("Giỏ hàng không tồn tại!", 400);
+
+                // Chỉ lấy sản phẩm được chọn thanh toán
+                var sanPhamThanhToan = gioHang.ChiTietGioHangs
+                    .Where(x => x.IsChecked == true && x.So_Luong > 0)
+                    .ToList();
+
+                if (!sanPhamThanhToan.Any())
+                    return _response.SetFail("Bạn chưa chọn sản phẩm để thanh toán!", 400);
 
                 // Kiểm tra tồn kho
-                foreach (var ct in gioHang.ChiTietGioHangs.Where(x => x.So_Luong > 0))
+                foreach (var ct in sanPhamThanhToan)
                 {
                     if (ct.BienThe!.So_Luong < ct.So_Luong)
                         return _response.SetFail($"Sản phẩm {ct.BienThe.SanPham!.Ten_SanPham} không đủ hàng!", 400);
                 }
 
                 // Tạo chi tiết đơn hàng
-                var chiTietDonHangs = gioHang.ChiTietGioHangs
-                    .Where(x => x.So_Luong > 0)
-                    .Select(ct => new ChiTietDonHang
-                    {
-                        Ma_DonHang = maDonHang,
-                        Ma_SanPham = ct.Ma_SanPham,
-                        Ma_BienThe = ct.Ma_BienThe,
-                        So_Luong = ct.So_Luong,
-                        DonGia = ct.BienThe!.Gia_Giam ?? ct.BienThe.Gia_BienThe
-                    }).ToList();
+                var chiTietDonHangs = sanPhamThanhToan.Select(ct => new ChiTietDonHang
+                {
+                    Ma_DonHang = maDonHang,
+                    Ma_SanPham = ct.Ma_SanPham,
+                    Ma_BienThe = ct.Ma_BienThe,
+                    So_Luong = ct.So_Luong,
+                    DonGia = ct.BienThe!.Gia_Giam ?? ct.BienThe.Gia_BienThe
+                }).ToList();
 
                 decimal tongTienBanDau = chiTietDonHangs.Sum(x => x.So_Luong * x.DonGia);
                 decimal tongTienSauGiam = tongTienBanDau;
 
-                // Áp dụng voucher nếu có
+                // Áp dụng voucher
                 if (!string.IsNullOrEmpty(maVoucher))
                 {
                     var voucher = await _context.Vouchers
@@ -274,6 +280,7 @@ namespace FashionStore.Repositories.Implementations
                         if (voucher.So_LanDung == 0)
                             return _response.SetFail("Voucher đã hết lượt sử dụng!", 400);
 
+                        // Giảm giá
                         if (voucher.Giam_PhanTram.HasValue && voucher.Giam_PhanTram > 0)
                         {
                             tongTienSauGiam = tongTienBanDau - (tongTienBanDau * voucher.Giam_PhanTram.Value / 100);
@@ -303,32 +310,33 @@ namespace FashionStore.Repositories.Implementations
                 };
 
                 // Trừ kho
-                foreach (var ct in gioHang.ChiTietGioHangs.Where(x => x.So_Luong > 0))
+                foreach (var ct in sanPhamThanhToan)
                 {
                     ct.BienThe!.So_Luong -= ct.So_Luong;
                 }
 
-                // Xóa giỏ hàng
-                _context.ChiTietGioHangs.RemoveRange(gioHang.ChiTietGioHangs);
-                _context.GioHangs.Remove(gioHang);
+                // Xóa chỉ các sản phẩm đã thanh toán
+                _context.ChiTietGioHangs.RemoveRange(sanPhamThanhToan);
 
-                // Thêm đơn hàng
+                // Reset flag lựa chọn
+                foreach (var ct in gioHang.ChiTietGioHangs)
+                    ct.IsChecked = false;
+
+                // Lưu đơn hàng
                 _context.DonHangs.Add(donHang);
                 _context.ChiTietDonHangs.AddRange(chiTietDonHangs);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // Lấy email và tên phương thức thanh toán
+                // Gửi email
                 var kh = await _context.KhachHangs.Include(k => k.TaiKhoan)
                     .FirstOrDefaultAsync(k => k.Ma_KhachHang == maKhachHang);
-                string? email = kh?.TaiKhoan?.Email;
 
+                string? email = kh?.TaiKhoan?.Email;
                 var phuongThuc = await _context.PhuongThucThanhToans
                     .FirstOrDefaultAsync(p => p.Ma_PhuongThuc == donHang.Ma_PhuongThuc);
-                string tenPhuongThuc = phuongThuc?.Ten_PhuongThuc ?? "VNPAY";
 
-                // Tạo DTO gửi email
                 var donHangDto = new DonHangDTO
                 {
                     Ma_DonHang = maDonHang,
@@ -338,31 +346,25 @@ namespace FashionStore.Repositories.Implementations
                     Tong_Tien = tongTienSauGiam,
                     Trang_Thai = donHang.Trang_Thai,
                     Ma_PhuongThuc = donHang.Ma_PhuongThuc,
-                    Ten_PhuongThuc = tenPhuongThuc,
+                    Ten_PhuongThuc = phuongThuc?.Ten_PhuongThuc ?? "VNPAY",
                     Ma_Voucher = maVoucher,
                     ChiTiet = chiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                     {
                         Ma_SanPham = ct.Ma_SanPham,
-                        Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                        Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
-                        Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
-                        Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
+                        Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "",
+                        Hinh_Anh = ct.BienThe?.HinhAnh ?? "",
+                        Mau_Sac = ct.BienThe?.Mau_Sac ?? "",
+                        Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? "",
                         So_Luong = ct.So_Luong,
                         DonGia = ct.DonGia,
                         ThanhTien = ct.DonGia * ct.So_Luong
                     }).ToList()
                 };
 
-                // Gửi email bất đồng bộ
-                _ = Task.Run(async () =>
+                if (!string.IsNullOrEmpty(email))
                 {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(email))
-                            await _emailService.SendOrderEmailAsync(email, donHangDto);
-                    }
-                    catch { }
-                });
+                    _ = Task.Run(async () => await _emailService.SendOrderEmailAsync(email, donHangDto));
+                }
 
                 return _response.SetSuccess("Thanh toán thành công! Đơn hàng đã được tạo.", new { maDonHang, tongTienSauGiam });
             }
@@ -372,7 +374,6 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi hệ thống khi tạo đơn hàng!", 500);
             }
         }
-
 
 
 

@@ -64,7 +64,7 @@ namespace FashionStore.Repositories.Implementations
                     Ma_BienThe = ct.Ma_BienThe,
                     InvalidReason = ct.InvalidReason,
                     IsInvalid=ct.IsInvalid,
-                    
+                    IsChecked=ct.IsChecked,
                    
                 })
                 .OrderBy(x => x.Ten_SanPham)
@@ -163,9 +163,14 @@ namespace FashionStore.Repositories.Implementations
             return _response.SetSuccess("Thêm vào giỏ hàng thành công", gioHangDto);
         }
 
-        public async Task<ResponseMessageResult> UpdateCartAsync(int maKhachHang, string maSanPham, int soLuong, int maBienThe)
+        public async Task<ResponseMessageResult> UpdateCartAsync(
+       int maKhachHang,
+       string maSanPham,
+       int soLuong,
+       int maBienThe,
+       bool? isChecked = null)       // <-- thêm tham số này
         {
-            // 1. Lấy giỏ hàng + chi tiết đầy đủ
+            // 1. Lấy giỏ hàng
             var gioHang = await _context.GioHangs
                 .Include(g => g.ChiTietGioHangs)
                     .ThenInclude(ct => ct.SanPham!)
@@ -177,14 +182,28 @@ namespace FashionStore.Repositories.Implementations
             if (gioHang == null)
                 return _response.SetFail("Giỏ hàng không tồn tại!", 404);
 
-            // 2. Tìm đúng item theo Ma_SanPham + Ma_BienThe
+            // 2. Lấy đúng sản phẩm cần cập nhật
             var item = gioHang.ChiTietGioHangs
                 .FirstOrDefault(x => x.Ma_SanPham == maSanPham && x.Ma_BienThe == maBienThe);
 
             if (item == null)
-                return _response.SetFail("Sản phẩm này (màu/size đã chọn) không có trong giỏ hàng!", 404);
+                return _response.SetFail("Sản phẩm này (màu/size) không có trong giỏ!", 404);
 
-            // 3. Nếu số lượng <= 0 → XÓA KHỎI GIỎ
+            // 3. Nếu người dùng CHỈ MUỐN CHECK/UNCHECK sản phẩm
+            if (isChecked.HasValue && soLuong == -1)
+            {
+                item.IsChecked = isChecked.Value;
+                await _context.SaveChangesAsync();
+
+                return _response.SetSuccess("Cập nhật trạng thái chọn sản phẩm thành công!", new
+                {
+                    item.Ma_SanPham,
+                    item.Ma_BienThe,
+                    item.IsChecked
+                });
+            }
+
+            // 4. Nếu số lượng <= 0 → xóa khỏi giỏ
             if (soLuong <= 0)
             {
                 _context.ChiTietGioHangs.Remove(item);
@@ -192,7 +211,7 @@ namespace FashionStore.Repositories.Implementations
             }
             else
             {
-                // 4. KIỂM TRA TỒN KHO TRƯỚC KHI CẬP NHẬT
+                // 5. Kiểm tra tồn kho
                 if (item.BienThe == null || item.BienThe.So_Luong < soLuong)
                 {
                     return _response.SetFail(
@@ -200,36 +219,40 @@ namespace FashionStore.Repositories.Implementations
                         400);
                 }
 
+                // Cập nhật số lượng
                 item.So_Luong = soLuong;
+
+                // --- nếu chọn sản phẩm khi thay đổi số lượng ---
+                if (isChecked.HasValue)
+                    item.IsChecked = isChecked.Value;
+
                 await _context.SaveChangesAsync();
             }
 
-            // 5. Tạo DTO trả về – ĐẸP LUNG LINH, ĐÚNG MÀU, ĐÚNG SIZE, CÓ THÀNH TIỀN
+            // 6. Tạo DTO trả về
             var gioHangDto = new GioHangDTO
             {
-                Ma_GioHang = gioHang!.Ma_GioHang,
+                Ma_GioHang = gioHang.Ma_GioHang,
                 Ma_KhachHang = gioHang.Ma_KhachHang,
                 SanPhams = gioHang.ChiTietGioHangs.Select(ct =>
                 {
                     var bienTheCt = ct.BienThe!;
-                    decimal giaGoc = bienTheCt.Gia_BienThe;
-                    decimal? giaGiam = bienTheCt.Gia_Giam;
                     return new ChiTietGioHangDTO
                     {
                         Ma_SanPham = ct.Ma_SanPham,
-                        Ten_SanPham = ct.SanPham?.Ten_SanPham ?? string.Empty,
-                        Hinh_Anh = ct.BienThe?.HinhAnh ?? string.Empty,
+                        Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "",
+                        Hinh_Anh = ct.BienThe?.HinhAnh ?? "",
                         Mau_Sac = bienTheCt.Mau_Sac,
                         Kich_Thuoc = bienTheCt.Kich_Thuoc,
-                        Gia_Goc = giaGoc,
-                        Gia_Giam = giaGiam,
+                        Gia_Goc = bienTheCt.Gia_BienThe,
+                        Gia_Giam = bienTheCt.Gia_Giam,
                         So_Luong = ct.So_Luong,
-                        Ma_BienThe = ct.Ma_BienThe
+                        Ma_BienThe = ct.Ma_BienThe,
+                        IsChecked = ct.IsChecked // <-- thêm giá trị này vào response
                     };
                 }).ToList()
             };
 
-            // Nếu giỏ rỗng sau khi xóa
             if (!gioHangDto.SanPhams.Any())
                 return _response.SetSuccess("Giỏ hàng đã trống!", gioHangDto);
 

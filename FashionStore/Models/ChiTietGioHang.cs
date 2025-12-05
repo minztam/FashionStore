@@ -13,6 +13,8 @@ namespace FashionStore.Models
         public int So_Luong { get; set; }
         public bool IsInvalid { get; set; } = false;
         public string? InvalidReason { get; set; }
+        public bool IsChecked { get; set; } = false;
+
 
         // Navigation property
         [ForeignKey("Ma_GioHang")]
