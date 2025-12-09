@@ -1,10 +1,12 @@
 ﻿using FashionStore.Data;
 using FashionStore.DTO;
+using FashionStore.Models;
 using FashionStore.Models.VNPay;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services.Momo;
 using FashionStore.Services.VnPay;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -54,66 +56,81 @@ namespace FashionStore.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        // POST : api/ThanhToan{ ThanhToanCODRequest }
+        // trong ThanhToanController
+
         [HttpPost("thanh-toan-vnpay")]
-        [HttpPost]
         public async Task<IActionResult> TaoPaymentVNPAY([FromBody] ThanhToanCODRequest request)
         {
-            if (request == null || request.Ma_KhachHang <= 0 || !request.ChiTiet.Any())
+            if (request == null || request.Ma_KhachHang <= 0 || request.ChiTiet == null || !request.ChiTiet.Any())
                 return Ok(_response.SetFail("Dữ liệu không hợp lệ!", 400));
 
-            // 1️⃣ Tính tiền & áp voucher cho các item được chọn
+            // tính tiền & kiểm tra tồn kho + áp voucher tạm thời (trả về tong thanh toan)
             var tinhTien = await TinhTienVaApVoucherPartialAsync(request.Ma_KhachHang, request.ChiTiet, request.Ma_Voucher);
             if (!tinhTien.Success) return Ok(tinhTien);
 
-            var data = tinhTien.Data as dynamic;
+            var data = (tinhTien.Data as dynamic);
+            decimal tongThanhToan = data.TongThanhToan;
 
-            // 2️⃣ Tạo mã đơn hàng duy nhất
+            // tạo mã đơn (chưa lưu DB)
             string maDonHang = "DH" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
 
-            // 3️⃣ Tạo Payment URL
+            // tạo payment url (gửi voucher và maKhachHang trong model)
             var paymentUrl = _vnPayService.CreatePaymentUrl(new PaymentInformationModel
             {
                 OrderId = maDonHang,
-                Amount = data!.TongThanhToan, // chỉ tính các item khách chọn
-                OrderDescription = $"Thanh toán đơn hàng {maDonHang} - Fashion Store",
-                Name = "Fashion Store"
+                Amount = tongThanhToan,
+                OrderDescription = $"Thanh toán đơn hàng {maDonHang}",
+                Name = "Fashion Store",
+                Voucher = request.Ma_Voucher,
+                Ma_KhachHang = request.Ma_KhachHang
             }, HttpContext);
 
-            // 4️⃣ Lưu tạm mã đơn vào Session để callback (tránh tạo trùng)
+            // optional: đánh dấu pending (giữ session tránh tạo trùng)
             HttpContext.Session.SetString("VNPAY_Pending_" + maDonHang, "true");
 
-            // 5️⃣ Trả về URL cho frontend
             return Ok(_response.SetSuccess("Chuyển đến VNPAY thành công!", new
             {
                 MaDonHang = maDonHang,
-                TongTien = data.TongThanhToan,
+                TongTien = tongThanhToan,
                 PaymentUrl = paymentUrl
             }));
         }
-
 
         [HttpGet("payment/callback")]
         public async Task<IActionResult> PaymentCallback()
         {
             var vnpayResult = _vnPayService.PaymentExecute(Request.Query);
 
-            string? orderId = Request.Query["vnp_TxnRef"].FirstOrDefault();
+            // lấy PaymentResult object
+            var payData = vnpayResult.Data as FashionStore.Models.VNPay.PaymentResult;
+
+            string? maVoucher = payData?.Voucher;
+            string? orderId = payData?.OrderId ?? Request.Query["vnp_TxnRef"].FirstOrDefault();
+            int? maKhachHangFromVnp = payData?.Ma_KhachHang;
+
             if (string.IsNullOrEmpty(orderId))
+                return Redirect($"{_config["FrontendUrl"]}/order-failure?msg=OrderKhongTonTai");
+
+            // xác định maKhachHang: ưu tiên dữ liệu từ vnpay (nếu có), nếu không fallback tìm giỏ hàng mới nhất của khách đang thao tác
+            int maKhachHang;
+            if (maKhachHangFromVnp.HasValue && maKhachHangFromVnp.Value > 0)
             {
-                var orderInfo = Request.Query["vnp_OrderInfo"].FirstOrDefault() ?? "";
-                orderId = Regex.Match(orderInfo, @"DH\d{14,}").Value;
+                maKhachHang = maKhachHangFromVnp.Value;
             }
+            else
+            {
+                // fallback cố gắng lấy giỏ hàng liên quan (giữ logic cũ nhưng kém an toàn)
+                var gioHangTmp = await _context.GioHangs
+                    .Include(g => g.ChiTietGioHangs)
+                    .Where(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0))
+                    .OrderByDescending(g => g.Ma_KhachHang) // heuristic: lấy gần nhất
+                    .FirstOrDefaultAsync();
 
-            // Chạy đúng 100% – giữ nguyên
-            var gioHang = await _context.GioHangs
-                .Include(g => g.ChiTietGioHangs)
-                .FirstOrDefaultAsync(g => g.ChiTietGioHangs.Any(ct => ct.So_Luong > 0));
+                if (gioHangTmp == null)
+                    return Redirect($"{_config["FrontendUrl"]}/order-failure?msg=GioHangRong");
 
-            if (gioHang == null)
-                return Redirect($"{_config["FrontendUrl"]}/order-failure?msg=GioHangRong");
-
-            int maKhachHang = gioHang.Ma_KhachHang;
+                maKhachHang = gioHangTmp.Ma_KhachHang;
+            }
 
             var diaChi = await _context.DiaChiGiaoHangs
                 .FirstOrDefaultAsync(d => d.Ma_KhachHang == maKhachHang);
@@ -123,47 +140,33 @@ namespace FashionStore.Controllers
 
             int maDiaChi = diaChi.Ma_DiaChi;
 
-
-            // Chuẩn bị query trả về frontend
-            var queryParams = new Dictionary<string, string?>
-    {
-        { "orderId", orderId },
-        { "responseCode", vnpayResult.Success ? "00" : "99" },
-        { "message", vnpayResult.Success ? "Thanh toán thành công!" : vnpayResult.Message ?? "Thanh toán thất bại!" }
-    };
-
             string frontendUrl = _config["FrontendUrl"];
-            string queryString = string.Join("&", queryParams
-                .Where(kv => kv.Value != null)
-                .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value!)}"));
+            string queryString = $"orderId={Uri.EscapeDataString(orderId)}&responseCode={(vnpayResult.Success ? "00" : "99")}";
 
-
-            // Nếu thanh toán thành công → Tạo đơn nếu chưa có
-            if (vnpayResult.Success && !string.IsNullOrEmpty(orderId))
+            // nếu thanh toán thành công => tạo đơn (nếu chưa có)
+            if (vnpayResult.Success)
             {
                 var daTonTai = await _context.DonHangs.AnyAsync(d => d.Ma_DonHang == orderId);
+
                 if (!daTonTai)
                 {
                     var result = await _thanhToanRepo.TaoDonHangKhiVNPAYThanhCongAsync(
                         orderId,
                         maKhachHang,
-                        maDiaChi
+                        maDiaChi,
+                        maVoucher
                     );
 
                     if (!result.Success)
                     {
-                        _logger.LogError("Tạo đơn thất bại sau VNPAY: {OrderId} - {Error}",
-                            orderId, result.Message);
-
+                        _logger.LogError("Tạo đơn thất bại sau VNPAY: {OrderId} - {Error}", orderId, result.Message);
                         return Redirect($"{frontendUrl}/order-failure?{queryString}");
                     }
                 }
 
-                // → Thành công → redirect
                 return Redirect($"{frontendUrl}/order-success?{queryString}");
             }
 
-            // → Thanh toán thất bại
             return Redirect($"{frontendUrl}/order-failure?{queryString}");
         }
 

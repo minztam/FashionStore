@@ -1,5 +1,6 @@
 ﻿using FashionStore.DTO;
 using FashionStore.Models;
+using FashionStore.Repositories.Implementations;
 using FashionStore.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,14 +53,13 @@ namespace FashionStore.Controllers
 
         // POST: api/DanhMuc
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DanhMucDTO dto)
+        public async Task<IActionResult> Create([FromBody] ThemDanhMucDTO dto)
         {
             if (dto == null)
                 return BadRequest("Dữ liệu không hợp lệ.");
 
-            var dm = new DanhMuc
+            var dm = new ThemDanhMucDTO
             {
-                Ma_DanhMuc = dto.Ma_DanhMuc.Trim().ToUpper(),
                 Ten_DanhMuc = dto.Ten_DanhMuc.Trim(),
                 Ma_DanhMucCha = string.IsNullOrWhiteSpace(dto.Ma_DanhMucCha) ? null : dto.Ma_DanhMucCha.Trim().ToUpper(),
                 Trang_Thai = dto.Trang_Thai
@@ -74,25 +74,22 @@ namespace FashionStore.Controllers
 
         // PUT: api/DanhMuc/{maDanhMuc}
         [HttpPut("{maDanhMuc}")]
-        public async Task<IActionResult> Update(string maDanhMuc, [FromBody] DanhMucDTO dto)
+        public async Task<IActionResult> Update(string maDanhMuc, [FromBody] ThemDanhMucDTO dto)
         {
-            if (dto == null || maDanhMuc != dto.Ma_DanhMuc)
-                return BadRequest("Dữ liệu không hợp lệ.");
+            if (string.IsNullOrWhiteSpace(maDanhMuc))
+                return BadRequest("Mã danh mục không hợp lệ.");
 
-            var dm = new DanhMuc
-            {
-                Ma_DanhMuc = maDanhMuc.Trim().ToUpper(),
-                Ten_DanhMuc = dto.Ten_DanhMuc,
-                Ma_DanhMucCha = dto.Ma_DanhMucCha,
-                Trang_Thai = dto.Trang_Thai
-            };
+            if (dto == null)
+                return BadRequest("Dữ liệu gửi lên rỗng.");
 
-            var success = await _dmRepo.UpdateAsync(dm);
-            if (!success)
-                return BadRequest("Không thể cập nhật danh mục. Kiểm tra dữ liệu.");
+            var result = await _dmRepo.UpdateAsync(maDanhMuc, dto);
 
-            return Ok(new { message = "Cập nhật danh mục thành công!" });
+            if (!result)
+                return BadRequest("Cập nhật danh mục thất bại. Kiểm tra lại dữ liệu.");
+
+            return Ok("Cập nhật danh mục thành công.");
         }
+
 
         // DELETE: api/DanhMuc/{maDanhMuc}
         [HttpDelete("{maDanhMuc}")]

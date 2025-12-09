@@ -15,6 +15,7 @@ namespace FashionStore.DTO
         public int Ma_PhuongThuc { get; set; }
         public string? Ten_PhuongThuc { get; set; }
         public string? Ma_Voucher { get; set; }
+        public decimal GiamGia { get; set; }
         public DiaChiGiaoHang? DiaChi { get; set; }
         public NhanVien? NhanVien { get; set; }
         public Shipper? Shipper { get; set; }

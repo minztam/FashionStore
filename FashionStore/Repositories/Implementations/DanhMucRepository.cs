@@ -92,10 +92,10 @@ namespace FashionStore.Repositories.Implementations
 
                 var lookup = allCategories.ToLookup(x => x.Ma_DanhMucCha);
 
-                foreach (var cat in allCategories)
-                {
-                    cat.DanhMucCon = lookup[cat.Ma_DanhMuc].OrderBy(c => c.Ten_DanhMuc).ToList();
-                }
+                //foreach (var cat in allCategories)
+                //{
+                //    cat.DanhMucCon = lookup[cat.Ma_DanhMuc].OrderBy(c => c.Ten_DanhMuc).ToList();
+                //}
 
                 var rootCategories = allCategories
                     .Where(x => string.IsNullOrEmpty(x.Ma_DanhMucCha))
@@ -111,33 +111,77 @@ namespace FashionStore.Repositories.Implementations
             }
         }
 
-        public async Task<bool> AddAsync(DanhMuc danhMuc)
+        public async Task<bool> AddAsync(ThemDanhMucDTO danhMuc)
         {
             if (danhMuc == null) return false;
 
-            danhMuc.Ma_DanhMuc = danhMuc.Ma_DanhMuc.Trim().ToUpper();
-            danhMuc.Ten_DanhMuc = danhMuc.Ten_DanhMuc.Trim();
-
-            if (string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMuc) ||
-                string.IsNullOrWhiteSpace(danhMuc.Ten_DanhMuc))
+            danhMuc.Ten_DanhMuc = danhMuc.Ten_DanhMuc?.Trim();
+            if (string.IsNullOrWhiteSpace(danhMuc.Ten_DanhMuc))
                 return false;
 
-            // Kiểm tra trùng mã danh mục
-            var exists = await _context.DanhMucs
-                .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMuc);
-            if (exists) return false;
+            string newCode = "";
 
-            // Nếu có mã cha → kiểm tra cha có tồn tại không
-            if (!string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMucCha))
+            // ============================
+            // 1) NẾU KHÔNG CÓ MÃ CHA → LÀ DANH MỤC CHA
+            // ============================
+            if (string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMucCha))
             {
-                var parentExists = await _context.DanhMucs
-                    .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMucCha);
-                if (!parentExists) return false;
+                var lastParent = await _context.DanhMucs
+                    .Where(x => x.Ma_DanhMuc.Length == 5)        // chỉ lấy DM001, DM010...
+                    .OrderByDescending(x => x.Ma_DanhMuc)
+                    .Select(x => x.Ma_DanhMuc)
+                    .FirstOrDefaultAsync();
+
+                if (lastParent == null)
+                {
+                    newCode = "DM003";
+                }
+                else
+                {
+                    int number = int.Parse(lastParent.Substring(2));
+                    number++;
+                    newCode = "DM" + number.ToString("D3");
+                }
             }
+            else
+            {
+                // ============================
+                // 2) NẾU CÓ MÃ CHA → LÀ DANH MỤC CON
+                // tạo theo dạng: mã cha + chữ cái A,B,C...
+                // ============================
+                string parent = danhMuc.Ma_DanhMucCha;
+
+                var lastChild = await _context.DanhMucs
+                    .Where(x => x.Ma_DanhMuc.StartsWith(parent)
+                                && x.Ma_DanhMuc.Length == parent.Length + 1)
+                    .OrderByDescending(x => x.Ma_DanhMuc)
+                    .Select(x => x.Ma_DanhMuc)
+                    .FirstOrDefaultAsync();
+
+                if (lastChild == null)
+                {
+                    newCode = parent + "A";
+                }
+                else
+                {
+                    char lastChar = lastChild.Last();
+                    char nextChar = (char)(lastChar + 1);
+                    newCode = parent + nextChar;
+                }
+            }
+
+            // Map DTO → Entity
+            var entity = new DanhMuc
+            {
+                Ma_DanhMuc = newCode,
+                Ten_DanhMuc = danhMuc.Ten_DanhMuc,
+                Ma_DanhMucCha = danhMuc.Ma_DanhMucCha,
+                Trang_Thai = danhMuc.Trang_Thai
+            };
 
             try
             {
-                await _context.DanhMucs.AddAsync(danhMuc);
+                await _context.DanhMucs.AddAsync(entity);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch
@@ -146,37 +190,42 @@ namespace FashionStore.Repositories.Implementations
             }
         }
 
-        public async Task<bool> UpdateAsync(DanhMuc danhMuc)
+
+
+
+        public async Task<bool> UpdateAsync(string maDanhMuc, ThemDanhMucDTO dto)
         {
-            if (danhMuc == null) return false;
+            if (dto == null) return false;
 
             var existing = await _context.DanhMucs
-                .FirstOrDefaultAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMuc);
+                .FirstOrDefaultAsync(x => x.Ma_DanhMuc == maDanhMuc);
 
             if (existing == null) return false;
 
             // Chuẩn hóa dữ liệu
-            danhMuc.Ten_DanhMuc = danhMuc.Ten_DanhMuc.Trim();
-            if (!string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMucCha))
-                danhMuc.Ma_DanhMucCha = danhMuc.Ma_DanhMucCha.Trim().ToUpper();
+            dto.Ten_DanhMuc = dto.Ten_DanhMuc?.Trim();
 
-            // Kiểm tra danh mục cha (nếu có)
-            if (!string.IsNullOrWhiteSpace(danhMuc.Ma_DanhMucCha))
+            if (!string.IsNullOrWhiteSpace(dto.Ma_DanhMucCha))
+                dto.Ma_DanhMucCha = dto.Ma_DanhMucCha.Trim().ToUpper();
+
+            // ===== KIỂM TRA DANH MỤC CHA =====
+            if (!string.IsNullOrWhiteSpace(dto.Ma_DanhMucCha))
             {
                 // Không được đặt chính nó làm cha
-                if (danhMuc.Ma_DanhMucCha == danhMuc.Ma_DanhMuc)
+                if (dto.Ma_DanhMucCha == maDanhMuc)
                     return false;
 
                 var parentExists = await _context.DanhMucs
-                    .AnyAsync(x => x.Ma_DanhMuc == danhMuc.Ma_DanhMucCha);
+                    .AnyAsync(x => x.Ma_DanhMuc == dto.Ma_DanhMucCha);
+
                 if (!parentExists)
                     return false;
             }
 
-            // Cập nhật các trường cho phép
-            existing.Ten_DanhMuc = danhMuc.Ten_DanhMuc;
-            existing.Ma_DanhMucCha = danhMuc.Ma_DanhMucCha;
-            existing.Trang_Thai = danhMuc.Trang_Thai;
+            // ===== CẬP NHẬT =====
+            existing.Ten_DanhMuc = dto.Ten_DanhMuc;
+            existing.Ma_DanhMucCha = dto.Ma_DanhMucCha;
+            existing.Trang_Thai = dto.Trang_Thai;
 
             try
             {
@@ -188,6 +237,7 @@ namespace FashionStore.Repositories.Implementations
                 return false;
             }
         }
+
 
         public async Task<bool> DeleteAsync(string id)
         {

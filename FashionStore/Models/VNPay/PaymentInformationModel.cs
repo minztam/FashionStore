@@ -6,6 +6,8 @@
         public decimal Amount { get; set; } // Dùng decimal thay double → chính xác tiền tệ
         public string OrderDescription { get; set; } = "Thanh toan don hang tai Fashion Store";
         public string Name { get; set; } = "Khach hang"; // Tên khách hoặc mã đơn
+        public string? Voucher { get; set; }
+        public int? Ma_KhachHang { get; set; }
         public string OrderId { get; set; } = DateTime.Now.Ticks.ToString(); // Bắt buộc có để lưu DB
     }
 }
