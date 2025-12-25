@@ -174,7 +174,7 @@ namespace FashionStore.Repositories.Implementations
                                 Kich_Thuoc = bt.Kich_Thuoc.Trim(),
                                 So_Luong = bt.So_Luong,
                                 Gia_BienThe = bt.Gia_BienThe,
-                                Gia_Giam = bt.Gia_Giam,
+                                Gia_Giam = CalculateGiaGiam(bt.Gia_BienThe,bt.PhanTramGiam),
                                 PhanTramGiam = bt.PhanTramGiam,
                                 HinhAnh = bt.HinhAnh,
                             });
