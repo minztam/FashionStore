@@ -10,6 +10,12 @@
 - **Payments**: MoMo, VNPay
 - **Features**: Real-time Order Tracking (giả lập), Email Service, Role-based Access Control (RBAC)
 
+## 🌐 Hệ sinh thái dự án
+
+Đây là giao diện Frontend của hệ thống **FashionStore**.
+
+- **Frontend Repository**: [FashionStore](https://gitlab.com/prjfashinstore/feprj)
+
 ## 🧩 Cấu trúc dự án
 
 ```plaintext
@@ -72,9 +78,3 @@ Hệ thống hỗ trợ phân quyền chặt chẽ thông qua JWT claims:
 - `Models/` - định nghĩa các entity cho database.
 - `DTO/` - định nghĩa các đối tượng truyền dữ liệu giữa client và server.
 - `Library/` - helper cho tích hợp VnPay/MoMo.
-
-## 🌐 Hệ sinh thái dự án
-
-Đây là giao diện Frontend của hệ thống **FashionStore**.
-
-- **Frontend Repository**: [FashionStore](https://gitlab.com/prjfashinstore/feprj)
