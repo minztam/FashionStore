@@ -33,5 +33,14 @@
             Data = data;
             return this;
         }
+
+    }
+    public static class ResponseExt
+    {
+        public static ResponseMessageResult WithData(this ResponseMessageResult res, object data)
+        {
+            res.Data = data;
+            return res;
+        }
     }
 }

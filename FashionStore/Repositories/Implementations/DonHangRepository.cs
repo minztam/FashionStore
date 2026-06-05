@@ -7,6 +7,7 @@ using FashionStore.Repositories.ResponseMessage;
 using FashionStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System.Text;
 
 namespace FashionStore.Repositories.Implementations
@@ -26,13 +27,15 @@ namespace FashionStore.Repositories.Implementations
         public async Task<ResponseMessageResult> GetAllDonHangAsync()
         {
             var donHangs = await _context.DonHangs
-                 .Include(d => d.ChiTietDonHangs)
-                     .ThenInclude(ct => ct.SanPham)
-                         .ThenInclude(sp => sp!.HinhAnhSanPhams)
-                 .Include(d => d.ChiTietDonHangs)
-                     .ThenInclude(ct => ct.BienThe)
-                 .Include(d => d.PhuongThucThanhToan)
-                 .ToListAsync();
+                .Include(nv => nv.NhanVien)
+                .Include(s=>s.Shipper)
+                .Include(d => d.ChiTietDonHangs)
+                .ThenInclude(ct => ct.SanPham)
+                .Include(d => d.ChiTietDonHangs)
+                .ThenInclude(ct => ct.BienThe)
+                .Include(d => d.PhuongThucThanhToan)
+                .Include(d => d.DiaChiGiaoHang) // <-- include DiaChi
+                .ToListAsync();
 
             var dtos = donHangs.Select(dh => new DonHangDTO
             {
@@ -41,24 +44,27 @@ namespace FashionStore.Repositories.Implementations
                 Ngay_Dat = dh.Ngay_Dat,
                 Tong_Tien = dh.Tong_Tien,
                 Trang_Thai = dh.Trang_Thai,
-                Ma_PhuongThuc = dh.Ma_PhuongThuc,
                 Ten_PhuongThuc = dh.PhuongThucThanhToan?.Ten_PhuongThuc,
                 Ma_Voucher = dh.Ma_Voucher,
-                ChiTiet = dh.ChiTietDonHangs.Select(x => new ChiTietDonHangDTO
+                DiaChi = dh.DiaChiGiaoHang ,
+                Shipper = dh.Shipper,
+                NhanVien =dh.NhanVien,
+                ChiTiet = dh.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
-                    Ma_SanPham = x.Ma_SanPham,
-                    Ten_SanPham = x.SanPham!.Ten_SanPham,
-                    Hinh_Anh = x.SanPham.HinhAnhSanPhams.FirstOrDefault()?.DuongDan ?? string.Empty,
-                    Mau_Sac = x.BienThe?.Mau_Sac ?? string.Empty,
-                    Kich_Thuoc = x.BienThe?.Kich_Thuoc ?? string.Empty,
-                    So_Luong = x.So_Luong,
-                    DonGia = x.DonGia,
-                    ThanhTien = x.DonGia * x.So_Luong
+                    Ma_SanPham = ct.Ma_SanPham,
+                    Ten_SanPham = ct.SanPham!.Ten_SanPham,
+                    Mau_Sac = ct.BienThe?.Mau_Sac ?? string.Empty,
+                    Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? string.Empty,
+                    Hinh_Anh=ct.BienThe?.HinhAnh ?? string.Empty,
+                    So_Luong = ct.So_Luong,
+                    DonGia = ct.DonGia,
+                    ThanhTien = ct.DonGia * ct.So_Luong
                 }).ToList()
             }).ToList();
 
             return _response.SetSuccess("Lấy danh sách đơn hàng thành công!", dtos);
         }
+
         public async Task<ResponseMessageResult> GetChiTietDonHangAsync(string maDonHang)
         {
             if (string.IsNullOrWhiteSpace(maDonHang))
@@ -72,9 +78,8 @@ namespace FashionStore.Repositories.Implementations
                 .Include(d => d.Voucher)
                 .Include(d => d.ChiTietDonHangs!)
                     .ThenInclude(ct => ct.SanPham!)
-                        .ThenInclude(sp => sp.HinhAnhSanPhams!)
                 .Include(d => d.ChiTietDonHangs!)
-                    .ThenInclude(ct => ct.BienThe!)
+                    .ThenInclude(ct => ct.BienThe!).Include(d => d.DiaChiGiaoHang)
                 .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
 
             if (donHang == null)
@@ -84,18 +89,18 @@ namespace FashionStore.Repositories.Implementations
             {
                 Ma_DonHang = donHang.Ma_DonHang,
                 Ma_KhachHang = donHang.Ma_KhachHang,
+                Ma_DiaChi=donHang.Ma_DiaChi,
                 Ngay_Dat = donHang.Ngay_Dat,
                 Tong_Tien = donHang.Tong_Tien,
                 Trang_Thai = donHang.Trang_Thai,
-                Ma_PhuongThuc = donHang.Ma_PhuongThuc,
                 Ten_PhuongThuc = donHang.PhuongThucThanhToan?.Ten_PhuongThuc ?? "Chưa xác định",
                 Ma_Voucher = donHang.Ma_Voucher,
+                DiaChi=donHang.DiaChiGiaoHang,
                 ChiTiet = donHang.ChiTietDonHangs.Select(ct => new ChiTietDonHangDTO
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm đã xóa",
-                    Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan
-                               ?? "/images/no-image.jpg",
+                    Hinh_Anh = ct.BienThe?.HinhAnh??"không có hình ảnh",
                     Mau_Sac = ct.BienThe?.Mau_Sac ?? "Không có",
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc ?? "Freesize",
                     So_Luong = ct.So_Luong,
@@ -189,6 +194,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_DonHang = maDH,
                     Ma_KhachHang = request.Ma_KhachHang,
+                    Ma_DiaChi =request.Ma_DiaChi,
                     Ngay_Dat = DateTime.Now,
                     Tong_Tien = tongCuoi,
                     Trang_Thai = trangThai,
@@ -218,7 +224,7 @@ namespace FashionStore.Repositories.Implementations
                         {
                             Ma_SanPham = ct.Ma_SanPham,
                             Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm",
-                            Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan ?? "/images/no-image.jpg",
+                            Hinh_Anh = ct.BienThe?.HinhAnh?? "/images/no-image.jpg",
                             Mau_Sac = ct.BienThe?.Mau_Sac,
                             Kich_Thuoc = ct.BienThe?.Kich_Thuoc,
                             So_Luong = ct.So_Luong,
@@ -267,7 +273,7 @@ namespace FashionStore.Repositories.Implementations
                 {
                     Ma_SanPham = ct.Ma_SanPham,
                     Ten_SanPham = ct.SanPham?.Ten_SanPham ?? "Sản phẩm",
-                    Hinh_Anh = ct.SanPham?.HinhAnhSanPhams?.FirstOrDefault()?.DuongDan,
+                    Hinh_Anh = ct.BienThe?.HinhAnh,
                     Mau_Sac = ct.BienThe?.Mau_Sac,
                     Kich_Thuoc = ct.BienThe?.Kich_Thuoc,
                     So_Luong = ct.So_Luong,
@@ -414,12 +420,14 @@ namespace FashionStore.Repositories.Implementations
                 var donHangs = await _context.DonHangs
                     .Where(d => d.Ma_KhachHang == maKhachHang)
                     .OrderByDescending(d => d.Ngay_Dat)
+                      .Include(d => d.DiaChiGiaoHang)
                     .Select(d => new
                     {
                         d.Ma_DonHang,
                         d.Ngay_Dat,
                         d.Tong_Tien,
                         d.Trang_Thai,
+                        d.DiaChiGiaoHang,
                         ChiTiet = d.ChiTietDonHangs.Select(ct => new
                         {
                             ct.Ma_SanPham,
@@ -427,9 +435,8 @@ namespace FashionStore.Repositories.Implementations
                             ct.So_Luong,
                             ct.DonGia,
                             Ten_SanPham = ct.SanPham!.Ten_SanPham,
-                            HinhAnh = ct.SanPham.HinhAnhSanPhams.FirstOrDefault() != null
-                                ? ct.SanPham.HinhAnhSanPhams.First().DuongDan
-                                : "/images/no-image.jpg",
+                            HinhAnh = ct.BienThe.HinhAnh
+                                ?? "/images/no-image.jpg",
                             Mau_Sac = ct.BienThe.Mau_Sac,
                             Kich_Thuoc = ct.BienThe.Kich_Thuoc
                         }).ToList()
@@ -443,7 +450,7 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi khi lấy danh sách đơn hàng: " + ex.Message, 500);
             }
         }
-        public async Task<ResponseMessageResult> CapNhatTrangThaiAsync(string maDonHang, string trangThaiMoi)
+        public async Task<ResponseMessageResult> CapNhatTrangThaiAsync(int? maShipper,int? maNhanVien,string maDonHang, string trangThaiMoi)
         {
             try
             {
@@ -453,12 +460,20 @@ namespace FashionStore.Repositories.Implementations
                 if (donHang == null)
                     return _response.SetFail("Đơn hàng không tồn tại!", 404);
 
-                // Kiểm tra trạng thái hiện tại, ví dụ:
                 // Không cho cập nhật nếu đơn đã giao hoặc đã hủy
                 if (donHang.Trang_Thai == "Đã giao" || donHang.Trang_Thai == "Đã hủy")
                     return _response.SetFail($"Không thể cập nhật trạng thái đơn hàng đã '{donHang.Trang_Thai}'!", 400);
 
                 donHang.Trang_Thai = trangThaiMoi;
+                if (maNhanVien != null)
+                {
+                    donHang.Ma_NhanVien = maNhanVien;
+
+                }
+                if (maNhanVien != null)
+                {
+                    donHang.Ma_Shipper = maShipper;
+                }
                 await _context.SaveChangesAsync();
 
                 return _response.SetSuccess("Cập nhật trạng thái thành công!", new
@@ -472,6 +487,7 @@ namespace FashionStore.Repositories.Implementations
                 return _response.SetFail("Lỗi cập nhật trạng thái: " + ex.Message, 500);
             }
         }
+
         public async Task<DonHang?> GetDonHangForInvoiceAsync(string maDonHang)
         {
             return await _context.DonHangs
@@ -485,6 +501,36 @@ namespace FashionStore.Repositories.Implementations
                     .ThenInclude(ct => ct.BienThe!)
                 .FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
         }
+        public async Task<ResponseMessageResult> GanDonHangChoShipperAsync( string maDonHang)
+        {
+            // 1️⃣ Lấy đơn hàng
+            var donHang = await _context.DonHangs.FirstOrDefaultAsync(d => d.Ma_DonHang == maDonHang);
+            if (donHang == null)
+                return _response.SetFail("Đơn hàng không tồn tại", 404);
+
+            // 2️⃣ Lấy danh sách shipper khả dụng
+            var availableShippers = await _context.Shippers
+                .Where(s => s.TrangThai == "online") // trạng thái shipper khả dụng
+                .ToListAsync();
+
+            if (!availableShippers.Any())
+                return _response.SetFail("Hiện không có shipper khả dụng", 404);
+
+            // 3️⃣ Random 1 shipper từ danh sách khả dụng
+            var random = new Random();
+            var shipper = availableShippers[random.Next(availableShippers.Count)];
+
+            // 4️⃣ Gán shipper vào đơn hàng
+            donHang.Ma_Shipper = shipper.Ma_Shipper;
+            donHang.Trang_Thai = "Đang chờ shipper tới nhận hàng";
+
+            await _context.SaveChangesAsync();
+
+            return _response.SetSuccess($"Đơn hàng {maDonHang} đã được gán cho shipper {shipper.Ten_DayDu}, biển số xe shipper là {shipper.BienSoXe} với số điện thoại là {shipper.SoDienThoai}");
+
+        }
+
+
         public async Task<string> GenerateInvoiceHtmlAsync(string maDonHang)
         {
             var donHang = await GetDonHangForInvoiceAsync(maDonHang);
@@ -759,6 +805,46 @@ namespace FashionStore.Repositories.Implementations
             return _response.SetSuccess("Tìm khách hàng thành công!", result);
         }
 
+        public async Task<ResponseMessageResult> GetDonHangByShipperAsync(int maShipper)
+        {
+            try
+            {
+                var donHangs = await _context.DonHangs
+                    .Where(d => d.Ma_Shipper == maShipper && d.Trang_Thai== "Đang chờ shipper tới nhận hàng" ||d.Trang_Thai=="Đang giao" || d.Trang_Thai=="Đã giao")
+                    .OrderByDescending(d => d.Ngay_Dat)
+                      .Include(d => d.DiaChiGiaoHang)
+                      .Include(pt=>pt.PhuongThucThanhToan)
+                    .Select(d => new
+                    {
+                        d.Ma_DonHang,
+                        d.Ngay_Dat,
+                        d.Tong_Tien,
+                        d.Trang_Thai,
+                        d.PhuongThucThanhToan.Ten_PhuongThuc,
+                        d.DiaChiGiaoHang,
+                        ChiTiet = d.ChiTietDonHangs.Select(ct => new
+                        {
+                            ct.Ma_SanPham,
+                            ct.Ma_BienThe,
+                            ct.So_Luong,
+                            ct.DonGia,
+                            Ten_SanPham = ct.SanPham!.Ten_SanPham,
+                            HinhAnh = ct.BienThe.HinhAnh
+                                ?? "/images/no-image.jpg",
+                            Mau_Sac = ct.BienThe.Mau_Sac,
+                            Kich_Thuoc = ct.BienThe.Kich_Thuoc
+                        }).ToList()
+                    })
+                    .ToListAsync();
+
+                return _response.SetSuccess("Lấy danh sách đơn hàng thành công!", donHangs);
+            }
+            catch (Exception ex)
+            {
+                return _response.SetFail("Lỗi khi lấy danh sách đơn hàng: " + ex.Message, 500);
+            }
+        }
+
         // 4. LỊCH SỬ TRẠNG THÁI ĐƠN HÀNG
         //public async Task<ResponseMessageResult> GetLichSuTrangThaiAsync(string maDonHang)
         //{
@@ -783,6 +869,7 @@ namespace FashionStore.Repositories.Implementations
     {
         public int Ma_KhachHang { get; set; }
         public int Ma_PhuongThuc { get; set; }
+        public int Ma_DiaChi { get; set; }
         public string? Ma_Voucher { get; set; }
         public List<TaoChiTietDonHangItem> ChiTiet { get; set; } = new();
     }

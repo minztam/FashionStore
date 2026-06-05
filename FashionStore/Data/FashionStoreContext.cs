@@ -15,7 +15,6 @@ namespace FashionStore.Data
         public DbSet<KhachHang> KhachHangs { get; set; }
         public DbSet<DanhMuc> DanhMucs { get; set; }
         public DbSet<SanPham> SanPhams { get; set; }
-        public DbSet<HinhAnhSanPham> HinhAnhSanPhams { get; set; }
         public DbSet<SanPhamBienThe> SanPhamBienThes { get; set; }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
@@ -24,6 +23,7 @@ namespace FashionStore.Data
         public DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<DiaChiGiaoHang> DiaChiGiaoHangs { get; set; }
+        public DbSet<Shipper> Shippers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -35,7 +35,12 @@ namespace FashionStore.Data
             modelBuilder.Entity<DanhMuc>().HasData(DanhMucSeedData.GetSeedData());
             modelBuilder.Entity<SanPham>().HasData(SanPhamSeedData.GetSeedData());
             modelBuilder.Entity<SanPhamBienThe>().HasData(SanPhamBienTheSeedData.GetSeedData());
-            modelBuilder.Entity<HinhAnhSanPham>().HasData(HinhAnhSanPhamSeedData.GetSeedData());
+            modelBuilder.Entity<KhachHang>().HasData(KhachHangSeedData.GetSeedData());
+            modelBuilder.Entity<Shipper>().HasData(ShipperSeedData.GetSeedData());
+            modelBuilder.Entity<TaiKhoan>().HasData(TaiKhoanSeedData.GetSeedData());
+            modelBuilder.Entity<NhanVien>().HasData(NhanVienSeedData.GetSeedData());
+
+
 
             // ===============================
             // 2. QUAN HỆ VAI TRÒ – TÀI KHOẢN
@@ -135,14 +140,7 @@ namespace FashionStore.Data
                 .HasForeignKey(sp => sp.Ma_DanhMuc)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ===============================
-            // 9. HÌNH ẢNH SẢN PHẨM
-            // ===============================
-            modelBuilder.Entity<HinhAnhSanPham>()
-                .HasOne(ha => ha.SanPham)
-                .WithMany(sp => sp.HinhAnhSanPhams)
-                .HasForeignKey(ha => ha.Ma_SanPham)
-                .OnDelete(DeleteBehavior.Cascade);
+           
 
             // ===============================
             // 10. SẢN PHẨM BIẾN THỂ – SẢN PHẨM
@@ -180,22 +178,35 @@ namespace FashionStore.Data
                 .Property(p => p.Giam_Tien)
                 .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<DiaChiGiaoHang>(entity =>
-            {
-                entity.HasKey(dc => dc.Ma_DiaChi);
+            // KhachHang – DiaChi: Cascade (HỢP LÝ)
+            modelBuilder.Entity<DiaChiGiaoHang>()
+                .HasOne(dc => dc.KhachHang)
+                .WithMany(kh => kh.DiaChiGiaoHangs)
+                .HasForeignKey(dc => dc.Ma_KhachHang)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(dc => dc.KhachHang)
-                      .WithMany(kh => kh.DiaChiGiaoHangs)
-                      .HasForeignKey(dc => dc.Ma_KhachHang)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
+            // GioHang – DiaChi: RESTRICT (không xóa Giỏ hàng nếu địa chỉ bị xóa)
+
+            // DonHang – DiaChi: RESTRICT (không xóa Đơn hàng nếu địa chỉ bị xóa)
             modelBuilder.Entity<DonHang>()
-    .HasOne(dh => dh.DiaChiGiaoHang)
+                .HasOne(dh => dh.DiaChiGiaoHang)
+                .WithMany()
+                .HasForeignKey(dh => dh.Ma_DiaChi)
+                .OnDelete(DeleteBehavior.Restrict);
+            // ===============================
+            // TÀI KHOẢN – SHIPPER (1–1)
+            // ===============================
+            modelBuilder.Entity<Shipper>()
+                .HasOne(s => s.TaiKhoan)
+                .WithOne(t => t.Shipper)
+                .HasForeignKey<Shipper>(s => s.Ma_TaiKhoan)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DonHang>()
+    .HasOne(dh => dh.Shipper)
     .WithMany()
-    .HasForeignKey(dh => dh.Ma_DiaChi)
-    .OnDelete(DeleteBehavior.Restrict);
-
-
+    .HasForeignKey(dh => dh.Ma_Shipper)
+    .OnDelete(DeleteBehavior.SetNull);
             // ===============================
             // 12. SEED ROLE
             // ===============================
@@ -203,7 +214,12 @@ namespace FashionStore.Data
                 new VaiTro { Ma_VaiTro = "1111-1111-1111-1111", Ten_VaiTro = "Admin" },
                 new VaiTro { Ma_VaiTro = "1111-2222-1111-2222", Ten_VaiTro = "Nhân viên bán hàng" },
                 new VaiTro { Ma_VaiTro = "1111-3333-1111-3333", Ten_VaiTro = "Nhân viên kho" },
-                new VaiTro { Ma_VaiTro = "2222-2222-2222-2222", Ten_VaiTro = "Khách hàng" }
+                new VaiTro { Ma_VaiTro = "2222-2222-2222-2222", Ten_VaiTro = "Khách hàng" },
+                new VaiTro
+                {
+                    Ma_VaiTro = "3333-3333-3333-3333",
+                    Ten_VaiTro = "Shipper"
+                }
             );
             modelBuilder.Entity<PhuongThucThanhToan>().HasData(
       new PhuongThucThanhToan { Ma_PhuongThuc = 1, Ten_PhuongThuc = "Thanh toán khi nhận hàng (COD)" },

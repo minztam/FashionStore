@@ -53,7 +53,7 @@ namespace FashionStore.Controllers
                 Trang_Thai = dto.Trang_Thai
             };
 
-            var result = await _sanPhamRepo.CreateAsync(sp, dto.HinhAnhs, dto.BienThes);
+            var result = await _sanPhamRepo.CreateAsync(sp, dto.BienThes);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -79,30 +79,30 @@ namespace FashionStore.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        //======== POST: api/SanPham/{maSanPham}/images ========
-        [HttpPost("{maSanPham}/images")]
-        public async Task<IActionResult> AddImage(string maSanPham, [FromBody] HinhAnhDTO dto)
-        {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.DuongDan))
-                return BadRequest(new ResponseMessageResult { Success = false, Message = "Đường dẫn hình ảnh không hợp lệ.", StatusCode = 400 });
+        ////======== POST: api/SanPham/{maSanPham}/images ========
+        //[HttpPost("{maSanPham}/images")]
+        //public async Task<IActionResult> AddImage(string maSanPham, [FromBody] HinhAnhDTO dto)
+        //{
+        //    if (dto == null || string.IsNullOrWhiteSpace(dto.DuongDan))
+        //        return BadRequest(new ResponseMessageResult { Success = false, Message = "Đường dẫn hình ảnh không hợp lệ.", StatusCode = 400 });
 
-            var img = new HinhAnhSanPham
-            {
-                Ma_SanPham = maSanPham,
-                DuongDan = dto.DuongDan.Trim()
-            };
+        //    var img = new HinhAnhSanPham
+        //    {
+        //        Ma_SanPham = maSanPham,
+        //        DuongDan = dto.DuongDan.Trim()
+        //    };
 
-            var result = await _sanPhamRepo.AddImageAsync(img);
-            return StatusCode(result.StatusCode, result);
-        }
+        //    var result = await _sanPhamRepo.AddImageAsync(img);
+        //    return StatusCode(result.StatusCode, result);
+        //}
 
-        //======== DELETE: api/SanPham/images/{id} ========
-        [HttpDelete("images/{id}")]
-        public async Task<IActionResult> DeleteImage(int id)
-        {
-            var result = await _sanPhamRepo.DeleteImageAsync(id);
-            return StatusCode(result.StatusCode, result);
-        }
+        ////======== DELETE: api/SanPham/images/{id} ========
+        //[HttpDelete("images/{id}")]
+        //public async Task<IActionResult> DeleteImage(int id)
+        //{
+        //    var result = await _sanPhamRepo.DeleteImageAsync(id);
+        //    return StatusCode(result.StatusCode, result);
+        //}
 
         //======== PATCH: api/SanPham/{maSanPham} ========
         [HttpPatch("{maSanPham}")]

@@ -14,7 +14,11 @@ namespace FashionStore.Models
         public string Trang_Thai { get; set; } = "Chờ xác nhận";
         public int Ma_PhuongThuc { get; set; }
         public string? Ma_Voucher { get; set; }
-
+        public int? Ma_Shipper { get; set; }
+        public int? Ma_NhanVien { get; set; }
+        public Shipper? Shipper { get; set; }
+        [ForeignKey("Ma_NhanVien")]
+        public NhanVien? NhanVien { get; set; }
         // Navigation
         [ForeignKey("Ma_KhachHang")]
         public KhachHang? KhachHang { get; set; }
@@ -24,7 +28,7 @@ namespace FashionStore.Models
         public Voucher? Voucher { get; set; }
 
         public ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
-        public int? Ma_DiaChi { get; set; }
+        public int Ma_DiaChi { get; set; }
         public DiaChiGiaoHang? DiaChiGiaoHang { get; set; }
     }
 }

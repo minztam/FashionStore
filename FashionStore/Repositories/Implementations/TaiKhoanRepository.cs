@@ -23,6 +23,8 @@ namespace FashionStore.Repositories.Implementations
         {
             var list = await _context.TaiKhoans
                 .Include(t => t.VaiTro)
+                .Include(nv=>nv.NhanVien)
+                .Include(s=>s.Shipper)
                 .ToListAsync();
 
             if (list == null || list.Count == 0)
@@ -38,10 +40,19 @@ namespace FashionStore.Repositories.Implementations
                 t.Email,
                 t.Ngay_Tao,
                 TrangThai = t.Trang_Thai == true ? "Hoạt động" : "Tạm khóa",
-                TenVaiTro = t.VaiTro != null ? t.VaiTro.Ten_VaiTro : "Không xác định",
+                TenVaiTro = t.VaiTro?.Ten_VaiTro ?? "Không xác định",
                 MaVaiTro = t.Ma_VaiTro,
-                t.Da_XacThuc
-            });
+                DiaChi=t.NhanVien?.DiaChi,
+                // Ép fullname + phone dựa trên loại tài khoản có dữ liệu
+                HoTen = t.NhanVien?.HoTen ?? t.Shipper?.Ten_DayDu ?? "Chưa cập nhật",
+                SoDienThoai = t.NhanVien?.SoDienThoai ?? t.Shipper?.SoDienThoai ?? "Chưa có",
+                HinhAnh = t.NhanVien?.Hinh_Anh ?? t.Shipper?.HinhAnh,
+                BienSoXe = t.Shipper?.BienSoXe,
+                Da_XacThuc = t.Da_XacThuc
+            }).ToList();
+
+
+
 
             return _response.SetSuccess("Lấy danh sách tài khoản thành công!", result);
         }
@@ -52,6 +63,8 @@ namespace FashionStore.Repositories.Implementations
         {
             return (await _context.TaiKhoans
                                     .Include(t => t.VaiTro)
+                                    .Include(nv=>nv.NhanVien)
+                                    .Include(s=>s.Shipper)
                                     .SingleOrDefaultAsync(t => t.Ma_TaiKhoan == maTaiKhoan));
         }
 
@@ -127,48 +140,51 @@ namespace FashionStore.Repositories.Implementations
         }
 
         // Cập nhật toàn bộ thông tin tài khoản
-        public async Task<bool> UpdateAsync(int maTaiKhoan, string? tenDangNhap, string? matKhau, string? maVaiTro, string? email)
+        public async Task UpdateAsync(TaiKhoan taiKhoan)
         {
-            var taiKhoan = await _context.TaiKhoans.FindAsync(maTaiKhoan);
-            if (taiKhoan == null)
-                return false;
+            // Kiểm tra entity đã được attach chưa
+            var existing = await _context.TaiKhoans
+                .Include(t => t.NhanVien)
+                .Include(t => t.Shipper)
+                .FirstOrDefaultAsync(t => t.Ma_TaiKhoan == taiKhoan.Ma_TaiKhoan);
 
-            // Cập nhật tên đăng nhập nếu có truyền vào
-            if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            if (existing == null)
+                throw new Exception("Tài khoản không tồn tại.");
+
+            // Cập nhật các trường cơ bản
+            existing.Ten_DangNhap = taiKhoan.Ten_DangNhap;
+            existing.Email = taiKhoan.Email;
+            existing.Mat_Khau = taiKhoan.Mat_Khau;
+            existing.Ma_VaiTro = taiKhoan.Ma_VaiTro;
+            existing.Trang_Thai = taiKhoan.Trang_Thai;
+
+            // Cập nhật thông tin nhân viên
+            if (taiKhoan.NhanVien != null)
             {
-                // Kiểm tra trùng tên đăng nhập
-                if (await _context.TaiKhoans.AnyAsync(t => t.Ten_DangNhap == tenDangNhap && t.Ma_TaiKhoan != maTaiKhoan))
-                    throw new InvalidOperationException("Tên đăng nhập đã tồn tại!");
-                taiKhoan.Ten_DangNhap = tenDangNhap;
+                if (existing.NhanVien == null)
+                    existing.NhanVien = new NhanVien { Ma_TaiKhoan = existing.Ma_TaiKhoan };
+
+                existing.NhanVien.HoTen = taiKhoan.NhanVien.HoTen;
+                existing.NhanVien.SoDienThoai = taiKhoan.NhanVien.SoDienThoai;
+                existing.NhanVien.DiaChi = taiKhoan.NhanVien.DiaChi;
             }
 
-            // Cập nhật mật khẩu nếu có
-            if (!string.IsNullOrWhiteSpace(matKhau))
-                taiKhoan.Mat_Khau = matKhau;
-
-            // Cập nhật vai trò nếu có
-            if (!string.IsNullOrWhiteSpace(maVaiTro))
+            // Cập nhật thông tin shipper
+            if (taiKhoan.Shipper != null)
             {
-                var vaiTro = await _context.VaiTros.FindAsync(maVaiTro);
-                if (vaiTro == null)
-                    throw new InvalidOperationException("Vai trò không tồn tại!");
-                taiKhoan.Ma_VaiTro = maVaiTro;
-                taiKhoan.VaiTro = vaiTro;
+                if (existing.Shipper == null)
+                    existing.Shipper = new Shipper { Ma_TaiKhoan = existing.Ma_TaiKhoan };
+
+                existing.Shipper.Ten_DayDu = taiKhoan.Shipper.Ten_DayDu;
+                existing.Shipper.SoDienThoai = taiKhoan.Shipper.SoDienThoai;
+                existing.Shipper.BienSoXe = taiKhoan.Shipper.BienSoXe;
+                existing.Shipper.HinhAnh = taiKhoan.Shipper.HinhAnh;
+                existing.Shipper.TrangThai = taiKhoan.Shipper.TrangThai;
             }
 
-            // Cập nhật email nếu có
-            if (!string.IsNullOrWhiteSpace(email))
-            {
-                // Kiểm tra trùng email
-                if (await _context.TaiKhoans.AnyAsync(t => t.Email == email && t.Ma_TaiKhoan != maTaiKhoan))
-                    throw new InvalidOperationException("Email đã tồn tại!");
-                taiKhoan.Email = email;
-            }
-
-            _context.TaiKhoans.Update(taiKhoan);
-            return await _context.SaveChangesAsync() > 0;
+            _context.TaiKhoans.Update(existing);
+            await _context.SaveChangesAsync();
         }
-
         //Cập nhật một phần thông tin tài khoản (PATCH)
         public async Task<bool> UpdatePartialAsync(int maTaiKhoan, TaiKhoanDTO dto)
         {
@@ -243,6 +259,9 @@ namespace FashionStore.Repositories.Implementations
         {
             return await _context.TaiKhoans 
                 .Include(t => t.VaiTro)
+                .Include(kh=>kh.KhachHang)
+                .Include(nv=>nv.NhanVien)
+                .Include(s=>s.Shipper)
                 .FirstOrDefaultAsync(t => t.Ten_DangNhap == username && t.Mat_Khau == password);
         }
 
@@ -282,7 +301,9 @@ namespace FashionStore.Repositories.Implementations
             // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
             var kh = new KhachHang
             {
-                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                HoTen=dto.HoTen,
+                SoDienThoai=dto.SoDienThoai
             };
 
             _context.KhachHangs.Add(kh);
@@ -330,7 +351,7 @@ namespace FashionStore.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<TaiKhoan?> RegisterSaleAssistanceAsync(RegisterDTO dto)
+        public async Task<TaiKhoan?> RegisterEmployeeAsync(SaleRegisterDTO dto)
         {
             // Kiểm tra trùng username
             if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
@@ -355,7 +376,7 @@ namespace FashionStore.Repositories.Implementations
                 Ten_DangNhap = dto.Ten_DangNhap,
                 Email = dto.Email,
                 Mat_Khau = dto.Mat_Khau,
-                Ma_VaiTro = "1111-2222-1111-2222", // khách hàng
+                Ma_VaiTro = dto?.Ma_VaiTro, // khách hàng
                 Ma_XacThuc = token,
                 Han_XacThuc = DateTime.UtcNow.AddDays(1)
             };
@@ -364,12 +385,33 @@ namespace FashionStore.Repositories.Implementations
             await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
 
             // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
-            var nv = new NhanVien
+            if (dto.Ma_VaiTro == "3333-3333-3333-3333") // SHIPPER
             {
-                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
-            };
+                var shipper = new Shipper
+                {
+                    Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                    Ten_DayDu = dto.HoTen,
+                    BienSoXe = dto.BienSoXe,
+                    SoDienThoai = dto.SoDienThoai,
+                    HinhAnh = dto.Hinh_Anh
+                };
 
-            _context.NhanViens.Add(nv);
+                _context.Shippers.Add(shipper);
+            }
+            else if(dto.Ma_VaiTro == "1111-2222-1111-2222") // SALE / NHÂN VIÊN
+            {
+                var nv = new NhanVien
+                {
+                    Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan,
+                    HoTen = dto.HoTen,
+                    DiaChi = dto.DiaChi,
+                    Hinh_Anh = dto.Hinh_Anh,
+                    SoDienThoai = dto.SoDienThoai
+                };
+
+                _context.NhanViens.Add(nv);
+            }
+
             await _context.SaveChangesAsync();
 
             return taiKhoan;
@@ -419,6 +461,51 @@ namespace FashionStore.Repositories.Implementations
 
             return taiKhoan;
 
+        }
+
+        public async Task<TaiKhoan?> RegisterShipperAsync(RegisterDTO dto)
+        {
+            // Kiểm tra trùng username
+            if (await _context.TaiKhoans.AnyAsync(x => x.Ten_DangNhap == dto.Ten_DangNhap))
+                return null;
+
+            // Kiểm tra trùng email
+            if (await _context.TaiKhoans.AnyAsync(x => x.Email == dto.Email))
+                return null;
+
+            if (string.IsNullOrWhiteSpace(dto.Mat_Khau))
+                return null;
+
+            // Hash mật khẩu
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Mat_Khau);
+
+            // Tạo token xác thực
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            // Tạo tài khoản
+            var taiKhoan = new TaiKhoan
+            {
+                Ten_DangNhap = dto.Ten_DangNhap,
+                Email = dto.Email,
+                Mat_Khau = dto.Mat_Khau,
+                Ma_VaiTro = "3333-3333-3333-3333", // shipper
+                Ma_XacThuc = token,
+                Han_XacThuc = DateTime.UtcNow.AddDays(1)
+            };
+
+            _context.TaiKhoans.Add(taiKhoan);
+            await _context.SaveChangesAsync(); // Lưu để sinh Ma_TaiKhoan
+
+            // Tạo khách hàng (Ma_KhachHang sẽ tự tăng)
+            var sp = new Shipper
+            {
+                Ma_TaiKhoan = taiKhoan.Ma_TaiKhoan
+            };
+
+            _context.Shippers.Add(sp);
+            await _context.SaveChangesAsync();
+
+            return taiKhoan;
         }
     }
 }

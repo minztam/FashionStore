@@ -12,6 +12,7 @@ namespace FashionStore.Models
         public required string DiaChi_ChiTiet { get; set; }
         public string? GhiChu { get; set; }
 
+        public bool IsActive { get; set; }
         public  int Ma_KhachHang { get; set; }
 
         public KhachHang KhachHang { get; set; }

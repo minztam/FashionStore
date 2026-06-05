@@ -12,7 +12,10 @@ namespace FashionStore.Repositories.Interfaces
         Task<ResponseMessageResult> GetChiTietDonHangAsync(string maDH);
         Task<ResponseMessageResult> ThongKeDonHangAsync(DateTime? fromDate, DateTime? toDate, string? groupBy);
         Task<ResponseMessageResult> GetDonHangByKhachHangAsync(int maKhachHang);
-        Task<ResponseMessageResult> CapNhatTrangThaiAsync(string maDonHang, string trangThaiMoi);
+        Task<ResponseMessageResult> GetDonHangByShipperAsync(int maShipper);
+
+        Task<ResponseMessageResult> CapNhatTrangThaiAsync(int? maShipper,int? maNhanVien,string maDonHang, string trangThaiMoi);
         Task<string> GenerateInvoiceHtmlAsync(string maDonHang);
+        Task<ResponseMessageResult> GanDonHangChoShipperAsync(string maDonHang);
     }
 }

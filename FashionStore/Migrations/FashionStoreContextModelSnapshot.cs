@@ -60,6 +60,15 @@ namespace FashionStore.Migrations
                     b.Property<int>("Ma_BienThe")
                         .HasColumnType("int");
 
+                    b.Property<string>("InvalidReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsInvalid")
+                        .HasColumnType("bit");
+
                     b.Property<int>("So_Luong")
                         .HasColumnType("int");
 
@@ -110,28 +119,63 @@ namespace FashionStore.Migrations
                         {
                             Ma_DanhMuc = "DM001A",
                             Ma_DanhMucCha = "DM001",
-                            Ten_DanhMuc = "Áo nam",
+                            Ten_DanhMuc = "Áo thun & Polo",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_DanhMuc = "DM001B",
                             Ma_DanhMucCha = "DM001",
-                            Ten_DanhMuc = "Quần nam",
+                            Ten_DanhMuc = "Áo sơ mi nam",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_DanhMuc = "DM001C",
+                            Ma_DanhMucCha = "DM001",
+                            Ten_DanhMuc = "Áo khoác & Hoodie nam",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_DanhMuc = "DM001D",
+                            Ma_DanhMucCha = "DM001",
+                            Ten_DanhMuc = "Quần jeans nam",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_DanhMuc = "DM001E",
+                            Ma_DanhMucCha = "DM001",
+                            Ten_DanhMuc = "Quần short & Jogger nam",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_DanhMuc = "DM002A",
                             Ma_DanhMucCha = "DM002",
-                            Ten_DanhMuc = "Áo nữ",
+                            Ten_DanhMuc = "Áo nữ & Croptop",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_DanhMuc = "DM002B",
                             Ma_DanhMucCha = "DM002",
-                            Ten_DanhMuc = "Váy nữ",
+                            Ten_DanhMuc = "Váy & Đầm nữ",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_DanhMuc = "DM002C",
+                            Ma_DanhMucCha = "DM002",
+                            Ten_DanhMuc = "Quần nữ & Legging",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_DanhMuc = "DM002D",
+                            Ma_DanhMucCha = "DM002",
+                            Ten_DanhMuc = "Áo khoác nữ",
                             Trang_Thai = true
                         });
                 });
@@ -155,6 +199,9 @@ namespace FashionStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Ma_KhachHang")
                         .HasColumnType("int");
 
@@ -174,13 +221,19 @@ namespace FashionStore.Migrations
                     b.Property<string>("Ma_DonHang")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("Ma_DiaChi")
+                    b.Property<int>("Ma_DiaChi")
                         .HasColumnType("int");
 
                     b.Property<int>("Ma_KhachHang")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Ma_NhanVien")
+                        .HasColumnType("int");
+
                     b.Property<int>("Ma_PhuongThuc")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Ma_Shipper")
                         .HasColumnType("int");
 
                     b.Property<string>("Ma_Voucher")
@@ -202,7 +255,11 @@ namespace FashionStore.Migrations
 
                     b.HasIndex("Ma_KhachHang");
 
+                    b.HasIndex("Ma_NhanVien");
+
                     b.HasIndex("Ma_PhuongThuc");
+
+                    b.HasIndex("Ma_Shipper");
 
                     b.HasIndex("Ma_Voucher");
 
@@ -222,7 +279,8 @@ namespace FashionStore.Migrations
 
                     b.HasKey("Ma_GioHang");
 
-                    b.HasIndex("Ma_KhachHang");
+                    b.HasIndex("Ma_KhachHang")
+                        .IsUnique();
 
                     b.ToTable("GioHang");
                 });
@@ -246,134 +304,6 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_SanPham");
 
                     b.ToTable("HinhAnhSanPham");
-
-                    b.HasData(
-                        new
-                        {
-                            Ma_HinhAnh = 1,
-                            DuongDan = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
-                            Ma_SanPham = "SP001"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 2,
-                            DuongDan = "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800",
-                            Ma_SanPham = "SP001"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 3,
-                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
-                            Ma_SanPham = "SP001"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 4,
-                            DuongDan = "https://images.unsplash.com/photo-1617114919317-8f6dce8e9df5?w=800",
-                            Ma_SanPham = "SP001"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 5,
-                            DuongDan = "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800",
-                            Ma_SanPham = "SP002"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 6,
-                            DuongDan = "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800",
-                            Ma_SanPham = "SP002"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 7,
-                            DuongDan = "https://images.unsplash.com/photo-1550616541-96cf6efa3c5e?w=800",
-                            Ma_SanPham = "SP002"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 8,
-                            DuongDan = "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800",
-                            Ma_SanPham = "SP002"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 9,
-                            DuongDan = "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800",
-                            Ma_SanPham = "SP003"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 10,
-                            DuongDan = "https://images.unsplash.com/photo-1602293589930-45aad59ba3e4?w=800",
-                            Ma_SanPham = "SP003"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 11,
-                            DuongDan = "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800",
-                            Ma_SanPham = "SP003"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 12,
-                            DuongDan = "https://images.unsplash.com/photo-1611318440154-8f60a0b9f512?w=800",
-                            Ma_SanPham = "SP004"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 13,
-                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
-                            Ma_SanPham = "SP004"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 14,
-                            DuongDan = "https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?w=800",
-                            Ma_SanPham = "SP004"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 15,
-                            DuongDan = "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800",
-                            Ma_SanPham = "SP005"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 16,
-                            DuongDan = "https://images.unsplash.com/photo-1612902376491-7a8a9b42425f?w=800",
-                            Ma_SanPham = "SP005"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 17,
-                            DuongDan = "https://images.unsplash.com/photo-1622473596033-9d8d1e7e6a5a?w=800",
-                            Ma_SanPham = "SP005"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 18,
-                            DuongDan = "https://images.unsplash.com/photo-1551029506-0807df4e2031?w=800",
-                            Ma_SanPham = "SP006"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 19,
-                            DuongDan = "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800",
-                            Ma_SanPham = "SP006"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 20,
-                            DuongDan = "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800",
-                            Ma_SanPham = "SP006"
-                        },
-                        new
-                        {
-                            Ma_HinhAnh = 21,
-                            DuongDan = "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800",
-                            Ma_SanPham = "SP006"
-                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.KhachHang", b =>
@@ -406,6 +336,17 @@ namespace FashionStore.Migrations
                         .HasFilter("[Ma_TaiKhoan] IS NOT NULL");
 
                     b.ToTable("KhachHang");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_KhachHang = 1,
+                            DiaChi = "Thanh Hóa",
+                            Hinh_Anh = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk8nOS9W4aP2bq6MY4K-HlIusxbKz4Bw1PEw&s",
+                            HoTen = "Trịnh Anh Đức",
+                            Ma_TaiKhoan = 2,
+                            SoDienThoai = "0989105436"
+                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.NhanVien", b =>
@@ -437,6 +378,17 @@ namespace FashionStore.Migrations
                         .IsUnique();
 
                     b.ToTable("NhanVien");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_NhanVien = 2,
+                            DiaChi = "Sài Gòn",
+                            Hinh_Anh = "https://cdn.24h.com.vn/upload/2-2021/images/2021-04-09/untitled-8-1617960812-512-width650height900.jpg",
+                            HoTen = "Nguyễn Đình Văn",
+                            Ma_TaiKhoan = 3,
+                            SoDienThoai = "0982343544"
+                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.PhuongThucThanhToan", b =>
@@ -503,48 +455,96 @@ namespace FashionStore.Migrations
                         {
                             Ma_SanPham = "SP001",
                             Ma_DanhMuc = "DM001A",
-                            Mo_Ta = "Chất vải Oxford nhập khẩu, thoáng mát, không nhăn, form dáng chuẩn công sở và dự tiệc.",
-                            Ten_SanPham = "Áo Sơ Mi Oxford Nam Cao Cấp",
+                            Mo_Ta = "Form rộng chuẩn street style, vải dày dặn không xù lông, mặc cực mát\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m70, Nặng < 68kg\r\nSize XL: Cao < 1m75, Nặng < 75kg\r\nSize XXL: Cao < 1m80, Nặng < 85kg",
+                            Ten_SanPham = "Áo Thun Trơn Basic Unisex 100% Cotton 4 Chiều",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP002",
-                            Ma_DanhMuc = "DM002B",
-                            Mo_Ta = "Lụa cao cấp mát mẻ, họa tiết hoa nhí vintage, dáng dài thướt tha, đi biển hay dự tiệc đều đẹp.",
-                            Ten_SanPham = "Váy Maxi Lụa Hoa Nhí Thanh Lịch",
+                            Ma_DanhMuc = "DM001A",
+                            Mo_Ta = "Vải Pima cotton siêu mềm, cổ bẻ đứng form, logo thêu nổi bật\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 50–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–70kg\r\nSize XL: Cao 1m72–1m78, Nặng 70–78kg\r\nSize XXL: Cao 1m78–1m82, Nặng 78–85kg",
+                            Ten_SanPham = "Áo Polo Nam Cao Cấp Pima Cotton Form Chuẩn",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP003",
                             Ma_DanhMuc = "DM001B",
-                            Mo_Ta = "Jeans co giãn 4 chiều, form slimfit tôn dáng, rách gối phong cách streetwear trẻ trung.",
-                            Ten_SanPham = "Quần Jeans Nam Slimfit Rách Gối",
+                            Mo_Ta = "Vải cotton thoáng mát, form chuẩn công sở, không nhăn\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 48–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–68kg\r\nSize XL: Cao 1m72–1m78, Nặng 68–75kg\r\nSize XXL: Cao 1m78–1m85, Nặng 75–85kg",
+                            Ten_SanPham = "Sơ Mi Nam Oxford Dài Tay Cao Cấp Form Chuẩn",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP004",
-                            Ma_DanhMuc = "DM002A",
-                            Mo_Ta = "Len mỏng nhẹ, dáng croptop tay dài, phối đồ mùa thu đông cực xinh, freesize từ 45-60kg.",
-                            Ten_SanPham = "Áo Len Croptop Nữ Dáng Rộng",
+                            Ma_DanhMuc = "DM001C",
+                            Mo_Ta = "Nỉ chân cua dày dặn, ấm áp mùa đông, form rộng cực chất\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m68, Nặng < 68kg\r\nSize XL: Cao < 1m75, Nặng < 78kg\r\nSize XXL: Cao < 1m82, Nặng < 90kg",
+                            Ten_SanPham = "Áo Hoodie Unisex Form Rộng Nỉ Bông 380GSM",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP005",
-                            Ma_DanhMuc = "DM002A",
-                            Mo_Ta = "Sơ mi kẻ caro hàn quốc, form rộng oversize, mặc mát cả mùa hè.",
-                            Ten_SanPham = "Sơ Mi Kẻ Sọc Nữ Form Rộng",
+                            Ma_DanhMuc = "DM001D",
+                            Mo_Ta = "Jeans cao cấp co giãn 4 chiều, form ôm tôn dáng, bền đẹp\r\nBảng size:\r\nSize M:  Cao < 1m60, Nặng < 60kg\r\nSize L:  Cao < 1m65, Nặng < 70kg\r\nSize XL: Cao < 1m70, Nặng < 76kg\r\nSize XXL: Cao < 1m75, Nặng < 80kg",
+                            Ten_SanPham = "Quần Jeans Nam Slimfit Co Giãn 4 Chiều",
                             Trang_Thai = true
                         },
                         new
                         {
                             Ma_SanPham = "SP006",
-                            Ma_DanhMuc = "DM001A",
-                            Mo_Ta = "Kaki dày dặn, có mũ tháo rời, chống nắng chống mưa nhẹ, form dáng trẻ trung.",
-                            Ten_SanPham = "Áo Khoác Kaki Nam Có Mũ",
+                            Ma_DanhMuc = "DM001E",
+                            Mo_Ta = "Hot trend 2025, nhiều túi tiện lợi, chất kaki dày dặn\r\nBảng size:\r\nSize M:  Eo 70–75cm\r\nSize L:  Eo 76–82cm\r\nSize XL: Eo 83–90cm\r\nSize XXL: Eo 90–100cm",
+                            Ten_SanPham = "Quần Short Kaki Nam Ống Rộng Cargo 6 Túi",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP023",
+                            Ma_DanhMuc = "DM001E",
+                            Mo_Ta = "Mặc nhà hoặc thể thao đều thoải mái, form đẹp\r\nBảng size:\r\nSize M:  Cao 1m55–1m65, Nặng 48–60kg\r\nSize L:  Cao 1m65–1m72, Nặng 60–70kg\r\nSize XL: Cao 1m72–1m78, Nặng 70–78kg\r\nSize XXL: Cao 1m78–1m85, Nặng 78–90kg",
+                            Ten_SanPham = "Quần Jogger Nam Thun Bo Gấu Co Giãn",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP007",
+                            Ma_DanhMuc = "DM002A",
+                            Mo_Ta = "Oversize cực xinh, mix đồ nào cũng đẹp, vải cotton mềm mại\r\nBảng size:\r\nSize S:  Cao < 1m55, Nặng < 48kg\r\nSize M:  Cao < 1m60, Nặng < 55kg\r\nSize L:  Cao < 1m65, Nặng < 62kg\r\nSize XL: Cao < 1m70, Nặng < 70kg",
+                            Ten_SanPham = "Áo Croptop Nữ Tay Lỡ Form Rộng Cotton",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP022",
+                            Ma_DanhMuc = "DM002A",
+                            Mo_Ta = "Mặc đi làm đi chơi đều sang chảnh, chất voan lụa mát\r\nBảng size:\r\nSize S:  Cao 1m50–1m58, Nặng 40–48kg\r\nSize M:  Cao 1m58–1m62, Nặng 48–55kg\r\nSize L:  Cao 1m62–1m68, Nặng 55–62kg\r\nSize XL: Cao 1m68–1m72, Nặng 62–70kg",
+                            Ten_SanPham = "Áo Sơ Mi Nữ Form Rộng Voan Lụa Cao Cấp",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP008",
+                            Ma_DanhMuc = "DM002B",
+                            Mo_Ta = "Che bụng mỡ cực tốt, mặc đi làm đi chơi đều hợp, freesize\r\nBảng size:\r\nFreesize: phù hợp Cao 1m50–1m68, Nặng 40–60kg",
+                            Ten_SanPham = "Váy Đầm Nữ Dáng A Babydoll Xinh Xắn",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP009",
+                            Ma_DanhMuc = "DM002C",
+                            Mo_Ta = "Vải cotton dày dặn, nâng mông tự nhiên, tôn dáng cực đẹp\r\nBảng size:\r\nSize S:  Eo 55–62cm\r\nSize M:  Eo 63–70cm\r\nSize L:  Eo 71–78cm\r\nSize XL: Eo 79–88cm",
+                            Ten_SanPham = "Quần Legging Nữ Lưng Cao Độn Mông",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_SanPham = "SP010",
+                            Ma_DanhMuc = "DM002D",
+                            Mo_Ta = "Form rộng đẹp, đi mưa nhẹ thoải mái, chống gió lạnh tốt\r\nBảng size:\r\nSize M:  Cao 1m50–1m58, Nặng 40–52kg\r\nSize L:  Cao 1m58–1m65, Nặng 52–60kg\r\nSize XL: Cao 1m65–1m72, Nặng 60–70kg\r\nSize XXL: Cao 1m70–1m75, Nặng 70–78kg",
+                            Ten_SanPham = "Áo Khoác Gió Nữ 2 Lớp Chống Nước Có Mũ",
                             Trang_Thai = true
                         });
                 });
@@ -562,6 +562,9 @@ namespace FashionStore.Migrations
 
                     b.Property<decimal?>("Gia_Giam")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("HinhAnh")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Kich_Thuoc")
                         .IsRequired()
@@ -581,6 +584,9 @@ namespace FashionStore.Migrations
                     b.Property<int>("So_Luong")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Trang_Thai")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Ma_SanPham");
@@ -591,164 +597,780 @@ namespace FashionStore.Migrations
                         new
                         {
                             Id = 1,
-                            Gia_BienThe = 450000m,
-                            Gia_Giam = 399000m,
+                            Gia_BienThe = 189000m,
+                            HinhAnh = "https://dosi-in.com/file/detailed/42/CDL10_1.jpg?w=670&h=670&fit=fill&fm=webp",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP001",
-                            Mau_Sac = "Trắng",
-                            PhanTramGiam = 11,
-                            So_Luong = 80
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 620,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 2,
-                            Gia_BienThe = 450000m,
-                            Gia_Giam = 399000m,
+                            Gia_BienThe = 189000m,
+                            HinhAnh = "https://dosi-in.com/file/detailed/42/CDL10_3.jpg?w=1000&h=1000&fit=fill&fm=webp",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP001",
-                            Mau_Sac = "Trắng",
-                            PhanTramGiam = 11,
-                            So_Luong = 100
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 590,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 3,
-                            Gia_BienThe = 470000m,
-                            Gia_Giam = 420000m,
-                            Kich_Thuoc = "XL",
+                            Gia_BienThe = 189000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/10/1-kem-ld9233.jpg",
+                            Kich_Thuoc = "M",
                             Ma_SanPham = "SP001",
-                            Mau_Sac = "Xanh Navy",
-                            PhanTramGiam = 11,
-                            So_Luong = 60
+                            Mau_Sac = "Xám",
+                            PhanTramGiam = 10,
+                            So_Luong = 460,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 4,
-                            Gia_BienThe = 780000m,
-                            Kich_Thuoc = "S",
-                            Ma_SanPham = "SP002",
-                            Mau_Sac = "Vàng Nhạt",
-                            So_Luong = 40
+                            Gia_BienThe = 189000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/10/ao-thun-tron-tay-ngan-dep-ld9233.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP001",
+                            Mau_Sac = "Xám",
+                            PhanTramGiam = 10,
+                            So_Luong = 430,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 5,
-                            Gia_BienThe = 780000m,
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP002",
-                            Mau_Sac = "Vàng Nhạt",
-                            So_Luong = 55
+                            Mau_Sac = "Trắng",
+                            PhanTramGiam = 25,
+                            So_Luong = 350,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 6,
-                            Gia_BienThe = 780000m,
-                            Gia_Giam = 699000m,
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
                             Kich_Thuoc = "L",
                             Ma_SanPham = "SP002",
-                            Mau_Sac = "Xanh Mint",
-                            PhanTramGiam = 10,
-                            So_Luong = 35
+                            Mau_Sac = "Trắng",
+                            PhanTramGiam = 25,
+                            So_Luong = 320,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 7,
-                            Gia_BienThe = 590000m,
-                            Gia_Giam = 499000m,
-                            Kich_Thuoc = "29",
-                            Ma_SanPham = "SP003",
-                            Mau_Sac = "Đen",
-                            PhanTramGiam = 15,
-                            So_Luong = 70
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_trang_1_a24816452efe4226bdd5fee6eb8375ec.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Trắng",
+                            PhanTramGiam = 25,
+                            So_Luong = 100,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 8,
-                            Gia_BienThe = 590000m,
-                            Gia_Giam = 499000m,
-                            Kich_Thuoc = "30",
-                            Ma_SanPham = "SP003",
-                            Mau_Sac = "Đen",
-                            So_Luong = 90
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_xanh_den_1_c691c6dc769d483e860b6a1805be1b6f.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 30,
+                            So_Luong = 380,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 9,
-                            Gia_BienThe = 610000m,
-                            Kich_Thuoc = "31",
-                            Ma_SanPham = "SP003",
-                            Mau_Sac = "Xanh Đậm",
-                            So_Luong = 50
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_xanh_den_1_c691c6dc769d483e860b6a1805be1b6f.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 30,
+                            So_Luong = 360,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 10,
-                            Gia_BienThe = 350000m,
-                            Gia_Giam = 299000m,
-                            Kich_Thuoc = "Freesize",
-                            Ma_SanPham = "SP004",
-                            Mau_Sac = "Be",
-                            PhanTramGiam = 15,
-                            So_Luong = 120
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Hồng",
+                            PhanTramGiam = 0,
+                            So_Luong = 310,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 11,
-                            Gia_BienThe = 350000m,
-                            Kich_Thuoc = "Freesize",
-                            Ma_SanPham = "SP004",
-                            Mau_Sac = "Đỏ Rượu",
-                            So_Luong = 80
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 0,
+                            So_Luong = 290,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 12,
-                            Gia_BienThe = 380000m,
-                            Gia_Giam = 329000m,
-                            Kich_Thuoc = "Freesize",
-                            Ma_SanPham = "SP005",
-                            Mau_Sac = "Trắng Kẻ Xanh",
-                            PhanTramGiam = 13,
-                            So_Luong = 100
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 0,
+                            So_Luong = 10,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 13,
-                            Gia_BienThe = 690000m,
-                            Gia_Giam = 590000m,
-                            Kich_Thuoc = "M",
-                            Ma_SanPham = "SP006",
-                            Mau_Sac = "Xanh Rêu",
-                            PhanTramGiam = 14,
-                            So_Luong = 60
+                            Gia_BienThe = 299000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/ao_ab19_hong_1_5ef748bd794749b7b0eb66c8bf6d3e33.jpg",
+                            Kich_Thuoc = "2XL",
+                            Ma_SanPham = "SP002",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 0,
+                            So_Luong = 10,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 14,
-                            Gia_BienThe = 690000m,
-                            Gia_Giam = 590000m,
-                            Kich_Thuoc = "L",
-                            Ma_SanPham = "SP006",
-                            Mau_Sac = "Xanh Rêu",
-                            So_Luong = 80
+                            Gia_BienThe = 359000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 35,
+                            So_Luong = 300,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 15,
-                            Gia_BienThe = 710000m,
-                            Kich_Thuoc = "XL",
-                            Ma_SanPham = "SP006",
-                            Mau_Sac = "Đen",
-                            So_Luong = 45
+                            Gia_BienThe = 359000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 35,
+                            So_Luong = 300,
+                            Trang_Thai = true
                         },
                         new
                         {
                             Id = 16,
-                            Gia_BienThe = 690000m,
+                            Gia_BienThe = 359000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/4-xanhnhat-8024.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 35,
+                            So_Luong = 300,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Gia_BienThe = 359000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/1-den-8024.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 260,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Gia_BienThe = 359000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/07/1-den-8024.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP003",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 260,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đỏ đô",
+                            PhanTramGiam = 30,
+                            So_Luong = 720,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đỏ đô",
+                            PhanTramGiam = 30,
+                            So_Luong = 720,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đỏ đô",
+                            PhanTramGiam = 30,
+                            So_Luong = 720,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-bitter-choco-ao-ni-unisex-1-jpg-omzo.webp",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đỏ đô",
+                            PhanTramGiam = 30,
+                            So_Luong = 720,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 15,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 15,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Gia_BienThe = 429000m,
+                            HinhAnh = "https://media.routine.vn/1987x0/prod/media/10f24hodu001-black-1-ao-ni-unisex-jpg-t2kt.webp",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP004",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 15,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Xanh nhạt",
+                            PhanTramGiam = 28,
+                            So_Luong = 420,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Xanh nhạt",
+                            PhanTramGiam = 28,
+                            So_Luong = 420,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/2-XANHNHAT-LD4142.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Xanh nhạt",
+                            PhanTramGiam = 28,
+                            So_Luong = 420,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/1-XANHDAM-LD4142.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Xanh Đậm",
+                            PhanTramGiam = 28,
+                            So_Luong = 380,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/4-DEN-LD4142.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 350,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Gia_BienThe = 489000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2024/12/4-DEN-LD4142.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP005",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 20,
+                            So_Luong = 350,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Gia_BienThe = 279000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 520,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Gia_BienThe = 279000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
                             Kich_Thuoc = "M",
                             Ma_SanPham = "SP006",
-                            Mau_Sac = "Be",
-                            So_Luong = 55
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 520,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Gia_BienThe = 279000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/1-DEN-LD4176.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 520,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Gia_BienThe = 279000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/2-KEM-LD4176.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Kem",
+                            PhanTramGiam = 30,
+                            So_Luong = 460,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Gia_BienThe = 279000m,
+                            HinhAnh = "https://lados.vn/wp-content/uploads/2025/05/2-KEM-LD4176.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP006",
+                            Mau_Sac = "Kem",
+                            PhanTramGiam = 30,
+                            So_Luong = 460,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám đậm",
+                            PhanTramGiam = 25,
+                            So_Luong = 620,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 38,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám đậm",
+                            PhanTramGiam = 25,
+                            So_Luong = 620,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 39,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám đậm",
+                            PhanTramGiam = 25,
+                            So_Luong = 620,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_28_582ad8f1eee945228c9b75aa515756bb.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám đậm",
+                            PhanTramGiam = 25,
+                            So_Luong = 620,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 590,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 590,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_25_54d21d9a57404e4fb00ffb09c2c241f1.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 25,
+                            So_Luong = 590,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xanh rêu",
+                            PhanTramGiam = 20,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 45,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xanh rêu",
+                            PhanTramGiam = 20,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 46,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_1200x1200_0000_layer_26_b22be9b19a4f4121827c866c78b45394.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xanh rêu",
+                            PhanTramGiam = 20,
+                            So_Luong = 550,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 47,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_xam_mon_1_af3a5dc03b574c6a981694529db928e1.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám",
+                            PhanTramGiam = 20,
+                            So_Luong = 520,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 48,
+                            Gia_BienThe = 329000m,
+                            HinhAnh = "https://product.hstatic.net/1000369857/product/kaki_dai_jogger_xam_mon_1_af3a5dc03b574c6a981694529db928e1.jpg",
+                            Kich_Thuoc = "XL",
+                            Ma_SanPham = "SP023",
+                            Mau_Sac = "Xám",
+                            PhanTramGiam = 15,
+                            So_Luong = 480,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 49,
+                            Gia_BienThe = 159000m,
+                            HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-3.jpg?v=1627743163683",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP007",
+                            Mau_Sac = "Vàng",
+                            PhanTramGiam = 30,
+                            So_Luong = 680,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 50,
+                            Gia_BienThe = 159000m,
+                            HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-3.jpg?v=1627743163683",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP007",
+                            Mau_Sac = "Vàng",
+                            PhanTramGiam = 30,
+                            So_Luong = 680,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 51,
+                            Gia_BienThe = 159000m,
+                            HinhAnh = "https://bizweb.dktcdn.net/100/287/440/products/ao-croptop-om-eo-nu-local-brand-davies-4.jpg?v=1627743163683",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP007",
+                            Mau_Sac = "Xanh",
+                            PhanTramGiam = 30,
+                            So_Luong = 680,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 52,
+                            Gia_BienThe = 349000m,
+                            HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP022",
+                            Mau_Sac = "Hồng",
+                            PhanTramGiam = 30,
+                            So_Luong = 480,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 53,
+                            Gia_BienThe = 349000m,
+                            HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP022",
+                            Mau_Sac = "Hồng",
+                            PhanTramGiam = 30,
+                            So_Luong = 480,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 54,
+                            Gia_BienThe = 349000m,
+                            HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-hong-1_f5a75811dced4e26868a7d23bfb9dc1e_master.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP022",
+                            Mau_Sac = "Hồng",
+                            PhanTramGiam = 30,
+                            So_Luong = 480,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 55,
+                            Gia_BienThe = 349000m,
+                            HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-kem-1_35fc1acf16f34bb9b2e141488e05a6e7_master.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP022",
+                            Mau_Sac = "Kem",
+                            PhanTramGiam = 25,
+                            So_Luong = 420,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 56,
+                            Gia_BienThe = 349000m,
+                            HinhAnh = "https://product.hstatic.net/200000588593/product/2sp23s051-ao-so-mi-kieu-nu-kem-1_35fc1acf16f34bb9b2e141488e05a6e7_master.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP022",
+                            Mau_Sac = "Kem",
+                            PhanTramGiam = 25,
+                            So_Luong = 420,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 57,
+                            Gia_BienThe = 399000m,
+                            HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
+                            Kich_Thuoc = "S",
+                            Ma_SanPham = "SP008",
+                            Mau_Sac = "Cam",
+                            PhanTramGiam = 30,
+                            So_Luong = 580,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 58,
+                            Gia_BienThe = 399000m,
+                            HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP008",
+                            Mau_Sac = "Cam",
+                            PhanTramGiam = 30,
+                            So_Luong = 580,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 59,
+                            Gia_BienThe = 399000m,
+                            HinhAnh = "https://product.hstatic.net/200000525243/product/image-cam-5-dam-kieu-linen-day-cheo-linen-nu-n-m-2005004_be45b0ff02764b16b9d60e373905cb16_1024x1024.jpg",
+                            Kich_Thuoc = "L",
+                            Ma_SanPham = "SP008",
+                            Mau_Sac = "Cam",
+                            PhanTramGiam = 30,
+                            So_Luong = 580,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 60,
+                            Gia_BienThe = 229000m,
+                            HinhAnh = "https://product.hstatic.net/200000900543/product/4062049265679_7a27ad55fa3a47fabe3d8077fd16d555_master.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP009",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 35,
+                            So_Luong = 820,
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Id = 61,
+                            Gia_BienThe = 459000m,
+                            HinhAnh = "http://www.wetrek.vn/pic/products/ao-khoacd-gio-2-ldaop-gothiar-2l-ja_63844192522421_638979609463833850.jpg",
+                            Kich_Thuoc = "M",
+                            Ma_SanPham = "SP010",
+                            Mau_Sac = "Đen",
+                            PhanTramGiam = 30,
+                            So_Luong = 620,
+                            Trang_Thai = true
+                        });
+                });
+
+            modelBuilder.Entity("FashionStore.Models.Shipper", b =>
+                {
+                    b.Property<int>("Ma_Shipper")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ma_Shipper"));
+
+                    b.Property<string>("BienSoXe")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HinhAnh")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Ma_TaiKhoan")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SoDienThoai")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ten_DayDu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Ma_Shipper");
+
+                    b.HasIndex("Ma_TaiKhoan")
+                        .IsUnique();
+
+                    b.ToTable("Shippers");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_Shipper = 1,
+                            BienSoXe = "69N4-9999",
+                            HinhAnh = "https://cdnphoto.dantri.com.vn/PZJhMVnXWQcyRwL7GOzw539WApw=/thumb_w/1020/2024/02/01/ghtk-crop-edited-1706744665204.jpeg",
+                            Ma_TaiKhoan = 4,
+                            SoDienThoai = "0982343222",
+                            Ten_DayDu = "Trương Minh Tâm",
+                            TrangThai = "online"
                         });
                 });
 
@@ -795,6 +1417,60 @@ namespace FashionStore.Migrations
                     b.HasIndex("Ma_VaiTro");
 
                     b.ToTable("TaiKhoan");
+
+                    b.HasData(
+                        new
+                        {
+                            Ma_TaiKhoan = 2,
+                            Da_XacThuc = true,
+                            Email = "khachhang@gmail.com",
+                            Han_XacThuc = new DateTime(2025, 12, 3, 10, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3963),
+                            Ma_VaiTro = "2222-2222-2222-2222",
+                            Ma_XacThuc = "9pug2MZlj0m6HZPJ6Njolg==",
+                            Mat_Khau = "string",
+                            Ngay_Tao = new DateTime(2025, 12, 2, 17, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3937),
+                            Ten_DangNhap = "khachhang",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_TaiKhoan = 1,
+                            Da_XacThuc = true,
+                            Email = "admin@gmail.com",
+                            Han_XacThuc = new DateTime(2025, 12, 3, 10, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3963),
+                            Ma_VaiTro = "1111-1111-1111-1111",
+                            Ma_XacThuc = "9pug2MZlj0m6HZPJ6Njolg==",
+                            Mat_Khau = "string",
+                            Ngay_Tao = new DateTime(2025, 12, 2, 17, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3937),
+                            Ten_DangNhap = "admin",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_TaiKhoan = 3,
+                            Da_XacThuc = true,
+                            Email = "staff@gmail.com",
+                            Han_XacThuc = new DateTime(2025, 12, 3, 10, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3963),
+                            Ma_VaiTro = "1111-2222-1111-2222",
+                            Ma_XacThuc = "9pug2MZlj0m6HZPJ6Njolg==",
+                            Mat_Khau = "string",
+                            Ngay_Tao = new DateTime(2025, 12, 2, 17, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3937),
+                            Ten_DangNhap = "staff",
+                            Trang_Thai = true
+                        },
+                        new
+                        {
+                            Ma_TaiKhoan = 4,
+                            Da_XacThuc = true,
+                            Email = "shipper@gmail.com",
+                            Han_XacThuc = new DateTime(2025, 12, 3, 10, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3963),
+                            Ma_VaiTro = "3333-3333-3333-3333",
+                            Ma_XacThuc = "9pug2MZlj0m6HZPJ6Njolg==",
+                            Mat_Khau = "string",
+                            Ngay_Tao = new DateTime(2025, 12, 2, 17, 30, 42, 261, DateTimeKind.Unspecified).AddTicks(3937),
+                            Ten_DangNhap = "shipper",
+                            Trang_Thai = true
+                        });
                 });
 
             modelBuilder.Entity("FashionStore.Models.VaiTro", b =>
@@ -830,6 +1506,11 @@ namespace FashionStore.Migrations
                         {
                             Ma_VaiTro = "2222-2222-2222-2222",
                             Ten_VaiTro = "Khách hàng"
+                        },
+                        new
+                        {
+                            Ma_VaiTro = "3333-3333-3333-3333",
+                            Ten_VaiTro = "Shipper"
                         });
                 });
 
@@ -944,7 +1625,8 @@ namespace FashionStore.Migrations
                     b.HasOne("FashionStore.Models.DiaChiGiaoHang", "DiaChiGiaoHang")
                         .WithMany()
                         .HasForeignKey("Ma_DiaChi")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("FashionStore.Models.KhachHang", "KhachHang")
                         .WithMany()
@@ -952,11 +1634,20 @@ namespace FashionStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FashionStore.Models.NhanVien", "NhanVien")
+                        .WithMany()
+                        .HasForeignKey("Ma_NhanVien");
+
                     b.HasOne("FashionStore.Models.PhuongThucThanhToan", "PhuongThucThanhToan")
                         .WithMany("DonHangs")
                         .HasForeignKey("Ma_PhuongThuc")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("FashionStore.Models.Shipper", "Shipper")
+                        .WithMany()
+                        .HasForeignKey("Ma_Shipper")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("FashionStore.Models.Voucher", "Voucher")
                         .WithMany("DonHangs")
@@ -966,7 +1657,11 @@ namespace FashionStore.Migrations
 
                     b.Navigation("KhachHang");
 
+                    b.Navigation("NhanVien");
+
                     b.Navigation("PhuongThucThanhToan");
+
+                    b.Navigation("Shipper");
 
                     b.Navigation("Voucher");
                 });
@@ -974,8 +1669,8 @@ namespace FashionStore.Migrations
             modelBuilder.Entity("FashionStore.Models.GioHang", b =>
                 {
                     b.HasOne("FashionStore.Models.KhachHang", "KhachHang")
-                        .WithMany()
-                        .HasForeignKey("Ma_KhachHang")
+                        .WithOne("GioHang")
+                        .HasForeignKey("FashionStore.Models.GioHang", "Ma_KhachHang")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -986,8 +1681,7 @@ namespace FashionStore.Migrations
                 {
                     b.HasOne("FashionStore.Models.SanPham", "SanPham")
                         .WithMany("HinhAnhSanPhams")
-                        .HasForeignKey("Ma_SanPham")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Ma_SanPham");
 
                     b.Navigation("SanPham");
                 });
@@ -1034,6 +1728,17 @@ namespace FashionStore.Migrations
                     b.Navigation("SanPham");
                 });
 
+            modelBuilder.Entity("FashionStore.Models.Shipper", b =>
+                {
+                    b.HasOne("FashionStore.Models.TaiKhoan", "TaiKhoan")
+                        .WithOne("Shipper")
+                        .HasForeignKey("FashionStore.Models.Shipper", "Ma_TaiKhoan")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaiKhoan");
+                });
+
             modelBuilder.Entity("FashionStore.Models.TaiKhoan", b =>
                 {
                     b.HasOne("FashionStore.Models.VaiTro", "VaiTro")
@@ -1065,6 +1770,8 @@ namespace FashionStore.Migrations
             modelBuilder.Entity("FashionStore.Models.KhachHang", b =>
                 {
                     b.Navigation("DiaChiGiaoHangs");
+
+                    b.Navigation("GioHang");
                 });
 
             modelBuilder.Entity("FashionStore.Models.PhuongThucThanhToan", b =>
@@ -1084,6 +1791,8 @@ namespace FashionStore.Migrations
                     b.Navigation("KhachHang");
 
                     b.Navigation("NhanVien");
+
+                    b.Navigation("Shipper");
                 });
 
             modelBuilder.Entity("FashionStore.Models.VaiTro", b =>

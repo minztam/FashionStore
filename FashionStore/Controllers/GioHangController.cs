@@ -17,9 +17,9 @@ namespace FashionStore.Controllers
         }
 
         [HttpGet("view")]
-        public async Task<IActionResult> GetCart(int maTaiKhoan)
+        public async Task<IActionResult> GetCart(int maKhachHang)
         {
-            var result = await _gioHangRepo.GetCartAsync(maTaiKhoan);
+            var result = await _gioHangRepo.GetCartAsync(maKhachHang);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -36,11 +36,11 @@ namespace FashionStore.Controllers
         }
 
         [HttpPut("{maKhachHang}/update")]
-        public async Task<IActionResult> UpdateCart(int maKhachHang, string maSanPham, int soLuong, int maBienThe)
+        public async Task<IActionResult> UpdateCart(int maKhachHang, string maSanPham, int soLuong, int maBienThe, bool? isChecked)
         {
           
 
-            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, maSanPham, soLuong, maBienThe);
+            var result = await _gioHangRepo.UpdateCartAsync(maKhachHang, maSanPham, soLuong, maBienThe,isChecked);
 
             if (result.Success)
                 return Ok(result);
@@ -49,12 +49,11 @@ namespace FashionStore.Controllers
         }
 
         [HttpDelete("{maKhachHang}/remove")]
-        public async Task<IActionResult> RemoveFromCart(int maKhachHang, [FromBody] ChiTietGioHangDTO dto)
+        public async Task<IActionResult> RemoveFromCart(int maKhachHang, string maSanPham,int maBienThe)
         {
-            if (dto == null)
-                return BadRequest(new ResponseMessageResult().SetFail("Dữ liệu gửi lên không hợp lệ!"));
+          
 
-            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, dto.Ma_SanPham, dto.Ma_BienThe);
+            var result = await _gioHangRepo.RemoveFromCartAsync(maKhachHang, maSanPham, maBienThe);
 
             if (result.Success)
                 return Ok(result);

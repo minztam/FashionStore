@@ -10,6 +10,5 @@
         // Danh sách biến thể sản phẩm (mới, thay thế cho Gia, So_Luong, Mau_Sac, Kich_Thuoc)
         public List<SanPhamBienTheDTO>? BienThes { get; set; }
         // Danh sách hình ảnh (giữ nguyên)
-        public List<HinhAnhDTO>? HinhAnhs { get; set; }
     }
 }

@@ -13,6 +13,10 @@ namespace FashionStore.DTO
         public decimal Gia_Goc { get; set; }
         public decimal? Gia_Giam { get; set; }
         public int So_Luong { get; set; }
+        public bool IsInvalid { get; set; } = false;
+        public bool IsChecked { get; set; } = false;
+
+        public string? InvalidReason { get; set; }
         public decimal Thanh_Tien => So_Luong * (Gia_Giam ?? Gia_Goc); // Tiền của sản phẩm này
 
     }
